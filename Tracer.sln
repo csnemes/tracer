@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.31101.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tracer.Fody.Tests", "Tracer.Fody.Tests\Tracer.Fody.Tests.csproj", "{1B6E1627-A800-4E81-9785-D2ED6D9F6DAE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tracer.Fody", "Tracer.Fody\Tracer.Fody.csproj", "{5E36561F-EA14-49A3-AA84-63176C256A30}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tracer.Fody.Tests.Func", "Tracer.Fody.Tests.Func\Tracer.Fody.Tests.Func.csproj", "{9F57E29D-3731-42F8-8426-EE19EBF03A64}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{1B6E1627-A800-4E81-9785-D2ED6D9F6DAE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1B6E1627-A800-4E81-9785-D2ED6D9F6DAE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1B6E1627-A800-4E81-9785-D2ED6D9F6DAE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1B6E1627-A800-4E81-9785-D2ED6D9F6DAE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5E36561F-EA14-49A3-AA84-63176C256A30}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5E36561F-EA14-49A3-AA84-63176C256A30}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5E36561F-EA14-49A3-AA84-63176C256A30}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5E36561F-EA14-49A3-AA84-63176C256A30}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9F57E29D-3731-42F8-8426-EE19EBF03A64}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9F57E29D-3731-42F8-8426-EE19EBF03A64}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9F57E29D-3731-42F8-8426-EE19EBF03A64}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9F57E29D-3731-42F8-8426-EE19EBF03A64}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
