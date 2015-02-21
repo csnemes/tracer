@@ -11,14 +11,14 @@ namespace Tracer.Fody.Weavers
     public class TraceLoggingConfiguration
     {
         private readonly ITraceLoggingFilter _filter;
-        private readonly AssemblyName _loggerAdapterAssemblyName;
+        private readonly AssemblyName _adapterAssemblyName;
         private readonly string _loggerAdapterTypeFullName;
         private readonly string _logManagerAdapterTypeFullName;
 
-        private TraceLoggingConfiguration(ITraceLoggingFilter filter, string loggerAdapterAssemblyDisplayName, string loggerAdapterTypeName, string logManagerAdapterTypeName)
+        private TraceLoggingConfiguration(ITraceLoggingFilter filter, string adapterAssemblyDisplayName, string loggerAdapterTypeName, string logManagerAdapterTypeName)
         {
             _filter = filter ?? NullFilter.Instance;
-            _loggerAdapterAssemblyName = new AssemblyName(loggerAdapterAssemblyDisplayName ?? "Tracer.LogAdapter, Version=1.0.0.0");
+            _adapterAssemblyName = new AssemblyName(adapterAssemblyDisplayName ?? "Tracer.LogAdapter, Version=1.0.0.0");
             _loggerAdapterTypeFullName = loggerAdapterTypeName ?? "Tracer.LogAdapter.ILog";
             _logManagerAdapterTypeFullName = logManagerAdapterTypeName ?? "Tracer.LogAdapter.LogManager";
         }
@@ -37,7 +37,7 @@ namespace Tracer.Fody.Weavers
         {
             get
             {
-                return new AssemblyNameReference(_loggerAdapterAssemblyName.Name, _loggerAdapterAssemblyName.Version);
+                return new AssemblyNameReference(_adapterAssemblyName.Name, _adapterAssemblyName.Version);
             }
         }
 

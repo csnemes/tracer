@@ -11,38 +11,47 @@ namespace Tracer.Fody.Tests.Func.MockLoggers
         public enum MockCallType
         {
             TraceEnter = 1,
-            TraceLeave = 2
+            TraceLeave = 2,
+            Log = 3
         }
 
 
         private readonly MockCallType _callType;
         private readonly string _loggerName;
-        private readonly string _method;
+        private readonly string _containingMethod;
         private readonly string _returnValue;
         private readonly string[] _paramNames;
         private readonly string[] _paramValues;
+        private readonly string _logMethod;
 
-
-        private MockCallInfo(string loggerName, MockCallType callType, string method, string returnValue, string[] paramNames, string[] paramValues)
+        private MockCallInfo(string loggerName, MockCallType callType, string containingMethod, string returnValue, string[] paramNames, string[] paramValues,
+            string logMethod)
         {
             _loggerName = loggerName;
             _callType = callType;
-            _method = method;
+            _containingMethod = containingMethod;
             _returnValue = returnValue;
             _paramNames = paramNames;
             _paramValues = paramValues;
+            _logMethod = logMethod;
         }
 
-        public static MockCallInfo CreateEnter(string loggerName, string method, string[] paramNames = null, string[] paramValues = null)
+        public static MockCallInfo CreateEnter(string loggerName, string containingMethod, string[] paramNames = null, string[] paramValues = null)
         {
-            return new MockCallInfo(loggerName, MockCallType.TraceEnter, method, null, paramNames, paramValues);
+            return new MockCallInfo(loggerName, MockCallType.TraceEnter, containingMethod, null, paramNames, paramValues, null);
         }
 
-        public static MockCallInfo CreateLeave(string loggerName, string method, string returnValue = null)
+        public static MockCallInfo CreateLeave(string loggerName, string containingMethod, string returnValue = null)
         {
-            return new MockCallInfo(loggerName, MockCallType.TraceLeave, method, returnValue, null, null);
+            return new MockCallInfo(loggerName, MockCallType.TraceLeave, containingMethod, returnValue, null, null, null);
         }
 
+        public static MockCallInfo CreateLog(string loggerName, string containingMethod, string logMethod,
+            string[] paramNames = null, string[] paramValues = null)
+        {
+            return new MockCallInfo(loggerName, MockCallType.Log, containingMethod, null, paramNames, paramValues, logMethod);
+        }
+        
         public string LoggerName
         {
             get { return _loggerName; }
@@ -53,9 +62,9 @@ namespace Tracer.Fody.Tests.Func.MockLoggers
             get { return _callType; }
         }
 
-        public string Method
+        public string ContainingMethod
         {
-            get { return _method; }
+            get { return _containingMethod; }
         }
 
         public string ReturnValue
@@ -72,6 +81,11 @@ namespace Tracer.Fody.Tests.Func.MockLoggers
         {
             get { return _paramValues; }
         }
+
+        public string LogMethod
+        {
+            get { return _logMethod; }
+        }
     }
 
     public static class MockCallInfoExtensions
@@ -80,7 +94,7 @@ namespace Tracer.Fody.Tests.Func.MockLoggers
         {
             var split = methodFullName.Split(new [] {"::"}, StringSplitOptions.RemoveEmptyEntries);
             mock.LoggerName.Should().Be(split[0]);
-            mock.Method.Should().Contain(split[1]);
+            mock.ContainingMethod.Should().Contain(split[1]);
             mock.CallType.Should().Be(MockCallInfo.MockCallType.TraceEnter);
             if (parameters != null)
             {
@@ -103,7 +117,7 @@ namespace Tracer.Fody.Tests.Func.MockLoggers
         {
             var split = methodFullName.Split(new[] { "::" }, StringSplitOptions.RemoveEmptyEntries);
             mock.LoggerName.Should().Be(split[0]);
-            mock.Method.Should().Contain(split[1]);
+            mock.ContainingMethod.Should().Contain(split[1]);
             mock.CallType.Should().Be(MockCallInfo.MockCallType.TraceLeave);
         }
 
@@ -111,7 +125,7 @@ namespace Tracer.Fody.Tests.Func.MockLoggers
         {
             var split = methodFullName.Split(new[] { "::" }, StringSplitOptions.RemoveEmptyEntries);
             mock.LoggerName.Should().Be(split[0]);
-            mock.Method.Should().Contain(split[1]);
+            mock.ContainingMethod.Should().Contain(split[1]);
             mock.CallType.Should().Be(MockCallInfo.MockCallType.TraceLeave);
             mock.ReturnValue.Should().Be(returnValue);
         }

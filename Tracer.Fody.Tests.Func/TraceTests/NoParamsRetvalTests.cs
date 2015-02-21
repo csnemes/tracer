@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using FluentAssertions;
+﻿using FluentAssertions;
 using NUnit.Framework;
 using Tracer.Fody.Tests.Func.MockLoggers;
 
-namespace Tracer.Fody.Tests.Func
+namespace Tracer.Fody.Tests.Func.TraceTests
 {
     [TestFixture]
     public class NoParamsRetvalTests : FuncTestBase

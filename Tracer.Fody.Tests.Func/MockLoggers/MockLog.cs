@@ -6,35 +6,12 @@ using System.Threading.Tasks;
 
 namespace Tracer.Fody.Tests.Func.MockLoggers
 {
-    public class MockLog : IMockLog
+    public static class MockLog
     {
-        private readonly Type _type;
-
-        public MockLog(Type type)
-        {
-            _type = type;
-        }
-
-        public void TraceEnter(string methodInfo)
-        {
-            MockLogManager.TraceEnterCalled(_type.FullName, methodInfo, null, null);
-        }
-
-        public void TraceEnter(string methodInfo, string[] paramNames, object[] paramValues)
-        {
-            var stringValues = paramValues.Select(val => val != null ? val.ToString() : null).ToArray();
-            MockLogManager.TraceEnterCalled(_type.FullName, methodInfo, paramNames, stringValues);
-        }
-
-        public void TraceLeave(string methodInfo, long numberOfTicks)
-        {
-            MockLogManager.TraceLeaveCalled(_type.FullName, methodInfo, null);
-        }
-
-        public void TraceLeave(string methodInfo, long numberOfTicks, object returnValue)
-        {
-            var returnValueString = returnValue != null ? returnValue.ToString() : null;
-            MockLogManager.TraceLeaveCalled(_type.FullName, methodInfo, returnValueString);
-        }
+        //When rewriting calls to this method they will be redirected to the adapter's MockLogOuter method.
+        //All adapter methods will have and additional string methodInfo first parameter so the corresponding method will be
+        //public void MockLogOuter(string methodInfo string message)
+        public static void Outer(string message)
+        {}
     }
 }

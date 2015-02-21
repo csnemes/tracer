@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Tracer.Fody.Tests.Func.MockLoggers
 {
-    public interface IMockLog
+    public interface IMockLogAdapter
     {
         void TraceEnter(string methodInfo);
         void TraceEnter(string methodInfo, string[] paramNames, object[] paramValues);

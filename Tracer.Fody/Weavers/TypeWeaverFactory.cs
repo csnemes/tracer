@@ -1,0 +1,28 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using Mono.Cecil;
+
+namespace Tracer.Fody.Weavers
+{
+    internal class TypeWeaverFactory
+    {
+        private readonly ITraceLoggingFilter _filter;
+        private readonly TypeReferenceProvider _typeReferenceProvider;
+        private readonly MethodReferenceProvider _methodReferenceProvider;
+
+        public TypeWeaverFactory(ITraceLoggingFilter filter, TypeReferenceProvider typeReferenceProvider, MethodReferenceProvider methodReferenceProvider)
+        {
+            _filter = filter;
+            _typeReferenceProvider = typeReferenceProvider;
+            _methodReferenceProvider = methodReferenceProvider;
+        }
+
+        public TypeWeaver Create(TypeDefinition typeDefinition)
+        {
+            return new TypeWeaver(_filter, _typeReferenceProvider, _methodReferenceProvider, typeDefinition);
+        }
+    }
+}

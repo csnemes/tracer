@@ -61,17 +61,19 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="FuncTestBase.cs" />
-    <Compile Include="MockLoggers\IMockLog.cs" />
+    <Compile Include="LogTests\CallingLogMethods.cs" />
+    <Compile Include="MockLoggers\IMockLogAdapter.cs" />
     <Compile Include="MockLoggers\MockCallInfo.cs" />
     <Compile Include="MockLoggers\MockLog.cs" />
-    <Compile Include="MockLoggers\MockLogManager.cs" />
+    <Compile Include="MockLoggers\MockLogAdapter.cs" />
+    <Compile Include="MockLoggers\MockLogManagerAdapter.cs" />
     <Compile Include="MockLoggers\MockLogResult.cs" />
-    <Compile Include="NoParamsRetvalTests.cs" />
-    <Compile Include="ParamsNoRetvalTests.cs" />
-    <Compile Include="ParamsRetvalTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="NoParamsNoRetvalTests.cs" />
-    <Compile Include="SpecialCasesTests.cs" />
+    <Compile Include="TraceTests\NoParamsNoRetvalTests.cs" />
+    <Compile Include="TraceTests\NoParamsRetvalTests.cs" />
+    <Compile Include="TraceTests\ParamsNoRetvalTests.cs" />
+    <Compile Include="TraceTests\ParamsRetvalTests.cs" />
+    <Compile Include="TraceTests\SpecialCasesTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -82,6 +84,7 @@
       <Name>Tracer.Fody</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

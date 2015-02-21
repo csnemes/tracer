@@ -57,7 +57,7 @@ namespace Tracer.Fody.Tests.Func
         /// <summary>
         /// Complies the give source and returns the resulting assembly's full path
         /// </summary>
-        private string Compile(string source, string assemblyName)
+        private string Compile(string source, string assemblyName, string[] additonalAssemblies)
         {
             var destPath = GetDestinationFilePath(assemblyName);
 
@@ -67,6 +67,8 @@ namespace Tracer.Fody.Tests.Func
             parameters.ReferencedAssemblies.Add("System.dll");
             parameters.ReferencedAssemblies.Add("System.Core.dll");
             parameters.ReferencedAssemblies.Add("System.Data.dll");
+            if (additonalAssemblies != null)
+                parameters.ReferencedAssemblies.AddRange(additonalAssemblies);
 
             var results = provider.CompileAssemblyFromSource(parameters, source);
 
@@ -95,8 +97,8 @@ namespace Tracer.Fody.Tests.Func
             var config = TraceLoggingConfiguration.New
                 .WithFilter(filter)
                 .WithAdapterAssembly(assembly.GetName().FullName)
-                .WithLogManager(typeof(MockLogManager).FullName)
-                .WithLogger(typeof(IMockLog).FullName);
+                .WithLogManager(typeof(MockLogManagerAdapter).FullName)
+                .WithLogger(typeof(IMockLogAdapter).FullName);
                 
             AssemblyWeaver.Execute(assemblyPath, config);
         }
@@ -108,7 +110,9 @@ namespace Tracer.Fody.Tests.Func
             var entryClass = splitEntry[0];
             var entryMethod = splitEntry[1];
 
-            var assemblyPath = Compile(source, "testasm");
+            var testDllLocation = new Uri(Assembly.GetExecutingAssembly().CodeBase);
+
+            var assemblyPath = Compile(source, "testasm", new []{ testDllLocation.AbsolutePath });
             Rewrite(assemblyPath, filter);
 
             //----
@@ -117,7 +121,7 @@ namespace Tracer.Fody.Tests.Func
             try
             {
                 var remote = (Worker)appDomain.CreateInstanceAndUnwrap(Assembly.GetExecutingAssembly().FullName, "Tracer.Fody.Tests.Func.FuncTestBase+Worker");
-                var result = remote.Run(assemblyPath, entryClass, entryMethod, typeof(MockLogManager).FullName);
+                var result = remote.Run(assemblyPath, entryClass, entryMethod, typeof(MockLogManagerAdapter).FullName);
                 return result;
             }
             finally
