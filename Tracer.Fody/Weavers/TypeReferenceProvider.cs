@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -15,7 +16,8 @@ namespace Tracer.Fody.Weavers
     {
         private readonly Lazy<TypeReference> _stringArray;
         private readonly Lazy<TypeReference> _objectArray;
-        private readonly Lazy<TypeReference> _type; 
+        private readonly Lazy<TypeReference> _type;
+        private readonly Lazy<TypeReference> _stopwatch; 
         private readonly ModuleDefinition _moduleDefinition;
         private readonly TraceLoggingConfiguration _configuration;
         private readonly ILoggerAdapterMetadataScopeProvider _loggerAdapterMetadataScopeProvider;
@@ -28,6 +30,7 @@ namespace Tracer.Fody.Weavers
             _stringArray = new Lazy<TypeReference>(() => moduleDefinition.Import(typeof(string[])));
             _objectArray = new Lazy<TypeReference>(() => moduleDefinition.Import(typeof(object[])));
             _type = new Lazy<TypeReference>(() => moduleDefinition.Import(typeof(Type)));
+            _stopwatch = new Lazy<TypeReference>(() => moduleDefinition.Import(typeof(Stopwatch)));
         }
 
         public TypeReference StringArray
@@ -59,12 +62,28 @@ namespace Tracer.Fody.Weavers
             get { return _moduleDefinition.TypeSystem.Void; }
         }
 
+        public TypeReference Long
+        {
+            get { return _moduleDefinition.TypeSystem.Int64; }
+        }
+
         public TypeReference LogAdapterReference
         {
             get
             {
                 var loggerScope = _loggerAdapterMetadataScopeProvider.GetLoggerAdapterMetadataScope();
-                var logger = _configuration.Logger; return new TypeReference(logger.Namespace, logger.Name, _moduleDefinition, loggerScope); 
+                var logger = _configuration.Logger; 
+                return new TypeReference(logger.Namespace, logger.Name, _moduleDefinition, loggerScope); 
+            }
+        }
+
+        public TypeReference StaticLogReference
+        {
+            get
+            {
+                var loggerScope = _loggerAdapterMetadataScopeProvider.GetLoggerAdapterMetadataScope();
+                var staticLogger = _configuration.StaticLogger;
+                return new TypeReference(staticLogger.Namespace, staticLogger.Name, _moduleDefinition, loggerScope); 
             }
         }
 
@@ -77,5 +96,11 @@ namespace Tracer.Fody.Weavers
                 return new TypeReference(logManager.Namespace, logManager.Name, _moduleDefinition, loggerScope);
             }
         }
+
+        public TypeReference Stopwatch
+        {
+            get { return _stopwatch.Value; }
+        }
+
     }
 }

@@ -14,13 +14,16 @@ namespace Tracer.Fody.Weavers
         private readonly AssemblyName _adapterAssemblyName;
         private readonly string _loggerAdapterTypeFullName;
         private readonly string _logManagerAdapterTypeFullName;
+        private readonly string _staticLoggerTypeFullName;
 
-        private TraceLoggingConfiguration(ITraceLoggingFilter filter, string adapterAssemblyDisplayName, string loggerAdapterTypeName, string logManagerAdapterTypeName)
+        private TraceLoggingConfiguration(ITraceLoggingFilter filter, string adapterAssemblyDisplayName, 
+            string loggerAdapterTypeName, string logManagerAdapterTypeName, string staticLoggerTypeFullName)
         {
             _filter = filter ?? NullFilter.Instance;
             _adapterAssemblyName = new AssemblyName(adapterAssemblyDisplayName ?? "Tracer.LogAdapter, Version=1.0.0.0");
             _loggerAdapterTypeFullName = loggerAdapterTypeName ?? "Tracer.LogAdapter.ILog";
             _logManagerAdapterTypeFullName = logManagerAdapterTypeName ?? "Tracer.LogAdapter.LogManager";
+            _staticLoggerTypeFullName = staticLoggerTypeFullName ?? "Tracer.LogAdapter.Log";
         }
 
         public static TraceLoggingConfigurationBuilder New
@@ -54,6 +57,14 @@ namespace Tracer.Fody.Weavers
             get
             {
                 return new TypeName(_loggerAdapterTypeFullName);
+            }
+        }
+
+        public TypeName StaticLogger
+        {
+            get
+            {
+                return new TypeName(_staticLoggerTypeFullName);
             }
         }
 
@@ -106,6 +117,7 @@ namespace Tracer.Fody.Weavers
             private string _loggerAdapterAssemblyDisplayName;
             private string _loggerAdapterTypeName;
             private string _logManagerAdapterTypeName;
+            private string _staticLoggerTypeName;
 
             public static implicit operator TraceLoggingConfiguration(TraceLoggingConfigurationBuilder builder)
             {
@@ -113,7 +125,8 @@ namespace Tracer.Fody.Weavers
                     builder._filter,
                     builder._loggerAdapterAssemblyDisplayName,
                     builder._loggerAdapterTypeName,
-                    builder._logManagerAdapterTypeName);
+                    builder._logManagerAdapterTypeName,
+                    builder._staticLoggerTypeName);
             }
 
             public TraceLoggingConfigurationBuilder WithFilter(ITraceLoggingFilter filter)
@@ -137,6 +150,12 @@ namespace Tracer.Fody.Weavers
             public TraceLoggingConfigurationBuilder WithLogger(string name)
             {
                 _loggerAdapterTypeName = name;
+                return this;
+            }
+
+            public TraceLoggingConfigurationBuilder WithStaticLogger(string name)
+            {
+                _staticLoggerTypeName = name;
                 return this;
             }
         }

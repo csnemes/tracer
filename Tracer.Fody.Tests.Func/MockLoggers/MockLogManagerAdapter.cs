@@ -22,15 +22,15 @@ namespace Tracer.Fody.Tests.Func.MockLoggers
             Calls.Add(MockCallInfo.CreateEnter(loggerName, containingMethod, paramNames, paramValues));
         }
 
-        public static void TraceLeaveCalled(string loggerName, string containingMethod, string returnValue)
+        public static void TraceLeaveCalled(string loggerName, string containingMethod, long numberOfTicks, string returnValue)
         {
-            Calls.Add(MockCallInfo.CreateLeave(loggerName, containingMethod, returnValue));
+            Calls.Add(MockCallInfo.CreateLeave(loggerName, containingMethod, numberOfTicks, returnValue));
         }
 
         public static void LogCalled(string loggerName, string containingMethod, string logMethodCalled,
-            string[] paramNames, string[] paramValues)
+             string[] paramValues = null)
         {
-            
+            Calls.Add(MockCallInfo.CreateLog(loggerName, containingMethod, logMethodCalled, paramValues));
         }
     }
 }

@@ -23,9 +23,10 @@ namespace Tracer.Fody.Tests.Func.MockLoggers
         private readonly string[] _paramNames;
         private readonly string[] _paramValues;
         private readonly string _logMethod;
+        private readonly long? _numberOfTicks;
 
         private MockCallInfo(string loggerName, MockCallType callType, string containingMethod, string returnValue, string[] paramNames, string[] paramValues,
-            string logMethod)
+            string logMethod, long? numberOfTicks)
         {
             _loggerName = loggerName;
             _callType = callType;
@@ -34,22 +35,23 @@ namespace Tracer.Fody.Tests.Func.MockLoggers
             _paramNames = paramNames;
             _paramValues = paramValues;
             _logMethod = logMethod;
+            _numberOfTicks = numberOfTicks;
         }
 
         public static MockCallInfo CreateEnter(string loggerName, string containingMethod, string[] paramNames = null, string[] paramValues = null)
         {
-            return new MockCallInfo(loggerName, MockCallType.TraceEnter, containingMethod, null, paramNames, paramValues, null);
+            return new MockCallInfo(loggerName, MockCallType.TraceEnter, containingMethod, null, paramNames, paramValues, null, null);
         }
 
-        public static MockCallInfo CreateLeave(string loggerName, string containingMethod, string returnValue = null)
+        public static MockCallInfo CreateLeave(string loggerName, string containingMethod, long numberOfTicks, string returnValue = null)
         {
-            return new MockCallInfo(loggerName, MockCallType.TraceLeave, containingMethod, returnValue, null, null, null);
+            return new MockCallInfo(loggerName, MockCallType.TraceLeave, containingMethod, returnValue, null, null, null, numberOfTicks);
         }
 
         public static MockCallInfo CreateLog(string loggerName, string containingMethod, string logMethod,
-            string[] paramNames = null, string[] paramValues = null)
+             string[] paramValues = null)
         {
-            return new MockCallInfo(loggerName, MockCallType.Log, containingMethod, null, paramNames, paramValues, logMethod);
+            return new MockCallInfo(loggerName, MockCallType.Log, containingMethod, null, null, paramValues, logMethod, null);
         }
         
         public string LoggerName
@@ -85,6 +87,11 @@ namespace Tracer.Fody.Tests.Func.MockLoggers
         public string LogMethod
         {
             get { return _logMethod; }
+        }
+        
+        public long NumberOfTicks
+        {
+            get { return _numberOfTicks.HasValue ? _numberOfTicks.Value : -1L; }
         }
     }
 
@@ -130,5 +137,21 @@ namespace Tracer.Fody.Tests.Func.MockLoggers
             mock.ReturnValue.Should().Be(returnValue);
         }
 
+        public static void ShouldBeLogCall(this MockCallInfo mock, string methodFullName, string logMethodName,
+            params string[] values)
+        {
+            var split = methodFullName.Split(new[] { "::" }, StringSplitOptions.RemoveEmptyEntries);
+            mock.LoggerName.Should().Be(split[0]);
+            mock.ContainingMethod.Should().Contain(split[1]);
+            mock.CallType.Should().Be(MockCallInfo.MockCallType.Log);
+            mock.LogMethod.Should().Be(logMethodName);
+            if (values != null && values.Length > 0)
+            {
+                for (int idx = 0; idx <  values.Length; idx++)
+                {
+                    mock.ParamValues[idx].Should().Be(values[idx]);
+                }
+            }
+        }
     }
 }

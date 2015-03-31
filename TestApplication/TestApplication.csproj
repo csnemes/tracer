@@ -4,15 +4,16 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{9F57E29D-3731-42F8-8426-EE19EBF03A64}</ProjectGuid>
-    <OutputType>Library</OutputType>
+    <ProjectGuid>{03D6FD5E-FC66-4840-89CC-74F62C686EAA}</ProjectGuid>
+    <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Tracer.Fody.Tests.Func</RootNamespace>
-    <AssemblyName>Tracer.Fody.Tests.Func</AssemblyName>
+    <RootNamespace>TestApplication</RootNamespace>
+    <AssemblyName>TestApplication</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -22,6 +23,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -30,26 +32,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="FluentAssertions">
-      <HintPath>..\packages\FluentAssertions.3.2.2\lib\net45\FluentAssertions.dll</HintPath>
-    </Reference>
-    <Reference Include="FluentAssertions.Core">
-      <HintPath>..\packages\FluentAssertions.3.2.2\lib\net45\FluentAssertions.Core.dll</HintPath>
-    </Reference>
-    <Reference Include="Mono.Cecil">
-      <HintPath>..\packages\FodyCecil.1.26.4\lib\net40\Mono.Cecil.dll</HintPath>
-    </Reference>
-    <Reference Include="Mono.Cecil.Mdb">
-      <HintPath>..\packages\FodyCecil.1.26.4\lib\net40\Mono.Cecil.Mdb.dll</HintPath>
-    </Reference>
-    <Reference Include="Mono.Cecil.Pdb">
-      <HintPath>..\packages\FodyCecil.1.26.4\lib\net40\Mono.Cecil.Pdb.dll</HintPath>
-    </Reference>
-    <Reference Include="Mono.Cecil.Rocks">
-      <HintPath>..\packages\FodyCecil.1.26.4\lib\net40\Mono.Cecil.Rocks.dll</HintPath>
-    </Reference>
-    <Reference Include="nunit.framework">
-      <HintPath>..\packages\NUnit.2.6.4\lib\nunit.framework.dll</HintPath>
+    <Reference Include="log4net, Version=1.2.13.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\log4net.2.0.3\lib\net40-full\log4net.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -60,36 +45,25 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ExecuteWeaveOnExamples.cs" />
-    <Compile Include="FuncTestBase.cs" />
-    <Compile Include="LogTests\CallingLogMethods.cs" />
-    <Compile Include="MockLoggers\IMockLogAdapter.cs" />
-    <Compile Include="MockLoggers\MockCallInfo.cs" />
-    <Compile Include="MockLoggers\MockLog.cs" />
-    <Compile Include="MockLoggers\MockLogAdapter.cs" />
-    <Compile Include="MockLoggers\MockLogManagerAdapter.cs" />
-    <Compile Include="MockLoggers\MockLogResult.cs" />
+    <Compile Include="GenericClass.cs" />
+    <Compile Include="MyApplication.cs" />
+    <Compile Include="NoRewriteGenericClass.cs" />
+    <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="TraceTests\NoParamsNoRetvalTests.cs" />
-    <Compile Include="TraceTests\NoParamsRetvalTests.cs" />
-    <Compile Include="TraceTests\ParamsNoRetvalTests.cs" />
-    <Compile Include="TraceTests\ParamsRetvalTests.cs" />
-    <Compile Include="TraceTests\SpecialCasesTests.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="App.config" />
+    <None Include="Logging.config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Tracer.Fody\Tracer.Fody.csproj">
-      <Project>{5e36561f-ea14-49a3-aa84-63176c256a30}</Project>
-      <Name>Tracer.Fody</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Tracer.Log4net\Tracer.Log4net.csproj">
       <Project>{c2b16352-62ae-4207-ba69-d02be7082c17}</Project>
       <Name>Tracer.Log4net</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

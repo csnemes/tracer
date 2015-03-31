@@ -49,6 +49,8 @@ namespace Tracer.Fody.Weavers
                     else { WeaveTraceLeaveWithoutReturnValue(body); }
                 }
 
+                SearchForAndChangeStaticLogCalls(body);
+
                 body.OptimizeMacros();
             }
         }
@@ -69,6 +71,7 @@ namespace Tracer.Fody.Weavers
             var returnType = body.Method.ReturnType;
             var returnValueDef = new VariableDefinition("returnValue", returnType);
             body.Variables.Add(returnValueDef);
+            var startTickVar = body.Variables.First(var => var.Name.Equals("startTick"));
             
             var allReturns = body.Instructions.Where(instr => instr.OpCode == OpCodes.Ret).ToList();
 
@@ -79,14 +82,20 @@ namespace Tracer.Fody.Weavers
                 instructions.Add(Instruction.Create(OpCodes.Stloc, returnValueDef)); //store it in local variable
 
                 var logTraceLeaveMethod = MethodReferenceProvider.GetTraceLeaveWithReturnValueReference();
-
                 instructions.Add(Instruction.Create(OpCodes.Ldsfld, StaticLogger));
                 instructions.Add(Instruction.Create(OpCodes.Ldstr, body.Method.FullName));
-                instructions.Add(Instruction.Create(OpCodes.Ldc_I8, 0L));
+
+                //calculate ticks elapsed
+                var getTimestampMethod = MethodReferenceProvider.GetTimestampReference();
+                instructions.Add(Instruction.Create(OpCodes.Call, getTimestampMethod));
+                instructions.Add(Instruction.Create(OpCodes.Ldloc, startTickVar));
+                instructions.Add(Instruction.Create(OpCodes.Sub));
+
+                //get return value
                 instructions.Add(Instruction.Create(OpCodes.Ldloc, returnValueDef));
 
                 //boxing if needed
-                if (returnType.IsPrimitive)
+                if (returnType.IsPrimitive || returnType.IsGenericParameter)
                 {
                     instructions.Add(Instruction.Create(OpCodes.Box, returnType));
                 }
@@ -112,6 +121,8 @@ namespace Tracer.Fody.Weavers
             */
             var allReturns = body.Instructions.Where(instr => instr.OpCode == OpCodes.Ret).ToList();
 
+            var startTickVar = body.Variables.First(var => var.Name.Equals("startTick"));
+
             foreach (var @return in allReturns)
             {
                 var instructions = new List<Instruction>();
@@ -121,7 +132,14 @@ namespace Tracer.Fody.Weavers
 
                 instructions.Add(Instruction.Create(OpCodes.Ldsfld, StaticLogger));
                 instructions.Add(Instruction.Create(OpCodes.Ldstr, body.Method.FullName));
-                instructions.Add(Instruction.Create(OpCodes.Ldc_I8, 0L));
+
+                //calculate ticks elapsed
+                var getTimestampMethod = MethodReferenceProvider.GetTimestampReference();
+                instructions.Add(Instruction.Create(OpCodes.Call, getTimestampMethod));
+                instructions.Add(Instruction.Create(OpCodes.Ldloc, startTickVar));
+                instructions.Add(Instruction.Create(OpCodes.Sub));
+
+                //call log
                 instructions.Add(Instruction.Create(OpCodes.Callvirt, logTraceLeaveMethod));
 
                 instructions.Add(Instruction.Create(OpCodes.Ret));
@@ -171,6 +189,15 @@ namespace Tracer.Fody.Weavers
                 Instruction.Create(OpCodes.Callvirt, logTraceEnterMethod)
             });
 
+            var getTimestampMethod = MethodReferenceProvider.GetTimestampReference();
+            var startTickVariable = new VariableDefinition("startTick", TypeReferenceProvider.Long);
+            body.Variables.Add(startTickVariable);
+            instructions.AddRange(new[]
+            {
+                Instruction.Create(OpCodes.Call, getTimestampMethod),
+                Instruction.Create(OpCodes.Stloc, startTickVariable)
+            });
+
             body.InsertAtTheBeginning(instructions);
         }
 
@@ -192,6 +219,15 @@ namespace Tracer.Fody.Weavers
                 Instruction.Create(OpCodes.Callvirt, logTraceEnterMethod)
             });
 
+            var getTimestampMethod = MethodReferenceProvider.GetTimestampReference();
+            var startTickVariable = new VariableDefinition("startTick", TypeReferenceProvider.Long);
+            body.Variables.Add(startTickVariable);
+            instructions.AddRange(new[]
+            {
+                Instruction.Create(OpCodes.Call, getTimestampMethod),
+                Instruction.Create(OpCodes.Stloc, startTickVariable)
+            });
+            
             body.InsertAtTheBeginning(instructions);
         }
 
@@ -223,7 +259,7 @@ namespace Tracer.Fody.Weavers
                 instructions.Add(Instruction.Create(OpCodes.Ldarg, parameter));
 
                 //box if necessary
-                if (parameter.ParameterType.IsPrimitive)
+                if (parameter.ParameterType.IsPrimitive || parameter.ParameterType.IsGenericParameter)
                 {
                     instructions.Add(Instruction.Create(OpCodes.Box, parameter.ParameterType));
                 }
@@ -236,9 +272,94 @@ namespace Tracer.Fody.Weavers
             return instructions;
         }
 
-        private void WeaveLogMethods(MethodBody body)
+        private void SearchForAndChangeStaticLogCalls(MethodBody body)
         {
-            
+            //look for static log calls
+            foreach (var instruction in body.Instructions.ToList()) //create a copy of the instructions so we can update the original
+            {
+                //TODO test if the instruction is really a static call
+                var methodReference = instruction.Operand as MethodReference;
+                if (methodReference != null && IsStaticLogTypeOrItsInnerType(methodReference.DeclaringType))
+                {
+                    //change the call
+                    if (!methodReference.HasParameters)
+                    {
+                        ChangeStaticLogCallWithoutParameter(body, instruction);
+                    }
+                    else
+                    {
+                        ChangeStaticLogCallWithParameter(body, instruction);
+                    }
+                }
+            }
+        }
+
+        ///The way how we solve this is a bit lame, but fairly simple. We store all parameters into local variables
+        /// then call the instance log method reading the parameters from these variables.
+        /// A better solution would be to figure out where the call really begins (where is the bottom of the stack)
+        /// and insert the instance ref there plus change the call instraction
+        private void ChangeStaticLogCallWithParameter(MethodBody body, Instruction oldInstruction)
+        {
+            var methodReference = (MethodReference)oldInstruction.Operand;
+            var instructions = new List<Instruction>();
+            var parameters = methodReference.Parameters;
+
+            //create variables to store parameters and push values into them
+            var variables = new VariableDefinition[parameters.Count];
+
+            for (int idx = 0; idx < parameters.Count; idx++)
+            {
+                variables[idx] = new VariableDefinition(parameters[idx].ParameterType);    
+                body.Variables.Add(variables[idx]);
+                instructions.Add(Instruction.Create(OpCodes.Stloc, variables[idx]));
+            }
+
+            //build-up instance call
+            instructions.Add(Instruction.Create(OpCodes.Ldsfld, StaticLogger));
+            instructions.Add(Instruction.Create(OpCodes.Ldstr, body.Method.FullName));
+
+            for (int idx = parameters.Count-1; idx >= 0; idx--)
+            {
+                instructions.Add(Instruction.Create(OpCodes.Ldloc, variables[idx]));
+            }
+
+            var instanceLogMethod = MethodReferenceProvider.GetInstanceLogMethodWithParameter(GetInstanceLogMethodName(methodReference),
+                parameters);
+
+            instructions.Add(Instruction.Create(OpCodes.Callvirt, instanceLogMethod));
+
+            body.Replace(oldInstruction, instructions);
+        }
+
+        private void ChangeStaticLogCallWithoutParameter(MethodBody body, Instruction oldInstruction)
+        {
+            var methodReference = (MethodReference)oldInstruction.Operand;
+
+            var instructions = new List<Instruction>(); 
+
+            var instanceLogMethod = MethodReferenceProvider.GetInstanceLogMethodWithoutParameter(GetInstanceLogMethodName(methodReference));
+
+            instructions.AddRange(new[]
+            {
+                Instruction.Create(OpCodes.Ldsfld, StaticLogger),
+                Instruction.Create(OpCodes.Ldstr, body.Method.FullName),
+                Instruction.Create(OpCodes.Callvirt, instanceLogMethod)
+            });
+
+            body.Replace(oldInstruction, instructions);
+        }
+        
+        private bool IsStaticLogTypeOrItsInnerType(TypeReference typeReference)
+        {
+            //TODO check for inner types
+            return typeReference.FullName == TypeReferenceProvider.StaticLogReference.FullName;
+        }
+
+        private string GetInstanceLogMethodName(MethodReference methodReference)
+        {
+            //TODO chain inner types in name
+            var typeName = methodReference.DeclaringType.Name;
+            return typeName + methodReference.Name;
         }
 
         private TypeReferenceProvider TypeReferenceProvider
@@ -268,7 +389,7 @@ namespace Tracer.Fody.Weavers
             if (loggerField == null)
             {
                 //TODO check if the _log name is used for something else and use a unqiue name
-                loggerField = new FieldDefinition("_log", FieldAttributes.Public | FieldAttributes.Static, logTypeRef);
+                loggerField = new FieldDefinition("_log", FieldAttributes.Public | FieldAttributes.Static, logTypeRef); //todo private field?
                 _typeDefinition.Fields.Add(loggerField);
 
                 //create field init

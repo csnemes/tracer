@@ -28,18 +28,28 @@ namespace Tracer.Fody.Tests.Func.MockLoggers
 
         public void TraceLeave(string methodInfo, long numberOfTicks)
         {
-            MockLogManagerAdapter.TraceLeaveCalled(_type.FullName, methodInfo, null);
+            MockLogManagerAdapter.TraceLeaveCalled(_type.FullName, methodInfo, numberOfTicks, null);
         }
 
         public void TraceLeave(string methodInfo, long numberOfTicks, object returnValue)
         {
             var returnValueString = returnValue != null ? returnValue.ToString() : null;
-            MockLogManagerAdapter.TraceLeaveCalled(_type.FullName, methodInfo, returnValueString);
+            MockLogManagerAdapter.TraceLeaveCalled(_type.FullName, methodInfo, numberOfTicks, returnValueString);
         }
 
         public void MockLogOuter(string methodInfo, string message)
         {
-            MockLogManagerAdapter.LogCalled(_type.FullName, methodInfo, "MockLogOuter", new []{"message"}, new []{ message});
+            MockLogManagerAdapter.LogCalled(_type.FullName, methodInfo, "MockLogOuter",  new []{ message});
+        }
+
+        public void MockLogOuterNoParam(string methodInfo)
+        {
+            MockLogManagerAdapter.LogCalled(_type.FullName, methodInfo, "MockLogOuterNoParam");
+        }
+
+        public void MockLogOuter(string methodInfo, string message, int i)
+        {
+            MockLogManagerAdapter.LogCalled(_type.FullName, methodInfo, "MockLogOuter", new[] { message, i.ToString() });
         }
     }
 }

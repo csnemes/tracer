@@ -13,5 +13,11 @@ namespace Tracer.Fody.Tests.Func.MockLoggers
         //public void MockLogOuter(string methodInfo string message)
         public static void Outer(string message)
         {}
+
+        public static void OuterNoParam()
+        {}
+
+        public static void Outer(string message, int i)
+        {}
     }
 }

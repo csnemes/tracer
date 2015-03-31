@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Mono.Cecil;
+using Mono.Collections.Generic;
 
 namespace Tracer.Fody.Weavers
 {
@@ -59,6 +61,31 @@ namespace Tracer.Fody.Weavers
         public MethodReference GetGetTypeFromHandleReference()
         {
             return _moduleDefinition.Import(typeof(Type).GetMethod("GetTypeFromHandle", BindingFlags.Public | BindingFlags.Static));
+        }
+
+        public MethodReference GetTimestampReference()
+        {
+            return _moduleDefinition.Import(typeof(Stopwatch).GetMethod("GetTimestamp", BindingFlags.Public | BindingFlags.Static));
+        }
+
+        public MethodReference GetInstanceLogMethodWithoutParameter(string instanceLogMethodName)
+        {
+            var logMethod = new MethodReference(instanceLogMethodName, _moduleDefinition.TypeSystem.Void, _typeReferenceProvider.LogAdapterReference);
+            logMethod.HasThis = true; //instance method
+            logMethod.Parameters.Add(new ParameterDefinition(_moduleDefinition.TypeSystem.String));
+            return logMethod;
+        }
+
+        public MethodReference GetInstanceLogMethodWithParameter(string instanceLogMethodName, IEnumerable<ParameterDefinition> parameters)
+        {
+            var logMethod = new MethodReference(instanceLogMethodName, _moduleDefinition.TypeSystem.Void, _typeReferenceProvider.LogAdapterReference);
+            logMethod.HasThis = true; //instance method
+            logMethod.Parameters.Add(new ParameterDefinition(_moduleDefinition.TypeSystem.String));
+            foreach (var parameter in parameters)
+            {
+                logMethod.Parameters.Add(parameter);
+            }
+            return logMethod;
         }
     }
 }

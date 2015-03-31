@@ -66,6 +66,38 @@ namespace Tracer.Fody.Tests.Func.TraceTests
         }
 
         [Test]
+        public void Test_Static_ObjectParameter()
+        {
+            string code = @"
+                using System;
+                using System.Diagnostics;
+
+                namespace First
+                {
+                    public class MyInput
+                    {}
+
+                    public class MyClass
+                    {
+                        public static void Main()
+                        {
+                            CallMe(new MyInput());
+                        }
+
+                        private static void CallMe(MyInput param)
+                        {
+                        }
+                    }
+                }
+            ";
+
+            var result = this.RunTest(code, new PrivateOnlyTraceLoggingFilter(), "First.MyClass::Main");
+            result.Count.Should().Be(2);
+            result.ElementAt(0).ShouldBeTraceEnterInto("First.MyClass::CallMe", "param", "First.MyInput");
+            result.ElementAt(1).ShouldBeTraceLeaveFrom("First.MyClass::CallMe");
+        }
+
+        [Test]
         public void Test_Static_OutParameter_NotListed()
         {
             string code = @"
@@ -94,6 +126,35 @@ namespace Tracer.Fody.Tests.Func.TraceTests
             result.Count.Should().Be(2);
             result.ElementAt(0).ShouldBeTraceEnterInto("First.MyClass::SetString", "param", "Hello");
             result.ElementAt(1).ShouldBeTraceLeaveFrom("First.MyClass::SetString");
+        }
+
+        [Test]
+        public void Test_Static_MultipleParameters()
+        {
+            string code = @"
+                using System;
+                using System.Diagnostics;
+
+                namespace First
+                {
+                    public class MyClass
+                    {
+                        public static void Main()
+                        {
+                            CallMe(""Hello"", ""Hello2"", 42);
+                        }
+
+                        private static void CallMe(string param, string param2, int paraInt)
+                        {
+                        }
+                    }
+                }
+            ";
+
+            var result = this.RunTest(code, new PrivateOnlyTraceLoggingFilter(), "First.MyClass::Main");
+            result.Count.Should().Be(2);
+            result.ElementAt(0).ShouldBeTraceEnterInto("First.MyClass::CallMe", "param", "Hello", "param2", "Hello2", "paraInt", "42");
+            result.ElementAt(1).ShouldBeTraceLeaveFrom("First.MyClass::CallMe");
         }
 
         [Test]

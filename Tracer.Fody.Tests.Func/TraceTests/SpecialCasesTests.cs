@@ -1,6 +1,9 @@
-﻿namespace Tracer.Fody.Tests.Func.TraceTests
+﻿using NUnit.Framework;
+
+namespace Tracer.Fody.Tests.Func.TraceTests
 {
-    class SpecialCasesTests
+    [TestFixture]
+    public class SpecialCasesTests : FuncTestBase
     {
     }
 }

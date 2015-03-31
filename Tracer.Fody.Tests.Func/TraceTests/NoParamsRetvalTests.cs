@@ -66,5 +66,38 @@ namespace Tracer.Fody.Tests.Func.TraceTests
             result.ElementAt(0).ShouldBeTraceEnterInto("First.MyClass::GetStringValue");
             result.ElementAt(1).ShouldBeTraceLeaveFrom("First.MyClass::GetStringValue", "Hello");
         }
+
+        [Test]
+        public void Test_Static_Empty_Method_Returns_Object()
+        {
+            string code = @"
+                using System;
+                using System.Diagnostics;
+
+                namespace First
+                {
+                    public class MyRetVal
+                    {}
+
+                    public class MyClass
+                    {
+                        public static void Main()
+                        {
+                            var val = GetValue();
+                        }
+
+                        private static MyRetVal GetValue()
+                        {
+                            return new MyRetVal();
+                        }
+                    }
+                }
+            ";
+
+            var result = this.RunTest(code, new PrivateOnlyTraceLoggingFilter(), "First.MyClass::Main");
+            result.Count.Should().Be(2);
+            result.ElementAt(0).ShouldBeTraceEnterInto("First.MyClass::GetValue");
+            result.ElementAt(1).ShouldBeTraceLeaveFrom("First.MyClass::GetValue", "First.MyRetVal");
+        }
     }
 }

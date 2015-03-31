@@ -98,7 +98,8 @@ namespace Tracer.Fody.Tests.Func
                 .WithFilter(filter)
                 .WithAdapterAssembly(assembly.GetName().FullName)
                 .WithLogManager(typeof(MockLogManagerAdapter).FullName)
-                .WithLogger(typeof(IMockLogAdapter).FullName);
+                .WithLogger(typeof(IMockLogAdapter).FullName)
+                .WithStaticLogger(typeof(MockLog).FullName);
                 
             AssemblyWeaver.Execute(assemblyPath, config);
         }
@@ -162,6 +163,14 @@ namespace Tracer.Fody.Tests.Func
             public bool ShouldAddTrace(MethodDefinition definition)
             {
                 return definition.IsPrivate;
+            }
+        }
+
+        protected class InternalOnlyTraceLoggingFilter : ITraceLoggingFilter
+        {
+            public bool ShouldAddTrace(MethodDefinition definition)
+            {
+                return definition.IsAssembly;
             }
         }
 

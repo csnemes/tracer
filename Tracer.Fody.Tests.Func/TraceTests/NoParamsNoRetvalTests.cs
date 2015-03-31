@@ -15,6 +15,7 @@ namespace Tracer.Fody.Tests.Func.TraceTests
             string code = @"
                 using System;
                 using System.Diagnostics;
+                using System.Threading; 
 
                 namespace First
                 {
@@ -22,6 +23,7 @@ namespace Tracer.Fody.Tests.Func.TraceTests
                     {
                         public static void Main()
                         {
+                            Thread.Sleep(10);
                         }
                     }
                 }
@@ -31,6 +33,7 @@ namespace Tracer.Fody.Tests.Func.TraceTests
             result.Count.Should().Be(2);
             result.ElementAt(0).ShouldBeTraceEnterInto("First.MyClass::Main");
             result.ElementAt(1).ShouldBeTraceLeaveFrom("First.MyClass::Main");
+            result.ElementAt(1).NumberOfTicks.Should().BeGreaterThan(0);
         }
 
         [Test]
