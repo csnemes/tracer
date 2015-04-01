@@ -143,8 +143,7 @@ namespace Tracer.Fody.Tests.Func.TraceTests
         }
 
 
-        [Test, Explicit]
-        //This one fails, incorrect IL code, check CECIL
+        [Test]
         public void Test_Generic_Class_Method()
         {
             string code = @"
@@ -176,10 +175,10 @@ namespace Tracer.Fody.Tests.Func.TraceTests
 
             var result = this.RunTest(code, new InternalOnlyTraceLoggingFilter(), "First.MyClass::Main");
             result.Count.Should().Be(4);
-            result.ElementAt(0).ShouldBeTraceEnterInto("First.MyClass::CallMe", "param", "Hello", "param2", "Hello2", "paraNum", "42");
-            result.ElementAt(1).ShouldBeTraceLeaveFrom("First.MyClass::CallMe", "Hello2!");
-            result.ElementAt(2).ShouldBeTraceEnterInto("First.MyClass::CallMe", "param", "Ahoy", "param2", "Ahoy2", "paraNum", "0,5");
-            result.ElementAt(3).ShouldBeTraceLeaveFrom("First.MyClass::CallMe", "Ahoy2!");
+            result.ElementAt(0).ShouldBeTraceEnterInto("First.MyGenClass`1::CallMe", "param", "Hello", "paramT", "John");
+            result.ElementAt(1).ShouldBeTraceLeaveFrom("First.MyGenClass`1::CallMe", null);
+            result.ElementAt(2).ShouldBeTraceEnterInto("First.MyGenClass`1::CallMe", "param", "Hello", "paramT", "42");
+            result.ElementAt(3).ShouldBeTraceLeaveFrom("First.MyGenClass`1::CallMe", "0");
         }
     }
 }

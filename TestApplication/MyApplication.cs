@@ -21,8 +21,8 @@ namespace TestApplication
 
             Write(Add(21, 22));
 
-            //var intGen = new GenericClass<int>();
-            //Write(intGen.GetDefault(42));
+            var intGen = new GenericClass<int>();
+            Write(intGen.GetDefault(42));
         }
 
         public void Write<T>(T input)

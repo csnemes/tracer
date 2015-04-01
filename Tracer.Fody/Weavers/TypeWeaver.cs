@@ -18,7 +18,7 @@ namespace Tracer.Fody.Weavers
         private readonly ITraceLoggingFilter _filter;
         private readonly TypeReferenceProvider _typeReferenceProvider;
         private readonly MethodReferenceProvider _methodReferenceProvider;
-        private readonly Lazy<FieldDefinition> _staticLoggerField;
+        private readonly Lazy<FieldReference> _staticLoggerField;
 
         internal TypeWeaver(ITraceLoggingFilter filter, TypeReferenceProvider typeReferenceProvider, MethodReferenceProvider methodReferenceProvider,
             TypeDefinition typeDefinition)
@@ -27,7 +27,7 @@ namespace Tracer.Fody.Weavers
             _typeReferenceProvider = typeReferenceProvider;
             _methodReferenceProvider = methodReferenceProvider;
             _typeDefinition = typeDefinition;
-            _staticLoggerField = new Lazy<FieldDefinition>(CreateLoggerStaticField);
+            _staticLoggerField = new Lazy<FieldReference>(CreateLoggerStaticField);
         }
 
         public void Execute()
@@ -372,12 +372,12 @@ namespace Tracer.Fody.Weavers
             get { return _methodReferenceProvider; }
         }
 
-        private FieldDefinition StaticLogger
+        private FieldReference StaticLogger
         {
             get { return _staticLoggerField.Value; }
         }
 
-        private FieldDefinition CreateLoggerStaticField()
+        private FieldReference CreateLoggerStaticField()
         {
             //TODO check for existing logger
             var logTypeRef = TypeReferenceProvider.LogAdapterReference;
@@ -386,38 +386,40 @@ namespace Tracer.Fody.Weavers
             //look for existing one
             var loggerField = _typeDefinition.Fields.FirstOrDefault(fld => fld.IsStatic && fld.FieldType == logTypeRef);
 
-            if (loggerField == null)
+            if (loggerField != null) return loggerField.FixFieldReferenceForGenericType();
+
+            //TODO check if the _log name is used for something else and use a unqiue name
+            loggerField = new FieldDefinition("_log", FieldAttributes.Private | FieldAttributes.Static, logTypeRef); 
+            _typeDefinition.Fields.Add(loggerField);
+
+            //create field init
+            var staticConstructor = _typeDefinition.GetStaticConstructor();
+            if (staticConstructor == null)
             {
-                //TODO check if the _log name is used for something else and use a unqiue name
-                loggerField = new FieldDefinition("_log", FieldAttributes.Public | FieldAttributes.Static, logTypeRef); //todo private field?
-                _typeDefinition.Fields.Add(loggerField);
-
-                //create field init
-                var staticConstructor = _typeDefinition.GetStaticConstructor();
-                if (staticConstructor == null)
-                {
-                    const MethodAttributes methodAttributes = MethodAttributes.Private | MethodAttributes.Static | MethodAttributes.HideBySig | MethodAttributes.SpecialName | MethodAttributes.RTSpecialName;
-                    staticConstructor = new MethodDefinition(".cctor", methodAttributes, TypeReferenceProvider.Void);
-                    _typeDefinition.Methods.Add(staticConstructor);
-                }
-
-                var getLoggerMethod = new MethodReference("GetLogger", logTypeRef, logManagerTypeRef);
-                getLoggerMethod.Parameters.Add(new ParameterDefinition(TypeReferenceProvider.Type));
-
-                //build up typeInfo
-                var getTypeFromHandleMethod = MethodReferenceProvider.GetGetTypeFromHandleReference();
-
-                staticConstructor.Body.InsertAtTheBeginning(new[]
-                    {
-                        Instruction.Create(OpCodes.Ldtoken, _typeDefinition),
-                        Instruction.Create(OpCodes.Call, getTypeFromHandleMethod),
-                        Instruction.Create(OpCodes.Call, getLoggerMethod),
-                        Instruction.Create(OpCodes.Stsfld, loggerField),
-                        Instruction.Create(OpCodes.Ret)
-                    });
+                const MethodAttributes methodAttributes = MethodAttributes.Private | MethodAttributes.Static | MethodAttributes.HideBySig | MethodAttributes.SpecialName | MethodAttributes.RTSpecialName;
+                staticConstructor = new MethodDefinition(".cctor", methodAttributes, TypeReferenceProvider.Void);
+                _typeDefinition.Methods.Add(staticConstructor);
             }
 
-            return loggerField;
+            var getLoggerMethod = new MethodReference("GetLogger", logTypeRef, logManagerTypeRef);
+            getLoggerMethod.Parameters.Add(new ParameterDefinition(TypeReferenceProvider.Type));
+
+            //build up typeInfo
+            var getTypeFromHandleMethod = MethodReferenceProvider.GetGetTypeFromHandleReference();
+
+            //spec treatment for generic types 
+            var loggerFieldRef = loggerField.FixFieldReferenceForGenericType();
+
+            staticConstructor.Body.InsertAtTheBeginning(new[]
+            {
+                Instruction.Create(OpCodes.Ldtoken, _typeDefinition),
+                Instruction.Create(OpCodes.Call, getTypeFromHandleMethod),
+                Instruction.Create(OpCodes.Call, getLoggerMethod),
+                Instruction.Create(OpCodes.Stsfld, loggerFieldRef),
+                Instruction.Create(OpCodes.Ret)
+            });
+
+            return loggerFieldRef;
         }
     }
 }

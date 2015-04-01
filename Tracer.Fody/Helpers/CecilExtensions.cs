@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Mono.Cecil;
 using Mono.Cecil.Cil;
 using Mono.Collections.Generic;
 
@@ -65,6 +66,26 @@ namespace Tracer.Fody.Helpers
                 collection.Insert(indexOf + 1, instruction1);
                 indexOf++;
             }
+        }
+
+
+        public static TypeReference CreateGenericInstantiation(this TypeReference definition)
+        {
+            var instType = new GenericInstanceType(definition);
+            foreach (var parameter in definition.GenericParameters)
+            {
+                instType.GenericArguments.Add(parameter);
+            }
+            return instType;
+        }
+
+        public static FieldReference FixFieldReferenceForGenericType(this FieldReference fieldReference)
+        {
+            if (fieldReference.DeclaringType.HasGenericParameters)
+            {
+                return new FieldReference(fieldReference.Name, fieldReference.FieldType, fieldReference.DeclaringType.CreateGenericInstantiation());
+            }
+            return fieldReference;
         }
     }
 }
