@@ -69,8 +69,9 @@ namespace Tracer.Fody.Helpers
         }
 
 
-        public static TypeReference CreateGenericInstantiation(this TypeReference definition)
+        public static TypeReference GetGenericInstantiationIfGeneric(this TypeReference definition)
         {
+            if (!definition.HasGenericParameters) return definition;
             var instType = new GenericInstanceType(definition);
             foreach (var parameter in definition.GenericParameters)
             {
@@ -79,11 +80,11 @@ namespace Tracer.Fody.Helpers
             return instType;
         }
 
-        public static FieldReference FixFieldReferenceForGenericType(this FieldReference fieldReference)
+        public static FieldReference FixFieldReferenceIfDeclaringTypeIsGeneric(this FieldReference fieldReference)
         {
             if (fieldReference.DeclaringType.HasGenericParameters)
             {
-                return new FieldReference(fieldReference.Name, fieldReference.FieldType, fieldReference.DeclaringType.CreateGenericInstantiation());
+                return new FieldReference(fieldReference.Name, fieldReference.FieldType, fieldReference.DeclaringType.GetGenericInstantiationIfGeneric());
             }
             return fieldReference;
         }

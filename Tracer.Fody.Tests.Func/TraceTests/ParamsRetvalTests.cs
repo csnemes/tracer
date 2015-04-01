@@ -175,10 +175,10 @@ namespace Tracer.Fody.Tests.Func.TraceTests
 
             var result = this.RunTest(code, new InternalOnlyTraceLoggingFilter(), "First.MyClass::Main");
             result.Count.Should().Be(4);
-            result.ElementAt(0).ShouldBeTraceEnterInto("First.MyGenClass`1::CallMe", "param", "Hello", "paramT", "John");
-            result.ElementAt(1).ShouldBeTraceLeaveFrom("First.MyGenClass`1::CallMe", null);
-            result.ElementAt(2).ShouldBeTraceEnterInto("First.MyGenClass`1::CallMe", "param", "Hello", "paramT", "42");
-            result.ElementAt(3).ShouldBeTraceLeaveFrom("First.MyGenClass`1::CallMe", "0");
+            result.ElementAt(0).ShouldBeTraceEnterInto("First.MyGenClass`1[[System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089]]::CallMe", "param", "Hello", "paramT", "John");
+            result.ElementAt(1).ShouldBeTraceLeaveFrom("First.MyGenClass`1[[System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089]]::CallMe", null);
+            result.ElementAt(2).ShouldBeTraceEnterInto("First.MyGenClass`1[[System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089]]::CallMe", "param", "Hello", "paramT", "42");
+            result.ElementAt(3).ShouldBeTraceLeaveFrom("First.MyGenClass`1[[System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089]]::CallMe", "0");
         }
     }
 }

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using log4net;
+using log4net.Core;
 
 namespace Tracer.Log4net.Adapters
 {
@@ -11,7 +12,7 @@ namespace Tracer.Log4net.Adapters
     {
         public static LoggerAdapter GetLogger(Type type)
         {
-            return new LoggerAdapter(LogManager.GetLogger(type));
+            return new LoggerAdapter(type);
         }
     }
 }

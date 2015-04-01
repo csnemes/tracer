@@ -386,10 +386,10 @@ namespace Tracer.Fody.Weavers
             //look for existing one
             var loggerField = _typeDefinition.Fields.FirstOrDefault(fld => fld.IsStatic && fld.FieldType == logTypeRef);
 
-            if (loggerField != null) return loggerField.FixFieldReferenceForGenericType();
+            if (loggerField != null) return loggerField.FixFieldReferenceIfDeclaringTypeIsGeneric();
 
-            //TODO check if the _log name is used for something else and use a unqiue name
-            loggerField = new FieldDefinition("_log", FieldAttributes.Private | FieldAttributes.Static, logTypeRef); 
+            //$log should be unique
+            loggerField = new FieldDefinition("$log", FieldAttributes.Private | FieldAttributes.Static, logTypeRef); 
             _typeDefinition.Fields.Add(loggerField);
 
             //create field init
@@ -408,11 +408,11 @@ namespace Tracer.Fody.Weavers
             var getTypeFromHandleMethod = MethodReferenceProvider.GetGetTypeFromHandleReference();
 
             //spec treatment for generic types 
-            var loggerFieldRef = loggerField.FixFieldReferenceForGenericType();
+            var loggerFieldRef = loggerField.FixFieldReferenceIfDeclaringTypeIsGeneric();
 
             staticConstructor.Body.InsertAtTheBeginning(new[]
             {
-                Instruction.Create(OpCodes.Ldtoken, _typeDefinition),
+                Instruction.Create(OpCodes.Ldtoken, _typeDefinition.GetGenericInstantiationIfGeneric()),
                 Instruction.Create(OpCodes.Call, getTypeFromHandleMethod),
                 Instruction.Create(OpCodes.Call, getLoggerMethod),
                 Instruction.Create(OpCodes.Stsfld, loggerFieldRef),

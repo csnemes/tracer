@@ -23,6 +23,9 @@ namespace TestApplication
 
             var intGen = new GenericClass<int>();
             Write(intGen.GetDefault(42));
+
+            var stringGen = new GenericClass<string>();
+            Write(stringGen.GetDefault("Hello"));
         }
 
         public void Write<T>(T input)
