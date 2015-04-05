@@ -12,5 +12,10 @@ namespace TestApplication
         {
             return default(T);
         }
+
+        IEnumerable<string> GetString()
+        {
+            yield return "12";
+        }
     }
 }

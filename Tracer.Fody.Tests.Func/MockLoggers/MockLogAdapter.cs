@@ -15,15 +15,17 @@ namespace Tracer.Fody.Tests.Func.MockLoggers
             _type = type;
         }
 
-        public void TraceEnter(string methodInfo)
-        {
-            MockLogManagerAdapter.TraceEnterCalled(_type.FullName, methodInfo, null, null);
-        }
-
         public void TraceEnter(string methodInfo, string[] paramNames, object[] paramValues)
         {
-            var stringValues = paramValues.Select(val => val != null ? val.ToString() : null).ToArray();
-            MockLogManagerAdapter.TraceEnterCalled(_type.FullName, methodInfo, paramNames, stringValues);
+            if (paramNames != null)
+            {
+                var stringValues = paramValues.Select(val => val != null ? val.ToString() : null).ToArray();
+                MockLogManagerAdapter.TraceEnterCalled(_type.FullName, methodInfo, paramNames, stringValues);
+            }
+            else
+            {
+                MockLogManagerAdapter.TraceEnterCalled(_type.FullName, methodInfo, null, null);
+            }
         }
 
         public void TraceLeave(string methodInfo, long numberOfTicks)

@@ -44,6 +44,7 @@ namespace Tracer.Fody.Weavers
             var factory = new TypeWeaverFactory(_configuration.Filter, typeReferenceProvider, methodReferenceProvider);
             foreach (var type in _moduleDefinition.GetAllTypes())
             {
+                //TODO skip classes with CompilerGeneratedAttribute
                 var weaver = factory.Create(type);
                 weaver.Execute();
             }

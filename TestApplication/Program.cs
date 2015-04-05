@@ -16,6 +16,7 @@ namespace TestApplication
             Console.WriteLine("Starting application...");
             var myApp = new MyApplication();
             myApp.Run();
+            Console.WriteLine("Press Enter to stop");
             Console.ReadLine();
         }
     }
