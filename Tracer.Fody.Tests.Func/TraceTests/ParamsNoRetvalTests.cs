@@ -200,5 +200,40 @@ namespace Tracer.Fody.Tests.Func.TraceTests
             result.ElementAt(4).ShouldBeTraceEnterInto("First.MyClass::Run", "input", "-1");
             result.ElementAt(5).ShouldBeTraceLeaveFrom("First.MyClass::Run");
         }
+
+        [Test]
+        public void Test_Static_SingleStructParameter_Empty_Method()
+        {
+            string code = @"
+                using System;
+                using System.Diagnostics;
+
+                namespace First
+                {
+                    public struct MyStruct
+                    {
+                        public string ValStr {get; set;}
+                        public int ValInt {get; set;}
+                    }
+
+                    public class MyClass
+                    {
+                        public static void Main()
+                        {
+                            SetStruct(new MyStruct() { ValStr=""Hi"", ValInt=42 });
+                        }
+
+                        private static void SetStruct(MyStruct param)
+                        {
+                        }
+                    }
+                }
+            ";
+
+            var result = this.RunTest(code, new PrivateOnlyTraceLoggingFilter(), "First.MyClass::Main");
+            result.Count.Should().Be(2);
+            result.ElementAt(0).ShouldBeTraceEnterInto("First.MyClass::SetStruct", "param", "First.MyStruct");
+            result.ElementAt(1).ShouldBeTraceLeaveFrom("First.MyClass::SetStruct");
+        }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -20,38 +21,75 @@ namespace Tracer.Fody.Tests.Func.MockLoggers
             if (paramNames != null)
             {
                 var stringValues = paramValues.Select(val => val != null ? val.ToString() : null).ToArray();
-                MockLogManagerAdapter.TraceEnterCalled(_type.FullName, methodInfo, paramNames, stringValues);
+                MockLogManagerAdapter.TraceEnterCalled(TypePrettyName, methodInfo, paramNames, stringValues);
             }
             else
             {
-                MockLogManagerAdapter.TraceEnterCalled(_type.FullName, methodInfo, null, null);
+                MockLogManagerAdapter.TraceEnterCalled(TypePrettyName, methodInfo, null, null);
             }
         }
 
-        public void TraceLeave(string methodInfo, long numberOfTicks)
+        public void TraceLeave(string methodInfo, long numberOfTicks, string[] paramNames, object[] paramValues)
         {
-            MockLogManagerAdapter.TraceLeaveCalled(_type.FullName, methodInfo, numberOfTicks, null);
-        }
-
-        public void TraceLeave(string methodInfo, long numberOfTicks, object returnValue)
-        {
-            var returnValueString = returnValue != null ? returnValue.ToString() : null;
-            MockLogManagerAdapter.TraceLeaveCalled(_type.FullName, methodInfo, numberOfTicks, returnValueString);
+            if (paramNames != null)
+            {
+                var stringValues = paramValues.Select(val => val != null ? val.ToString() : null).ToArray();
+                MockLogManagerAdapter.TraceLeaveCalled(TypePrettyName, methodInfo, numberOfTicks, paramNames, stringValues);
+            }
+            else
+            {
+                MockLogManagerAdapter.TraceLeaveCalled(TypePrettyName, methodInfo, numberOfTicks, null, null);
+            }
         }
 
         public void MockLogOuter(string methodInfo, string message)
         {
-            MockLogManagerAdapter.LogCalled(_type.FullName, methodInfo, "MockLogOuter",  new []{ message});
+            MockLogManagerAdapter.LogCalled(TypePrettyName, methodInfo, "MockLogOuter", new[] { message });
         }
 
         public void MockLogOuterNoParam(string methodInfo)
         {
-            MockLogManagerAdapter.LogCalled(_type.FullName, methodInfo, "MockLogOuterNoParam");
+            MockLogManagerAdapter.LogCalled(TypePrettyName, methodInfo, "MockLogOuterNoParam");
         }
 
         public void MockLogOuter(string methodInfo, string message, int i)
         {
-            MockLogManagerAdapter.LogCalled(_type.FullName, methodInfo, "MockLogOuter", new[] { message, i.ToString() });
+            MockLogManagerAdapter.LogCalled(TypePrettyName, methodInfo, "MockLogOuter", new[] { message, i.ToString() });
+        }
+
+        private string TypePrettyName
+        {
+            get 
+            {
+                var sb = new StringBuilder();
+                if (!String.IsNullOrEmpty(_type.Namespace))
+                {
+                    sb.Append(_type.Namespace);
+                    sb.Append(".");
+                }
+
+                if (_type.IsGenericType)
+                {
+                    sb.Append(_type.Name.Remove(_type.Name.IndexOf('`')));
+                    AddGenericPrettyFormat(sb, _type.GenericTypeArguments);
+                }
+                else
+                {
+                    sb.Append(_type.Name);
+                }
+                return sb.ToString();
+            }
+        }
+
+        private static void AddGenericPrettyFormat(StringBuilder sb, Type[] genericArgumentTypes)
+        {
+            sb.Append("<");
+            for (int i = 0; i < genericArgumentTypes.Length; i++)
+            {
+                sb.Append(genericArgumentTypes[i].Name);
+                if (i < genericArgumentTypes.Length - 1) sb.Append(", ");
+            }
+            sb.Append(">");
         }
     }
 }

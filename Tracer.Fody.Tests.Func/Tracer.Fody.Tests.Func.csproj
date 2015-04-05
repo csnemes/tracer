@@ -70,11 +70,12 @@
     <Compile Include="MockLoggers\MockLogManagerAdapter.cs" />
     <Compile Include="MockLoggers\MockLogResult.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TraceTests\ByRefParamTests.cs" />
     <Compile Include="TraceTests\NoParamsNoRetvalTests.cs" />
     <Compile Include="TraceTests\NoParamsRetvalTests.cs" />
+    <Compile Include="TraceTests\OutParamTests.cs" />
     <Compile Include="TraceTests\ParamsNoRetvalTests.cs" />
     <Compile Include="TraceTests\ParamsRetvalTests.cs" />
-    <Compile Include="TraceTests\SpecialCasesTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

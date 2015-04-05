@@ -20,7 +20,9 @@ namespace TestApplication
             GenericMethodTests();
             GenericClassTests();
 
-            StaticLogRewriteTests();
+            StaticLogRewrites();
+
+            OutParamLogs();
 
             Write(Add(21, 22));
             Write(Add(100, 1));
@@ -29,7 +31,16 @@ namespace TestApplication
             perfComp.SpeedTest();
         }
 
-        public void StaticLogRewriteTests()
+        public void OutParamLogs()
+        {
+            var op = new OutParamClass();
+            string outString;
+            op.SetParamString("in", out outString);
+            int outInt;
+            op.SetParamInt("42", out outInt);
+        }
+
+        public void StaticLogRewrites()
         {
             Log.Debug(new MyClass());
             Log.Debug("Hello");

@@ -19,19 +19,17 @@ namespace Tracer.Fody.Tests.Func.MockLoggers
         private readonly MockCallType _callType;
         private readonly string _loggerName;
         private readonly string _containingMethod;
-        private readonly string _returnValue;
         private readonly string[] _paramNames;
         private readonly string[] _paramValues;
         private readonly string _logMethod;
         private readonly long? _numberOfTicks;
 
-        private MockCallInfo(string loggerName, MockCallType callType, string containingMethod, string returnValue, string[] paramNames, string[] paramValues,
+        private MockCallInfo(string loggerName, MockCallType callType, string containingMethod, string[] paramNames, string[] paramValues,
             string logMethod, long? numberOfTicks)
         {
             _loggerName = loggerName;
             _callType = callType;
             _containingMethod = containingMethod;
-            _returnValue = returnValue;
             _paramNames = paramNames;
             _paramValues = paramValues;
             _logMethod = logMethod;
@@ -40,18 +38,18 @@ namespace Tracer.Fody.Tests.Func.MockLoggers
 
         public static MockCallInfo CreateEnter(string loggerName, string containingMethod, string[] paramNames = null, string[] paramValues = null)
         {
-            return new MockCallInfo(loggerName, MockCallType.TraceEnter, containingMethod, null, paramNames, paramValues, null, null);
+            return new MockCallInfo(loggerName, MockCallType.TraceEnter, containingMethod, paramNames, paramValues, null, null);
         }
 
-        public static MockCallInfo CreateLeave(string loggerName, string containingMethod, long numberOfTicks, string returnValue = null)
+        public static MockCallInfo CreateLeave(string loggerName, string containingMethod, long numberOfTicks, string[] paramNames = null, string[] paramValues = null)
         {
-            return new MockCallInfo(loggerName, MockCallType.TraceLeave, containingMethod, returnValue, null, null, null, numberOfTicks);
+            return new MockCallInfo(loggerName, MockCallType.TraceLeave, containingMethod, paramNames, paramValues, null, numberOfTicks);
         }
 
         public static MockCallInfo CreateLog(string loggerName, string containingMethod, string logMethod,
              string[] paramValues = null)
         {
-            return new MockCallInfo(loggerName, MockCallType.Log, containingMethod, null, null, paramValues, logMethod, null);
+            return new MockCallInfo(loggerName, MockCallType.Log, containingMethod, null, paramValues, logMethod, null);
         }
         
         public string LoggerName
@@ -67,11 +65,6 @@ namespace Tracer.Fody.Tests.Func.MockLoggers
         public string ContainingMethod
         {
             get { return _containingMethod; }
-        }
-
-        public string ReturnValue
-        {
-            get { return _returnValue; }
         }
 
         public string[] ParamNames
@@ -103,11 +96,19 @@ namespace Tracer.Fody.Tests.Func.MockLoggers
             mock.LoggerName.Should().Be(split[0]);
             mock.ContainingMethod.Should().Contain(split[1]);
             mock.CallType.Should().Be(MockCallInfo.MockCallType.TraceEnter);
-            if (parameters != null)
+            if (parameters != null && parameters.Length > 0)
             {
+                if (mock.ParamNames == null)
+                {
+                    throw new Exception(String.Format("No parameters in call"));
+                }
                 for (int idx = 0; idx < parameters.Length; idx++)
                 {
                     int mockIdx = idx/2;
+                    if (mock.ParamNames.Length <= mockIdx)
+                    {
+                        throw new Exception(String.Format("Too many parameters in expected. We have only {0}.", mock.ParamNames.Length));
+                    }
                     if (idx%2 == 0)
                     {
                         mock.ParamNames[mockIdx].Should().Be(parameters[idx]);
@@ -134,7 +135,51 @@ namespace Tracer.Fody.Tests.Func.MockLoggers
             mock.LoggerName.Should().Be(split[0]);
             mock.ContainingMethod.Should().Contain(split[1]);
             mock.CallType.Should().Be(MockCallInfo.MockCallType.TraceLeave);
-            mock.ReturnValue.Should().Be(returnValue);
+            if (mock.ParamValues == null || mock.ParamValues.Length == 0 || mock.ParamNames[0] != null)
+            {
+                throw new Exception("There's no return value");
+            }
+            mock.ParamValues[0].Should().Be(returnValue);
+        }
+
+        public static void ShouldBeTraceLeaveWithOutsFrom(this MockCallInfo mock, string methodFullName, params string[] parameters)
+        {
+            var split = methodFullName.Split(new[] { "::" }, StringSplitOptions.RemoveEmptyEntries);
+            mock.LoggerName.Should().Be(split[0]);
+            mock.ContainingMethod.Should().Contain(split[1]);
+            mock.CallType.Should().Be(MockCallInfo.MockCallType.TraceLeave);
+
+            var mockIdxCorrection = 0;
+            //check if the first one is a return value
+            if (mock.ParamNames != null && mock.ParamNames.Length > 0 && mock.ParamNames[0] == null)
+            {
+                //if so step over it
+                mockIdxCorrection = 1;
+            }
+
+            if (parameters != null && parameters.Length > 0)
+            {
+                if (mock.ParamNames == null)
+                {
+                    throw new Exception(String.Format("No out parameters in call"));
+                }
+                for (int idx = 0; idx < parameters.Length; idx++)
+                {
+                    int mockIdx = idx / 2 + mockIdxCorrection;
+                    if (mock.ParamNames.Length <= mockIdx)
+                    {
+                        throw new Exception(String.Format("Too many parameters in expected. We have only {0}.", mock.ParamNames.Length));
+                    }
+                    if (idx % 2 == 0)
+                    {
+                        mock.ParamNames[mockIdx].Should().Be(parameters[idx]);
+                    }
+                    else
+                    {
+                        mock.ParamValues[mockIdx].Should().Be(parameters[idx]);
+                    }
+                }
+            }
         }
 
         public static void ShouldBeLogCall(this MockCallInfo mock, string methodFullName, string logMethodName,

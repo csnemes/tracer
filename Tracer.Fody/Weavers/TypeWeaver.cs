@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using Mono.Cecil;
@@ -13,13 +15,14 @@ namespace Tracer.Fody.Weavers
     /// <summary>
     /// Executes weaving on the given type.
     /// </summary>
-    internal class TypeWeaver
+    internal class TypeWeaver : MethodWeaver.ILoggerProvider
     {
         private readonly TypeDefinition _typeDefinition;
         private readonly ITraceLoggingFilter _filter;
         private readonly TypeReferenceProvider _typeReferenceProvider;
         private readonly MethodReferenceProvider _methodReferenceProvider;
         private readonly Lazy<FieldReference> _staticLoggerField;
+        private readonly MethodWeaverFactory _methodWeaverFactory;
 
         internal TypeWeaver(ITraceLoggingFilter filter, TypeReferenceProvider typeReferenceProvider, MethodReferenceProvider methodReferenceProvider,
             TypeDefinition typeDefinition)
@@ -29,6 +32,7 @@ namespace Tracer.Fody.Weavers
             _methodReferenceProvider = methodReferenceProvider;
             _typeDefinition = typeDefinition;
             _staticLoggerField = new Lazy<FieldReference>(CreateLoggerStaticField);
+            _methodWeaverFactory = new MethodWeaverFactory(typeReferenceProvider, methodReferenceProvider, this);
         }
 
         public void Execute()
@@ -38,18 +42,8 @@ namespace Tracer.Fody.Weavers
                 if (AlreadyWeaved(method)) continue;
                 
                 bool shouldAddTrace = _filter.ShouldAddTrace(method);
-                var body = method.Body;
-                body.SimplifyMacros();
-
-                if (shouldAddTrace)
-                {
-                    WeaveTraceEnter(body);
-                    WeaveTraceLeave(body); 
-                }
-
-                SearchForAndReplaceStaticLogCalls(body);
-
-                body.OptimizeMacros();
+               
+                _methodWeaverFactory.Create(method).Execute(shouldAddTrace);
             }
         }
 
@@ -70,18 +64,20 @@ namespace Tracer.Fody.Weavers
                * _log.TraceLeave("MethodName", methodTimeInTicks, returnValue)
                * 
             */
+            VariableDefinition paramNamesDef = null;
+            VariableDefinition paramValuesDef = null;
 
             var returnType = body.Method.ReturnType;
             bool hasReturnValue = (returnType.MetadataType != MetadataType.Void);
+            int numberOfOutParams = body.Method.Parameters.Count(param => param.IsOut);
+
             VariableDefinition returnValueDef = null;
-            var startTickVar = body.Variables.First(var => var.Name.Equals("startTick"));
+            var startTickVar = body.Variables.First(var => var.Name.Equals("$startTick"));
 
             if (hasReturnValue)
             {
                 //Declare local variable for the return value
-                returnValueDef = new VariableDefinition("returnValue", returnType);
-                body.Variables.Add(returnValueDef);
-                
+                returnValueDef = body.GetOrDeclareVariable("$returnValue", returnType);
             }
             
             var allReturns = body.Instructions.Where(instr => instr.OpCode == OpCodes.Ret).ToList();
@@ -95,6 +91,53 @@ namespace Tracer.Fody.Weavers
                     instructions.Add(Instruction.Create(OpCodes.Stloc, returnValueDef)); //store it in local variable
                 }
 
+                if (hasReturnValue || numberOfOutParams > 0)
+                {
+                    //Get local variables for the arrays or declare them if they not exist
+                    paramNamesDef = body.GetOrDeclareVariable("$paramNames", TypeReferenceProvider.StringArray);
+                    paramValuesDef = body.GetOrDeclareVariable("$paramValues", TypeReferenceProvider.ObjectArray);
+
+                    instructions.AddRange(new[]
+                    {
+                        Instruction.Create(OpCodes.Ldc_I4, numberOfOutParams + (hasReturnValue ? 1 : 0)),  //setArraySize
+                        Instruction.Create(OpCodes.Newarr, TypeReferenceProvider.String), //create name array
+                        Instruction.Create(OpCodes.Stloc, paramNamesDef), //store it in local variable
+                        Instruction.Create(OpCodes.Ldc_I4, numberOfOutParams + (hasReturnValue ? 1 : 0)),  //setArraySize
+                        Instruction.Create(OpCodes.Newarr, TypeReferenceProvider.Object), //create value array
+                        Instruction.Create(OpCodes.Stloc, paramValuesDef), //store it in local variable
+                    });
+
+                    if (hasReturnValue)
+                    {
+                        //set name at index
+                        instructions.AddRange(new[]
+                        {
+                            Instruction.Create(OpCodes.Ldloc, paramNamesDef),
+                            Instruction.Create(OpCodes.Ldc_I4, 0),
+                            Instruction.Create(OpCodes.Ldnull),
+                            Instruction.Create(OpCodes.Stelem_Ref)
+                        });
+
+                        //set value at index
+                        instructions.Add(Instruction.Create(OpCodes.Ldloc, paramValuesDef));
+                        instructions.Add(Instruction.Create(OpCodes.Ldc_I4, 0));
+                        instructions.Add(Instruction.Create(OpCodes.Ldloc, returnValueDef));
+
+                        //box if necessary
+                        if (returnType.IsPrimitive || returnType.IsGenericParameter)
+                        {
+                            instructions.Add(Instruction.Create(OpCodes.Box, returnType));
+                        }
+
+                        instructions.Add(Instruction.Create(OpCodes.Stelem_Ref));
+                    }
+
+                    instructions.AddRange(
+                        BuildInstructionsToCopyParameterNamesAndValues(body.Method.Parameters.Where(p => p.IsOut),
+                        paramNamesDef, paramValuesDef, hasReturnValue ? 1 : 0));
+                }
+
+                //build up Trace call
                 instructions.Add(Instruction.Create(OpCodes.Ldsfld, StaticLogger));
 
                 instructions.AddRange(LoadMethodNameOnStack(body.Method));
@@ -105,24 +148,27 @@ namespace Tracer.Fody.Weavers
                 instructions.Add(Instruction.Create(OpCodes.Ldloc, startTickVar));
                 instructions.Add(Instruction.Create(OpCodes.Sub));
 
-                if (hasReturnValue)
-                {
-                    //get return value
-                    instructions.Add(Instruction.Create(OpCodes.Ldloc, returnValueDef));
 
-                    //boxing if needed
-                    if (returnType.IsPrimitive || returnType.IsGenericParameter)
+                if (hasReturnValue || numberOfOutParams > 0)
+                {
+                    instructions.AddRange(new[]
                     {
-                        instructions.Add(Instruction.Create(OpCodes.Box, returnType));
-                    }
-                    instructions.Add(Instruction.Create(OpCodes.Callvirt, MethodReferenceProvider.GetTraceLeaveWithReturnValueReference()));
+                        Instruction.Create(OpCodes.Ldloc, paramNamesDef),
+                        Instruction.Create(OpCodes.Ldloc, paramValuesDef),
+                    });
                 }
                 else
                 {
-                    instructions.Add(Instruction.Create(OpCodes.Callvirt, MethodReferenceProvider.GetTraceLeaveWithoutReturnValueReference()));
+                    instructions.AddRange(new[]
+                    {
+                        Instruction.Create(OpCodes.Ldnull),
+                        Instruction.Create(OpCodes.Ldnull),
+                    });
                 }
 
-                
+                instructions.Add(Instruction.Create(OpCodes.Callvirt, MethodReferenceProvider.GetTraceLeaveWithReturnValueReference()));
+
+                //return with original value
                 if (hasReturnValue)
                 {
                     instructions.Add(Instruction.Create(OpCodes.Ldloc, returnValueDef)); //read from local variable
@@ -133,6 +179,8 @@ namespace Tracer.Fody.Weavers
                 body.Replace(@return, instructions);
             }
         }
+
+
 
         private void WeaveTraceEnter(MethodBody body)
         {
@@ -145,7 +193,8 @@ namespace Tracer.Fody.Weavers
              * var startTick = Stopwatch.GetTimestamp();
              * ...(existing code)...
              */
-            bool hasLoggableParams = body.Method.Parameters.Count(param => !param.IsOut) > 0;
+            int numberOfLoggableParams = body.Method.Parameters.Count(param => !param.IsOut);
+            bool hasLoggableParams = numberOfLoggableParams > 0;
 
             var instructions = new List<Instruction>();
             VariableDefinition paramNamesDef = null;
@@ -154,23 +203,21 @@ namespace Tracer.Fody.Weavers
             if (hasLoggableParams)
             {
                 //Declare local variables for the arrays
-                paramNamesDef = new VariableDefinition("$paramNames", TypeReferenceProvider.StringArray);
-                paramValuesDef = new VariableDefinition("$paramValues", TypeReferenceProvider.ObjectArray);
-                body.Variables.Add(paramNamesDef);
-                body.Variables.Add(paramValuesDef);
+                paramNamesDef = body.GetOrDeclareVariable("$paramNames", TypeReferenceProvider.StringArray);
+                paramValuesDef = body.GetOrDeclareVariable("$paramValues", TypeReferenceProvider.ObjectArray);
 
-                int arraySize = body.Method.Parameters.Count(param => !param.IsOut);
                 instructions.AddRange(new[]
                 {
-                    Instruction.Create(OpCodes.Ldc_I4, arraySize),  //setArraySize
+                    Instruction.Create(OpCodes.Ldc_I4, numberOfLoggableParams),  //setArraySize
                     Instruction.Create(OpCodes.Newarr, TypeReferenceProvider.String), //create name array
                     Instruction.Create(OpCodes.Stloc, paramNamesDef), //store it in local variable
-                    Instruction.Create(OpCodes.Ldc_I4, arraySize),  //setArraySize
+                    Instruction.Create(OpCodes.Ldc_I4, numberOfLoggableParams),  //setArraySize
                     Instruction.Create(OpCodes.Newarr, TypeReferenceProvider.Object), //create value array
                     Instruction.Create(OpCodes.Stloc, paramValuesDef), //store it in local variable
                 });
 
-                instructions.AddRange(BuildInstructionsToCopyParameterNamesAndValues(body.Method.Parameters, paramNamesDef, paramValuesDef));
+                instructions.AddRange(BuildInstructionsToCopyParameterNamesAndValues(
+                    body.Method.Parameters.Where(p => !p.IsOut), paramNamesDef, paramValuesDef, 0));
             }
 
             //build up logger call
@@ -198,8 +245,7 @@ namespace Tracer.Fody.Weavers
 
 
             //timer start
-            var startTickVariable = new VariableDefinition("startTick", TypeReferenceProvider.Long);
-            body.Variables.Add(startTickVariable);
+            var startTickVariable = body.GetOrDeclareVariable("$startTick", TypeReferenceProvider.Long);
             instructions.AddRange(new[]
             {
                 Instruction.Create(OpCodes.Call, MethodReferenceProvider.GetTimestampReference()),
@@ -229,31 +275,54 @@ namespace Tracer.Fody.Weavers
             };
         }
 
-        private IEnumerable<Instruction> BuildInstructionsToCopyParameterNamesAndValues(Collection<ParameterDefinition> parameters,
-            VariableDefinition paramNamesDef, VariableDefinition paramValuesDef)
+        private IEnumerable<Instruction> BuildInstructionsToCopyParameterNamesAndValues(IEnumerable<ParameterDefinition> parameters,
+                VariableDefinition paramNamesDef, VariableDefinition paramValuesDef, int startingIndex)
         {
             var instructions = new List<Instruction>();
-            var targetIdx = 0;
-            //fill name array and param array
-            for (int inputIdx = 0; inputIdx < parameters.Count; inputIdx++)
-            {
-                var parameter = parameters[inputIdx];
 
-                if (parameter.IsOut) continue; //skip out parameters
-                
+            foreach (var parameter in parameters)
+            {
                 //set name at index
                 instructions.AddRange(new[]
                 {
                     Instruction.Create(OpCodes.Ldloc, paramNamesDef),
-                    Instruction.Create(OpCodes.Ldc_I4, targetIdx),
+                    Instruction.Create(OpCodes.Ldc_I4, startingIndex),
                     Instruction.Create(OpCodes.Ldstr, parameter.Name),
                     Instruction.Create(OpCodes.Stelem_Ref)
                 });
 
                 //set value at index
                 instructions.Add(Instruction.Create(OpCodes.Ldloc, paramValuesDef));
-                instructions.Add(Instruction.Create(OpCodes.Ldc_I4, targetIdx));
+                instructions.Add(Instruction.Create(OpCodes.Ldc_I4, startingIndex));
                 instructions.Add(Instruction.Create(OpCodes.Ldarg, parameter));
+
+                if (parameter.IsOut)
+                {
+                    switch (parameter.ParameterType.MetadataType)
+                    {
+                        case MetadataType.Int16:
+                            instructions.Add(Instruction.Create(OpCodes.Ldind_I2));
+                            break;
+                        case MetadataType.Int32:
+                            instructions.Add(Instruction.Create(OpCodes.Ldind_I4));
+                            break;
+                        case MetadataType.Int64:
+                            instructions.Add(Instruction.Create(OpCodes.Ldind_I8));
+                            break;
+                        case MetadataType.UInt16:
+                            instructions.Add(Instruction.Create(OpCodes.Ldind_U2));
+                            break;
+                        case MetadataType.UInt32:
+                            instructions.Add(Instruction.Create(OpCodes.Ldind_U4));
+                            break;
+                        case MetadataType.UInt64:
+                            instructions.Add(Instruction.Create(OpCodes.Ldind_I8));
+                            break;
+                        default:
+                            instructions.Add(Instruction.Create(OpCodes.Ldind_Ref));
+                            break;
+                    }
+                }
 
                 //box if necessary
                 if (parameter.ParameterType.IsPrimitive || parameter.ParameterType.IsGenericParameter)
@@ -263,7 +332,7 @@ namespace Tracer.Fody.Weavers
 
                 instructions.Add(Instruction.Create(OpCodes.Stelem_Ref));
 
-                targetIdx++;
+                startingIndex++;
             }
 
             return instructions;
@@ -361,7 +430,7 @@ namespace Tracer.Fody.Weavers
             get { return _methodReferenceProvider; }
         }
 
-        private FieldReference StaticLogger
+        public FieldReference StaticLogger
         {
             get { return _staticLoggerField.Value; }
         }

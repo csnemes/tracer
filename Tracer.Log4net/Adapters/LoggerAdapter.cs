@@ -53,21 +53,25 @@ namespace Tracer.Log4net.Adapters
             }
         }
 
-        public void TraceLeave(string methodInfo, long numberOfTicks)
+        public void TraceLeave(string methodInfo, long numberOfTicks, string[] paramNames, object[] paramValues)
         {
             if (_logger.IsEnabledFor(Level.Trace))
             {
-                Log(Level.Trace, methodInfo, String.Format("Returned from. Time taken: {0:0.00} ms.", ConvertTicksToMilliseconds(numberOfTicks)));
-            }
-        }
+                string returnValue = null;
+                if (paramNames != null)
+                {
+                    var parameters = new StringBuilder();
+                    for (int i = 0; i < paramNames.Length; i++)
+                    {
+                        parameters.AppendFormat("{0}={1}", paramNames[i] ?? "$return", paramValues[i] ?? NullString);
+                        if (i < paramNames.Length - 1) parameters.Append(", ");
+                    }
+                    returnValue = parameters.ToString();
+                }
 
-        public void TraceLeave(string methodInfo, long numberOfTicks, object returnValue)
-        {
-            if (_logger.IsEnabledFor(Level.Trace))
-            {
                 Log(Level.Trace, methodInfo,
-                    String.Format("Returned from. (returns={1}). Time taken: {0:0.00} ms.",
-                        ConvertTicksToMilliseconds(numberOfTicks), returnValue ?? NullString));
+                    String.Format("Returned from. ({1}). Time taken: {0:0.00} ms.",
+                        ConvertTicksToMilliseconds(numberOfTicks), returnValue));
             }
         }
 

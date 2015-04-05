@@ -88,5 +88,28 @@ namespace Tracer.Fody.Helpers
             }
             return fieldReference;
         }
+
+        public static VariableDefinition GetOrDeclareVariable(this MethodBody body, string name, TypeReference type)
+        {
+            var variable = body.Variables.FirstOrDefault(p => p.Name.Equals(name));
+            if (variable == null)
+            {
+                variable = new VariableDefinition(name, type);
+                body.Variables.Add(variable);
+            }
+
+            return variable;
+        }
+
+        public static VariableDefinition GetVariable(this MethodBody body, string name)
+        {
+            var variable = body.Variables.FirstOrDefault(p => p.Name.Equals(name));
+            if (variable == null)
+            {
+                throw new ArgumentException(String.Format("Variable {0} not found in method {1}", name, body.Method.Name));
+            }
+
+            return variable;
+        }
     }
 }

@@ -60,6 +60,8 @@
     <Compile Include="Weavers\ILoggerAdapterMetadataScopeProvider.cs" />
     <Compile Include="Weavers\ITraceLoggingFilter.cs" />
     <Compile Include="Weavers\MethodReferenceProvider.cs" />
+    <Compile Include="Weavers\MethodWeaver.cs" />
+    <Compile Include="Weavers\MethodWeaverFactory.cs" />
     <Compile Include="Weavers\TypeReferenceProvider.cs" />
     <Compile Include="Weavers\TypeWeaver.cs" />
     <Compile Include="Weavers\TraceLoggingConfiguration.cs" />
