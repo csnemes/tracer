@@ -238,11 +238,16 @@ namespace Tracer.Fody.Weavers
             yield return Instruction.Create(OpCodes.Ldc_I4, position);
             yield return Instruction.Create(OpCodes.Ldloc, variable);
             //box if necessary
-            if (varType.IsPrimitive || varType.IsGenericParameter || varType.IsValueType)
+            if (IsBoxingNeeded(varType))
             {
                 yield return Instruction.Create(OpCodes.Box, varType);
             }
             yield return Instruction.Create(OpCodes.Stelem_Ref);
+        }
+
+        private static bool IsBoxingNeeded(TypeReference type)
+        {
+            return type.IsPrimitive || type.IsGenericParameter || type.IsValueType;
         }
 
         private IEnumerable<Instruction> StoreParameterInObjectArray(VariableDefinition arrayVar, int position, ParameterDefinition parameter)
@@ -299,7 +304,7 @@ namespace Tracer.Fody.Weavers
             }
 
             //box if necessary
-            if (parameterElementType.IsPrimitive || parameterElementType.IsGenericParameter || parameterElementType.IsValueType)
+            if (IsBoxingNeeded(parameterElementType))
             {
                 yield return Instruction.Create(OpCodes.Box, parameterElementType);
             }
