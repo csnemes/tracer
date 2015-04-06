@@ -76,6 +76,8 @@
     <Compile Include="TraceTests\OutParamTests.cs" />
     <Compile Include="TraceTests\ParamsNoRetvalTests.cs" />
     <Compile Include="TraceTests\ParamsRetvalTests.cs" />
+    <Compile Include="TraceTests\ScopeTests.cs" />
+    <Compile Include="TraceTests\SpecialTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

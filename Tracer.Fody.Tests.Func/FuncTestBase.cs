@@ -57,7 +57,7 @@ namespace Tracer.Fody.Tests.Func
         /// <summary>
         /// Complies the give source and returns the resulting assembly's full path
         /// </summary>
-        private string Compile(string source, string assemblyName, string[] additonalAssemblies)
+        protected string Compile(string source, string assemblyName, string[] additonalAssemblies)
         {
             var destPath = GetDestinationFilePath(assemblyName);
 
@@ -89,7 +89,7 @@ namespace Tracer.Fody.Tests.Func
             return destPath;
         }
 
-        private void Rewrite(string assemblyPath, ITraceLoggingFilter filter)
+        protected void Rewrite(string assemblyPath, ITraceLoggingFilter filter)
         {
             //Set-up log adapter to our mock 
             var assembly = Assembly.GetExecutingAssembly();
@@ -117,6 +117,11 @@ namespace Tracer.Fody.Tests.Func
             Rewrite(assemblyPath, filter);
 
             //----
+            return RunCode(assemblyPath, entryClass, entryMethod);
+        }
+
+        protected MockLogResult RunCode(string assemblyPath, string entryClass, string entryMethod)
+        {
             var currentSetup = AppDomain.CurrentDomain.SetupInformation;
             var appDomain = AppDomain.CreateDomain("testrun", null, currentSetup);
             try

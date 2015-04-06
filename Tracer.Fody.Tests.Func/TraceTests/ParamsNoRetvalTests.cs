@@ -235,5 +235,81 @@ namespace Tracer.Fody.Tests.Func.TraceTests
             result.ElementAt(0).ShouldBeTraceEnterInto("First.MyClass::SetStruct", "param", "First.MyStruct");
             result.ElementAt(1).ShouldBeTraceLeaveFrom("First.MyClass::SetStruct");
         }
+
+        [Test]
+        public void Test_Instance_MultipleParameters()
+        {
+            string code = @"
+                using System;
+                using System.Diagnostics;
+
+                namespace First
+                {
+                    public class MyClass
+                    {
+                        public static void Main()
+                        {
+                            var mc = new MyClass();
+                            mc.CallMe(""Hello"", ""Hello2"", 42);
+                        }
+
+                        private void CallMe(string param, string param2, int paraInt)
+                        {
+                        }
+                    }
+                }
+            ";
+
+            var result = this.RunTest(code, new PrivateOnlyTraceLoggingFilter(), "First.MyClass::Main");
+            result.Count.Should().Be(2);
+            result.ElementAt(0).ShouldBeTraceEnterInto("First.MyClass::CallMe", "param", "Hello", "param2", "Hello2", "paraInt", "42");
+            result.ElementAt(1).ShouldBeTraceLeaveFrom("First.MyClass::CallMe");
+        }
+
+
+        [Test]
+        public void Test_Instance_Method_Multiple_Returns()
+        {
+            string code = @"
+                using System;
+                using System.Diagnostics;
+
+                namespace First
+                {
+                    public class MyClass
+                    {
+                        public static void Main()
+                        {
+                            var mc = new MyClass();
+                            mc.Run(1);
+                            mc.Run(0);
+                            mc.Run(-1);
+                        }
+
+                        private void Run(int input)
+                        {
+                            if (input > 0)
+                            {
+                                return;
+                            }    
+                            input = input + 1;
+                            if (input > 0)
+                            {
+                                return;
+                            }
+                        }
+                    }
+                }
+            ";
+
+            var result = this.RunTest(code, new PrivateOnlyTraceLoggingFilter(), "First.MyClass::Main");
+            result.Count.Should().Be(6);
+            result.ElementAt(0).ShouldBeTraceEnterInto("First.MyClass::Run", "input", "1");
+            result.ElementAt(1).ShouldBeTraceLeaveFrom("First.MyClass::Run");
+            result.ElementAt(2).ShouldBeTraceEnterInto("First.MyClass::Run", "input", "0");
+            result.ElementAt(3).ShouldBeTraceLeaveFrom("First.MyClass::Run");
+            result.ElementAt(4).ShouldBeTraceEnterInto("First.MyClass::Run", "input", "-1");
+            result.ElementAt(5).ShouldBeTraceLeaveFrom("First.MyClass::Run");
+        }
     }
 }

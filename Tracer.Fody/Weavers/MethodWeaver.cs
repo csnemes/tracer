@@ -151,8 +151,8 @@ namespace Tracer.Fody.Weavers
 
                 if (HasReturnValue)
                 {
-                    instructions.AddRange(StoreValueInArray(paramNamesDef, 0, Instruction.Create(OpCodes.Ldnull)));
-                    instructions.AddRange(StoreVariableInArray(paramValuesDef, 0, returnValueDef));
+                    instructions.AddRange(StoreValueReadByInstructionsInArray(paramNamesDef, 0, Instruction.Create(OpCodes.Ldnull)));
+                    instructions.AddRange(StoreVariableInObjectArray(paramValuesDef, 0, returnValueDef));
                 }
 
                 instructions.AddRange(
@@ -220,7 +220,7 @@ namespace Tracer.Fody.Weavers
             yield return Instruction.Create(OpCodes.Stloc, arrayVar); //store it in local variable
         }
 
-        private IEnumerable<Instruction> StoreValueInArray(VariableDefinition arrayVar, int position, params Instruction[] putValueOnStack)
+        private IEnumerable<Instruction> StoreValueReadByInstructionsInArray(VariableDefinition arrayVar, int position, params Instruction[] putValueOnStack)
         {
             yield return Instruction.Create(OpCodes.Ldloc, arrayVar);
             yield return Instruction.Create(OpCodes.Ldc_I4, position);
@@ -231,21 +231,21 @@ namespace Tracer.Fody.Weavers
             yield return Instruction.Create(OpCodes.Stelem_Ref);
         }
 
-        private IEnumerable<Instruction> StoreVariableInArray(VariableDefinition arrayVar, int position, VariableDefinition variable)
+        private IEnumerable<Instruction> StoreVariableInObjectArray(VariableDefinition arrayVar, int position, VariableDefinition variable)
         {
             var varType = variable.VariableType;
             yield return Instruction.Create(OpCodes.Ldloc, arrayVar);
             yield return Instruction.Create(OpCodes.Ldc_I4, position);
             yield return Instruction.Create(OpCodes.Ldloc, variable);
             //box if necessary
-            if (varType.IsPrimitive || varType.IsGenericParameter)
+            if (varType.IsPrimitive || varType.IsGenericParameter || varType.IsValueType)
             {
                 yield return Instruction.Create(OpCodes.Box, varType);
             }
             yield return Instruction.Create(OpCodes.Stelem_Ref);
         }
 
-        private IEnumerable<Instruction> StoreParameterInArray(VariableDefinition arrayVar, int position, ParameterDefinition parameter)
+        private IEnumerable<Instruction> StoreParameterInObjectArray(VariableDefinition arrayVar, int position, ParameterDefinition parameter)
         {
             var parameterType = parameter.ParameterType;
             var parameterElementType = parameterType.IsByReference ? ((ByReferenceType) parameterType).ElementType : parameterType;
@@ -314,8 +314,8 @@ namespace Tracer.Fody.Weavers
             foreach (var parameter in parameters)
             {
                 //set name at index
-                instructions.AddRange(StoreValueInArray(paramNamesDef, index, Instruction.Create(OpCodes.Ldstr, parameter.Name)));
-                instructions.AddRange(StoreParameterInArray(paramValuesDef, index, parameter));
+                instructions.AddRange(StoreValueReadByInstructionsInArray(paramNamesDef, index, Instruction.Create(OpCodes.Ldstr, parameter.Name)));
+                instructions.AddRange(StoreParameterInObjectArray(paramValuesDef, index, parameter));
                 index++;
             }
 

@@ -24,6 +24,9 @@ namespace TestApplication
 
             OutParamLogs();
 
+            var structParams = new StructParamClass();
+            structParams.RunStructs();
+
             Write(Add(21, 22));
             Write(Add(100, 1));
 
@@ -59,6 +62,33 @@ namespace TestApplication
             Log.InfoFormat("A{0}-B{1}-C{2}", 1, 2, 3);
             Log.InfoFormat("A{0}-B{1}-C{2}-D{3}", 1, 2, 3, 4);
             Log.InfoFormat(new CultureInfo("en-us"), "A{0}-B{1}-C{2}-D{3}", 1, 2, 3, 4);
+
+            Log.Warn(new MyClass());
+            Log.Warn("Hello");
+            Log.Warn("Hello", new ApplicationException("Failure."));
+            Log.WarnFormat("A{0}", 1);
+            Log.WarnFormat("A{0}-B{1}", 1, 2);
+            Log.WarnFormat("A{0}-B{1}-C{2}", 1, 2, 3);
+            Log.WarnFormat("A{0}-B{1}-C{2}-D{3}", 1, 2, 3, 4);
+            Log.WarnFormat(new CultureInfo("en-us"), "A{0}-B{1}-C{2}-D{3}", 1, 2, 3, 4);
+
+            Log.Error(new MyClass());
+            Log.Error("Hello");
+            Log.Error("Hello", new ApplicationException("Failure."));
+            Log.ErrorFormat("A{0}", 1);
+            Log.ErrorFormat("A{0}-B{1}", 1, 2);
+            Log.ErrorFormat("A{0}-B{1}-C{2}", 1, 2, 3);
+            Log.ErrorFormat("A{0}-B{1}-C{2}-D{3}", 1, 2, 3, 4);
+            Log.ErrorFormat(new CultureInfo("en-us"), "A{0}-B{1}-C{2}-D{3}", 1, 2, 3, 4);
+
+            Log.Fatal(new MyClass());
+            Log.Fatal("Hello");
+            Log.Fatal("Hello", new ApplicationException("Failure."));
+            Log.FatalFormat("A{0}", 1);
+            Log.FatalFormat("A{0}-B{1}", 1, 2);
+            Log.FatalFormat("A{0}-B{1}-C{2}", 1, 2, 3);
+            Log.FatalFormat("A{0}-B{1}-C{2}-D{3}", 1, 2, 3, 4);
+            Log.FatalFormat(new CultureInfo("en-us"), "A{0}-B{1}-C{2}-D{3}", 1, 2, 3, 4);
         }
 
         private void GenericMethodTests()
