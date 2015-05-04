@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Tracer.Fody.Tests")]
+[assembly: AssemblyTitle("Tracer.Log4Net.Tests")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("Tracer.Fody.Tests")]
+[assembly: AssemblyProduct("Tracer.Log4Net.Tests")]
 [assembly: AssemblyCopyright("Copyright ©  2015")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("fbb44319-1b2f-4f77-b4a6-e2bf67658bbd")]
+[assembly: Guid("c4d7cab3-c216-4de6-84b4-c058b8c81785")]
 
 // Version information for an assembly consists of the following four values:
 //

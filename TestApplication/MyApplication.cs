@@ -7,7 +7,8 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using log4net;
-using Tracer.Log4net;
+using Tracer.Log4Net;
+using TracerAttributes;
 
 namespace TestApplication
 {
@@ -91,6 +92,7 @@ namespace TestApplication
             Log.FatalFormat(new CultureInfo("en-us"), "A{0}-B{1}-C{2}-D{3}", 1, 2, 3, 4);
         }
 
+        [TraceOn]
         private void GenericMethodTests()
         {
             Write(42);

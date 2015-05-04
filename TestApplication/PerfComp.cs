@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using log4net;
-using Tracer.Log4net;
+using Tracer.Log4Net;
 
 namespace TestApplication
 {

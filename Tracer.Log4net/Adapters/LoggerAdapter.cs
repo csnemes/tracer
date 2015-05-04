@@ -12,7 +12,7 @@ using log4net;
 using log4net.Core;
 using log4net.Util;
 
-namespace Tracer.Log4net.Adapters
+namespace Tracer.Log4Net.Adapters
 {
     public class LoggerAdapter
     {
@@ -425,7 +425,7 @@ namespace Tracer.Log4net.Adapters
             if (type.IsGenericType)
             {
                 sb.Append(type.Name.Remove(type.Name.IndexOf('`')));
-                AddGenericPrettyFormat(sb, type.GenericTypeArguments);
+                AddGenericPrettyFormat(sb, type.GetGenericArguments());
             }
             else
             {

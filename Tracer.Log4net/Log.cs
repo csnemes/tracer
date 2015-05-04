@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using log4net;
 
-namespace Tracer.Log4net
+namespace Tracer.Log4Net
 {
     public static class Log 
     {

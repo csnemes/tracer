@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using Mono.Cecil;
 using Mono.Cecil.Rocks;
+using Tracer.Fody.Helpers;
 
 namespace Tracer.Fody.Weavers
 {
@@ -32,8 +35,19 @@ namespace Tracer.Fody.Weavers
        
         public static void Execute(TraceLoggingConfiguration configuration, ModuleDefinition moduleDefinition)
         {
-            var weaver = new ModuleLevelWeaver(configuration, moduleDefinition);
-            weaver.InternalExecute();
+            try
+            {
+                WeavingLog.LogInfo("Tracer: Starts weaving.");
+                var timer = Stopwatch.StartNew();
+                var weaver = new ModuleLevelWeaver(configuration, moduleDefinition);
+                weaver.InternalExecute();
+                timer.Stop();
+                WeavingLog.LogInfo(String.Format("Tracer: Weaving done in {0} ms.", timer.ElapsedMilliseconds));
+            }
+            catch (Exception ex)
+            {
+                WeavingLog.LogError(String.Format("Tracer: Weaving failed with {0}", ex));
+            }
         }
 
         private void InternalExecute()
@@ -44,10 +58,18 @@ namespace Tracer.Fody.Weavers
             var factory = new TypeWeaverFactory(_configuration.Filter, typeReferenceProvider, methodReferenceProvider);
             foreach (var type in _moduleDefinition.GetAllTypes())
             {
-                //TODO skip classes with CompilerGeneratedAttribute
-                var weaver = factory.Create(type);
-                weaver.Execute();
+                if (!HasCompilerGeneratedAttribute(type))
+                {
+                    var weaver = factory.Create(type);
+                    weaver.Execute();
+                }
             }
+        }
+
+        private bool HasCompilerGeneratedAttribute(TypeDefinition type)
+        {
+            return type.HasCustomAttributes && type.CustomAttributes.
+                Any(attr => attr.AttributeType.FullName.Equals(typeof(CompilerGeneratedAttribute).FullName, StringComparison.Ordinal));
         }
 
         private IMetadataScope _loggerScope;

@@ -1,0 +1,26 @@
+﻿<?xml version="1.0"?>
+<package>
+  <metadata>
+    <id>Tracer.Fody</id>
+    <version>1.0.0</version>
+    <authors>csnemes</authors>
+    <owners>csnemes</owners>
+    <projectUrl>https://github.com/csnemes/tracer</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Trace.Fody is an ILWeaver which adds trace enter and leave log entries to methods. Besides it rewrites static log calls to
+    instance calls adding method information to the call in order to avoid stack walks in the logger.</description>
+    <summary>ILWeaver for adding trace log entries and rewrite static log calls</summary>
+    <copyright>Copyright 2015</copyright>
+    <tags>Fody, Logging, Tracing, ILWeaving, Cecil</tags>
+    <dependencies>
+      <group>
+        <dependency id="Fody" version="1.28.3" />
+        <dependency id="FodyCecil" version="1.26.4" />
+      </group>
+    </dependencies>
+    <references />
+  </metadata>
+  <files>
+    <file src="Tracer.Fody.dll" target="" />
+  </files>
+</package>

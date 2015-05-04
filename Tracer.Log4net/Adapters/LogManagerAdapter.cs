@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using log4net;
 using log4net.Core;
 
-namespace Tracer.Log4net.Adapters
+namespace Tracer.Log4Net.Adapters
 {
     public static class LogManagerAdapter
     {
