@@ -20,6 +20,7 @@ namespace Tracer.Fody.Helpers
         private string _logManager;
         private string _logger;
         private string _staticLogger;
+        private IEnumerable<XElement> _filterConfigElements;
 
         public static FodyConfigParser Parse(XElement element)
         {
@@ -34,7 +35,7 @@ namespace Tracer.Fody.Helpers
             {
                 return TraceLoggingConfiguration.New
                     .WithAdapterAssembly(_adapterAssembly)
-                    .WithFilter(new DefaultFilter(null))
+                    .WithFilter(new DefaultFilter(_filterConfigElements))
                     .WithLogger(_logger)
                     .WithLogManager(_logManager)
                     .WithStaticLogger(_staticLogger);
@@ -60,6 +61,7 @@ namespace Tracer.Fody.Helpers
                 _logManager = GetAttributeValue(element, "logManager", true);
                 _logger = GetAttributeValue(element, "logger", true);
                 _staticLogger = GetAttributeValue(element, "staticLogger", false);
+                _filterConfigElements = element.Descendants();
             }
             catch (Exception ex)
             {

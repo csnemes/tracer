@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 using Mono.Cecil;
 using Tracer.Fody.Weavers;
 
@@ -17,14 +18,20 @@ namespace Tracer.Fody.Filters
 
         private readonly Dictionary<string, TraceAttributeInfo> _traceAttributeCache = new Dictionary<string, TraceAttributeInfo>();
 
-        public DefaultFilter() : this(null)
+        public DefaultFilter(IEnumerable<XElement> configElements) : this(ParseConfig(configElements)) 
         {}
 
-        public DefaultFilter(IEnumerable<AssemblyLevelTraceDefinition> assemblyLevelTraceDefinitions)
+        public DefaultFilter(IEnumerable<AssemblyLevelTraceDefinition> configDefinitions)
         {
             //sort from most specific to least specific
-            _assemblyLevelTraceDefinitions = (assemblyLevelTraceDefinitions ?? DefaultAssemblyLevelTraceDefinitions)
+            _assemblyLevelTraceDefinitions = (configDefinitions.Any() ? configDefinitions : DefaultAssemblyLevelTraceDefinitions)
                 .OrderBy(def => (int)def.TargetClass).ToList();
+        }
+
+        internal static IEnumerable<AssemblyLevelTraceDefinition> ParseConfig(IEnumerable<XElement> configElements)
+        {
+            return configElements.Where(elem => elem.Name.LocalName.Equals("TraceOn", StringComparison.OrdinalIgnoreCase))
+                    .Select(AssemblyLevelTraceDefinition.ParseFromConfig).ToList();
         }
 
         public bool ShouldAddTrace(MethodDefinition definition)
@@ -171,15 +178,39 @@ namespace Tracer.Fody.Filters
             Private = 3
         }
 
-        public class AssemblyLevelTraceDefinition
+        internal class AssemblyLevelTraceDefinition
         {
             private readonly TraceTargetVisibility _targetClass;
             private readonly TraceTargetVisibility _targetMethod;
 
-            public AssemblyLevelTraceDefinition(TraceTargetVisibility targetClass, TraceTargetVisibility targetMethod)
+            internal AssemblyLevelTraceDefinition(TraceTargetVisibility targetClass, TraceTargetVisibility targetMethod)
             {
                 _targetClass = targetClass;
                 _targetMethod = targetMethod;
+            }
+
+            internal static AssemblyLevelTraceDefinition ParseFromConfig(XElement element)
+            {
+                return new AssemblyLevelTraceDefinition(ParseTraceTargetVisibility(element, "class"), ParseTraceTargetVisibility(element, "method"));
+            }
+
+            private static TraceTargetVisibility ParseTraceTargetVisibility(XElement element, string attributeName)
+            {
+                var attribute = element.Attribute(attributeName);
+                if (attribute == null)
+                {
+                    throw new ApplicationException(String.Format("Tracer: TraceOn config element missing attribute {0}.", attributeName));
+                }
+
+                switch (attribute.Value.ToLower())
+                {
+                    case "public": return TraceTargetVisibility.Public;
+                    case "internal": return TraceTargetVisibility.InternalOrMoreVisible;
+                    case "protected": return TraceTargetVisibility.ProtectedOrMoreVisible;
+                    case "private": return TraceTargetVisibility.All;
+                    default:
+                        throw new ApplicationException(String.Format("Tracer: TraceOn config element attribute {0} has an invalid value {1}.", attributeName, attribute.Value));
+                }
             }
 
             public TraceTargetVisibility TargetClass

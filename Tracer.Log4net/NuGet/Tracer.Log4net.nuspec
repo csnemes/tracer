@@ -7,7 +7,7 @@
     <owners>csnemes</owners>
     <projectUrl>https://github.com/csnemes/tracer</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>Log4Net adapter for Trace.Fody which is an ILWeaver adding trace enter and leave log entries to methods. This adapter redirects trace logs and
+    <description>Log4Net adapter for Tracer.Fody which is an ILWeaver adding trace enter and leave log entries to methods. This adapter redirects trace logs and
     all other log calls to Log4Net.</description>
     <summary>Log4Net adapter for Tracer.Fody. Adds trace log entries and rewrite static log calls using Log4Net.</summary>
     <copyright>Copyright 2015</copyright>

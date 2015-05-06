@@ -8,8 +8,9 @@
     <projectUrl>https://github.com/csnemes/tracer</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Trace.Fody is an ILWeaver which adds trace enter and leave log entries to methods. Besides it rewrites static log calls to
-    instance calls adding method information to the call in order to avoid stack walks in the logger.</description>
-    <summary>ILWeaver for adding trace log entries and rewrite static log calls</summary>
+    instance calls adding method information to the call in order to avoid costly stack walks in the logger. This is a general rewriter which can be adapted to different logging frameworks, do not use it directly.
+	Use one of the existing adapters in your project like Tracer.Log4Net.Fody or build your own.</description>
+    <summary>ILWeaver for adding trace log entries and rewrite static log calls. Do NOT use this package directly, use one of its adapters like Tracer.Log4Net.Fody</summary>
     <copyright>Copyright 2015</copyright>
     <tags>Fody, Logging, Tracing, ILWeaving, Cecil</tags>
     <dependencies>

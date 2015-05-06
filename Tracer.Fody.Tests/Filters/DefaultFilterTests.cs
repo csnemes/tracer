@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Remoting.Messaging;
 using System.Text;
+using System.Xml.Linq;
 using FluentAssertions;
 using NUnit.Framework;
 using Tracer.Fody.Filters;
@@ -441,6 +442,55 @@ namespace Tracer.Fody.Tests.Filters
             filter.ShouldAddTrace(protectedMethodDef).Should().BeTrue("protected");
             filter.ShouldAddTrace(privateMethodDef).Should().BeFalse("private");
         }
+
+        [Test]
+        public void ParseConfig_DefaultConfig_Parsed()
+        {
+            var input = new XElement("Tracer",
+                new XElement("TraceOn", new XAttribute("class", "public"), new XAttribute("method", "public"))
+                );
+
+            var parseResult = DefaultFilter.ParseConfig(input.Descendants()).ToList();
+            parseResult.Count.Should().Be(1);
+            parseResult[0].TargetClass.Should().Be(DefaultFilter.TraceTargetVisibility.Public);
+            parseResult[0].TargetMethod.Should().Be(DefaultFilter.TraceTargetVisibility.Public);
+        }
+
+        [Test]
+        public void ParseConfig_PrivateConfig_Parsed()
+        {
+            var input = new XElement("Tracer",
+                new XElement("TraceOn", new XAttribute("class", "internal"), new XAttribute("method", "private"))
+                );
+
+            var parseResult = DefaultFilter.ParseConfig(input.Descendants()).ToList();
+            parseResult.Count.Should().Be(1);
+            parseResult[0].TargetClass.Should().Be(DefaultFilter.TraceTargetVisibility.InternalOrMoreVisible);
+            parseResult[0].TargetMethod.Should().Be(DefaultFilter.TraceTargetVisibility.All);
+        }
+
+        [Test]
+        public void ParseConfig_MissingAttribute_Throws()
+        {
+            var input = new XElement("Tracer",
+                new XElement("TraceOn", new XAttribute("method", "private"))
+                );
+
+            Action runParse = () => DefaultFilter.ParseConfig(input.Descendants());
+            runParse.ShouldThrow<ApplicationException>();
+        }
+
+        [Test]
+        public void ParseConfig_WrongAttributeValue_Throws()
+        {
+            var input = new XElement("Tracer",
+                new XElement("TraceOn", new XAttribute("class", "wrongvalue"), new XAttribute("method", "private"))
+                );
+
+            Action runParse = () => DefaultFilter.ParseConfig(input.Descendants());
+            runParse.ShouldThrow<ApplicationException>();
+        }
+
 
         private ITraceLoggingFilter GetDefaultFilter(DefaultFilter.TraceTargetVisibility classTarget,
             DefaultFilter.TraceTargetVisibility methodTarget)
