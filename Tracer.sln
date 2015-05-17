@@ -1,0 +1,51 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.31101.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tracer.Fody", "Tracer.Fody\Tracer.Fody.csproj", "{5E36561F-EA14-49A3-AA84-63176C256A30}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tracer.Log4Net", "Tracer.Log4net\Tracer.Log4Net.csproj", "{C2B16352-62AE-4207-BA69-D02BE7082C17}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Examples", "Examples", "{56CD446F-8047-4916-83AA-9B99A2F73DFF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApplication", "TestApplication\TestApplication.csproj", "{03D6FD5E-FC66-4840-89CC-74F62C686EAA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tracer.Fody.Tests", "Tracer.Fody.Tests\Tracer.Fody.Tests.csproj", "{9F57E29D-3731-42F8-8426-EE19EBF03A64}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tracer.Log4Net.Tests", "Tracer.Log4Net.Tests\Tracer.Log4Net.Tests.csproj", "{00587743-F2C1-45CB-9BFD-49D1C9976042}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{5E36561F-EA14-49A3-AA84-63176C256A30}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5E36561F-EA14-49A3-AA84-63176C256A30}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5E36561F-EA14-49A3-AA84-63176C256A30}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5E36561F-EA14-49A3-AA84-63176C256A30}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C2B16352-62AE-4207-BA69-D02BE7082C17}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C2B16352-62AE-4207-BA69-D02BE7082C17}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C2B16352-62AE-4207-BA69-D02BE7082C17}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C2B16352-62AE-4207-BA69-D02BE7082C17}.Release|Any CPU.Build.0 = Release|Any CPU
+		{03D6FD5E-FC66-4840-89CC-74F62C686EAA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{03D6FD5E-FC66-4840-89CC-74F62C686EAA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{03D6FD5E-FC66-4840-89CC-74F62C686EAA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{03D6FD5E-FC66-4840-89CC-74F62C686EAA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9F57E29D-3731-42F8-8426-EE19EBF03A64}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9F57E29D-3731-42F8-8426-EE19EBF03A64}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9F57E29D-3731-42F8-8426-EE19EBF03A64}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9F57E29D-3731-42F8-8426-EE19EBF03A64}.Release|Any CPU.Build.0 = Release|Any CPU
+		{00587743-F2C1-45CB-9BFD-49D1C9976042}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{00587743-F2C1-45CB-9BFD-49D1C9976042}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{00587743-F2C1-45CB-9BFD-49D1C9976042}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{00587743-F2C1-45CB-9BFD-49D1C9976042}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{03D6FD5E-FC66-4840-89CC-74F62C686EAA} = {56CD446F-8047-4916-83AA-9B99A2F73DFF}
+	EndGlobalSection
+EndGlobal
