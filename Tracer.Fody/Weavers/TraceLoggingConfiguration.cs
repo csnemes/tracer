@@ -21,6 +21,8 @@ namespace Tracer.Fody.Weavers
         {
             _filter = filter ?? NullFilter.Instance;
             _adapterAssemblyName = new AssemblyName(adapterAssemblyDisplayName ?? "Tracer.LogAdapter, Version=1.0.0.0");
+            //set version to avoid cecil nullRef exception issue
+            if (_adapterAssemblyName.Version == null) _adapterAssemblyName.Version = new Version(0,0,0,0);
             _loggerAdapterTypeFullName = loggerAdapterTypeName ?? "Tracer.LogAdapter.ILog";
             _logManagerAdapterTypeFullName = logManagerAdapterTypeName ?? "Tracer.LogAdapter.LogManager";
             _staticLoggerTypeFullName = staticLoggerTypeFullName ?? "Tracer.LogAdapter.Log";

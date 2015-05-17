@@ -27,7 +27,7 @@ namespace Tracer.Fody.Weavers
             _configuration = configuration;
             _moduleDefinition = moduleDefinition;
             _loggerAdapterMetadataScopeProvider = loggerAdapterMetadataScopeProvider;
-            _stringArray = new Lazy<TypeReference>(() => moduleDefinition.Import(typeof(string[])));
+            _stringArray = new Lazy<TypeReference>(() => moduleDefinition.Import((typeof(string[]))));
             _objectArray = new Lazy<TypeReference>(() => moduleDefinition.Import(typeof(object[])));
             _type = new Lazy<TypeReference>(() => moduleDefinition.Import(typeof(Type)));
             _stopwatch = new Lazy<TypeReference>(() => moduleDefinition.Import(typeof(Stopwatch)));

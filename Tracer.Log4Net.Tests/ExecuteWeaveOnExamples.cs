@@ -26,7 +26,7 @@ namespace Tracer.Log4Net.Tests
         {
             public bool ShouldAddTrace(MethodDefinition definition)
             {
-                return definition.IsPublic;
+                return true;
             }
         }
     }

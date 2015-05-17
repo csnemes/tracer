@@ -80,9 +80,9 @@ function Fix-ReferencesCopyLocal($package, $project)
     {
         if ($asms -contains $reference.Name + ".dll")
         {
-            if($reference.CopyLocal -eq $true)
+            if($reference.CopyLocal -eq $false)
             {
-                $reference.CopyLocal = $false;
+                $reference.CopyLocal = $true;
             }
         }
     }

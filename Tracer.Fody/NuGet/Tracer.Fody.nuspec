@@ -13,10 +13,10 @@
     <summary>ILWeaver for adding trace log entries and rewrite static log calls. Do NOT use this package directly, use one of its adapters like Tracer.Log4Net.Fody</summary>
     <copyright>Copyright 2015</copyright>
     <tags>Fody, Logging, Tracing, ILWeaving, Cecil</tags>
+	<developmentDependency>true</developmentDependency>
     <dependencies>
       <group>
         <dependency id="Fody" version="1.28.3" />
-        <dependency id="FodyCecil" version="1.26.4" />
       </group>
     </dependencies>
     <references />
