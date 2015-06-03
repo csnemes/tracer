@@ -20,6 +20,8 @@ namespace Tracer.Fody.Weavers
         private readonly MethodDefinition _methodDefinition;
         private readonly MethodBody _body;
         private readonly ILoggerProvider _loggerProvider;
+        private Instruction _firstInstructionAfterTraceEnter;
+        private bool _isEmptyBody;
 
         internal MethodWeaver(TypeReferenceProvider typeReferenceProvider, MethodReferenceProvider methodReferenceProvider,
             ILoggerProvider loggerProvider, MethodDefinition methodDefinition)
@@ -60,6 +62,9 @@ namespace Tracer.Fody.Weavers
              * var startTick = Stopwatch.GetTimestamp();
              * ...(existing code)...
              */
+            _firstInstructionAfterTraceEnter = _body.Instructions.FirstOrDefault();
+            _isEmptyBody = (_body.Instructions.Count == 0);
+
             var instructions = new List<Instruction>();
             VariableDefinition paramNamesDef = null;
             VariableDefinition paramValuesDef = null;
@@ -108,9 +113,11 @@ namespace Tracer.Fody.Weavers
                *  long methodTimeInTicks = Stopwatch.GetTimestamp() - startTick;
                * _log.TraceLeave("MethodName", methodTimeInTicks, returnValue)
                * 
+               * we'd also like to catch any exception at leave without using rethrow as it messes up the callstack
+               * we use CLR's fault block capbility to do so
             */
             VariableDefinition returnValueDef = null;
-
+            
             if (HasReturnValue)
             {
                 //Declare local variable for the return value
@@ -119,25 +126,75 @@ namespace Tracer.Fody.Weavers
 
             var allReturns = _body.Instructions.Where(instr => instr.OpCode == OpCodes.Ret).ToList();
 
+            var lastStatement = _body.Instructions.Last();
+//                Instruction.Create(OpCodes.Nop);
+//            _body.Instructions.Add(lastStatement);
+
+            var handlerStart = CreateHandlerAtTheEnd();
+
+            var loggingReturnStart = CreateLoggingReturnAtTheEnd(returnValueDef);
+
+            //add exception handler 
+            if (!_isEmptyBody)
+            {
+                _body.ExceptionHandlers.Add(new ExceptionHandler(ExceptionHandlerType.Catch)
+                {
+                    TryStart = _firstInstructionAfterTraceEnter,
+                    TryEnd = lastStatement,
+                    HandlerStart = handlerStart,
+                    HandlerEnd = loggingReturnStart,
+                    CatchType = _typeReferenceProvider.Exception
+                });
+            }
+            
             foreach (var @return in allReturns)
             {
-                ProcessSingleReturn(@return, returnValueDef);
+                ChangeReturnToGotoLoggingReturn(@return, returnValueDef, loggingReturnStart);
             }
         }
 
-        private void ProcessSingleReturn(Instruction @return, VariableDefinition returnValueDef)
+        //redirect return to actualReturn
+        private void ChangeReturnToGotoLoggingReturn(Instruction @return, VariableDefinition returnValueDef, Instruction actualReturn)
         {
             var instructions = new List<Instruction>();
+            
+            if (HasReturnValue)
+            {
+                instructions.Add(Instruction.Create(OpCodes.Stloc, returnValueDef)); //store it in local variable
+            }
+            instructions.Add(Instruction.Create(OpCodes.Br, actualReturn));
+
+            _body.Replace(@return, instructions);
+        }
+
+
+        private Instruction CreateHandlerAtTheEnd()
+        {
+            var instructions = new List<Instruction>();
+
+            //store the exception
+            var exceptionValue = _body.GetOrDeclareVariable("$exceptionValue", _typeReferenceProvider.Object);
+            instructions.Add(Instruction.Create(OpCodes.Stloc, exceptionValue));
+
+            //do the logging 
+
+
+
+            //and rethrow
+            instructions.Add(Instruction.Create(OpCodes.Rethrow));
+
+            return _body.AddAtTheEnd(instructions);
+        }
+
+        private Instruction CreateLoggingReturnAtTheEnd(VariableDefinition returnValueDef)
+        {
+            var instructions = new List<Instruction>();
+
             VariableDefinition paramNamesDef = null;
             VariableDefinition paramValuesDef = null;
             
             var traceLeaveNeedsParamArray = (HasReturnValue || _body.Method.Parameters.Any(param => param.IsOut || param.ParameterType.IsByReference));
             var traceLeaveParamArraySize = _body.Method.Parameters.Count(param => param.IsOut || param.ParameterType.IsByReference) + (HasReturnValue ? 1 : 0); 
-
-            if (HasReturnValue)
-            {
-                instructions.Add(Instruction.Create(OpCodes.Stloc, returnValueDef)); //store it in local variable
-            }
 
             if (traceLeaveNeedsParamArray)
             {
@@ -158,6 +215,8 @@ namespace Tracer.Fody.Weavers
                 instructions.AddRange(
                     BuildInstructionsToCopyParameterNamesAndValues(_body.Method.Parameters.Where(p => p.IsOut || p.ParameterType.IsByReference),
                         paramNamesDef, paramValuesDef, HasReturnValue ? 1 : 0));
+
+                //see if we have exception and add it to the parameters
             }
 
             //build up Trace call
@@ -179,7 +238,7 @@ namespace Tracer.Fody.Weavers
             }
             instructions.Add(Instruction.Create(OpCodes.Ret));
 
-            _body.Replace(@return, instructions);
+            return _body.AddAtTheEnd(instructions);
         }
 
         private void SearchForAndReplaceStaticLogCalls()
