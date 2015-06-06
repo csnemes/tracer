@@ -142,6 +142,19 @@ namespace Tracer.Fody.Tests.MockLoggers
             mock.ParamValues[0].Should().Be(returnValue);
         }
 
+        public static void ShouldBeTraceLeaveWithExceptionFrom(this MockCallInfo mock, string methodFullName, string exceptionMessage)
+        {
+            var split = methodFullName.Split(new[] { "::" }, StringSplitOptions.RemoveEmptyEntries);
+            mock.LoggerName.Should().Be(split[0]);
+            mock.ContainingMethod.Should().Contain(split[1]);
+            mock.CallType.Should().Be(MockCallInfo.MockCallType.TraceLeave);
+            if (mock.ParamValues == null || mock.ParamValues.Length == 0 || mock.ParamNames[0] != "$exception")
+            {
+                throw new Exception("There's no return value");
+            }
+            mock.ParamValues[0].Should().Contain(exceptionMessage);
+        }
+
         public static void ShouldBeTraceLeaveWithOutsFrom(this MockCallInfo mock, string methodFullName, params string[] parameters)
         {
             var split = methodFullName.Split(new[] { "::" }, StringSplitOptions.RemoveEmptyEntries);

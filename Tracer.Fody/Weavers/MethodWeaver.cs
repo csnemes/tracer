@@ -23,6 +23,8 @@ namespace Tracer.Fody.Weavers
         private Instruction _firstInstructionAfterTraceEnter;
         private bool _isEmptyBody;
 
+        private const string ExceptionMarker = "$exception";
+
         internal MethodWeaver(TypeReferenceProvider typeReferenceProvider, MethodReferenceProvider methodReferenceProvider,
             ILoggerProvider loggerProvider, MethodDefinition methodDefinition)
         {
@@ -90,7 +92,7 @@ namespace Tracer.Fody.Weavers
             instructions.AddRange(LoadMethodNameOnStack());
             instructions.Add(traceEnterNeedsParamArray ? Instruction.Create(OpCodes.Ldloc, paramNamesDef) : Instruction.Create(OpCodes.Ldnull));
             instructions.Add(traceEnterNeedsParamArray ? Instruction.Create(OpCodes.Ldloc, paramValuesDef) : Instruction.Create(OpCodes.Ldnull));
-            instructions.Add(Instruction.Create(OpCodes.Callvirt, _methodReferenceProvider.GetTraceEnterWithParametersReference()));
+            instructions.Add(Instruction.Create(OpCodes.Callvirt, _methodReferenceProvider.GetTraceEnterReference()));
 
             //timer start
             var startTickVariable = _body.GetOrDeclareVariable("$startTick", _typeReferenceProvider.Long);
@@ -125,11 +127,6 @@ namespace Tracer.Fody.Weavers
             }
 
             var allReturns = _body.Instructions.Where(instr => instr.OpCode == OpCodes.Ret).ToList();
-
-            var lastStatement = _body.Instructions.Last();
-//                Instruction.Create(OpCodes.Nop);
-//            _body.Instructions.Add(lastStatement);
-
             var handlerStart = CreateHandlerAtTheEnd();
 
             var loggingReturnStart = CreateLoggingReturnAtTheEnd(returnValueDef);
@@ -140,7 +137,7 @@ namespace Tracer.Fody.Weavers
                 _body.ExceptionHandlers.Add(new ExceptionHandler(ExceptionHandlerType.Catch)
                 {
                     TryStart = _firstInstructionAfterTraceEnter,
-                    TryEnd = lastStatement,
+                    TryEnd = handlerStart,
                     HandlerStart = handlerStart,
                     HandlerEnd = loggingReturnStart,
                     CatchType = _typeReferenceProvider.Exception
@@ -177,8 +174,30 @@ namespace Tracer.Fody.Weavers
             instructions.Add(Instruction.Create(OpCodes.Stloc, exceptionValue));
 
             //do the logging 
+            VariableDefinition paramNamesDef = null;
+            VariableDefinition paramValuesDef = null;
 
+            paramNamesDef = _body.GetOrDeclareVariable("$paramNames", _typeReferenceProvider.StringArray);
+            paramValuesDef = _body.GetOrDeclareVariable("$paramValues", _typeReferenceProvider.ObjectArray);
 
+            instructions.AddRange(InitArray(paramNamesDef, 1, _typeReferenceProvider.String));
+            instructions.AddRange(InitArray(paramValuesDef, 1, _typeReferenceProvider.Object));
+
+            instructions.AddRange(StoreValueReadByInstructionsInArray(paramNamesDef, 0, Instruction.Create(OpCodes.Ldstr, ExceptionMarker)));
+            instructions.AddRange(StoreVariableInObjectArray(paramValuesDef, 0, exceptionValue));
+
+            //build up Trace call
+            instructions.Add(Instruction.Create(OpCodes.Ldsfld, _loggerProvider.StaticLogger));
+            instructions.AddRange(LoadMethodNameOnStack());
+            //calculate ticks elapsed
+            instructions.Add(Instruction.Create(OpCodes.Call, _methodReferenceProvider.GetTimestampReference()));
+            instructions.Add(Instruction.Create(OpCodes.Ldloc, _body.GetVariable("$startTick")));
+            instructions.Add(Instruction.Create(OpCodes.Sub));
+            //tick calc ends
+
+            instructions.Add(Instruction.Create(OpCodes.Ldloc, paramNamesDef));
+            instructions.Add(Instruction.Create(OpCodes.Ldloc, paramValuesDef));
+            instructions.Add(Instruction.Create(OpCodes.Callvirt, _methodReferenceProvider.GetTraceLeaveReference()));
 
             //and rethrow
             instructions.Add(Instruction.Create(OpCodes.Rethrow));
@@ -215,8 +234,6 @@ namespace Tracer.Fody.Weavers
                 instructions.AddRange(
                     BuildInstructionsToCopyParameterNamesAndValues(_body.Method.Parameters.Where(p => p.IsOut || p.ParameterType.IsByReference),
                         paramNamesDef, paramValuesDef, HasReturnValue ? 1 : 0));
-
-                //see if we have exception and add it to the parameters
             }
 
             //build up Trace call
@@ -229,7 +246,7 @@ namespace Tracer.Fody.Weavers
             //tick calc ends
             instructions.Add(traceLeaveNeedsParamArray ? Instruction.Create(OpCodes.Ldloc, paramNamesDef) : Instruction.Create(OpCodes.Ldnull));
             instructions.Add(traceLeaveNeedsParamArray ? Instruction.Create(OpCodes.Ldloc, paramValuesDef) : Instruction.Create(OpCodes.Ldnull));
-            instructions.Add(Instruction.Create(OpCodes.Callvirt, _methodReferenceProvider.GetTraceLeaveWithReturnValueReference()));
+            instructions.Add(Instruction.Create(OpCodes.Callvirt, _methodReferenceProvider.GetTraceLeaveReference()));
 
             //return with original value
             if (HasReturnValue)
