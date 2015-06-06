@@ -18,6 +18,8 @@ namespace TestApplication
         {
             Thread.Sleep(500);
 
+            ExceptionTests();
+
             GenericMethodTests();
             GenericClassTests();
 
@@ -107,6 +109,32 @@ namespace TestApplication
 
             var stringGen = new GenericClass<string>();
             Write(stringGen.GetDefault("Hello"));
+        }
+
+        private void ExceptionTests()
+        {
+            ThrowException(1);
+            try
+            {
+                ThrowException(0);
+            }
+            catch { }
+            ThrowExceptionOuter(1);
+            try
+            {
+                ThrowExceptionOuter(0);
+            }
+            catch { }
+        }
+
+        public int ThrowExceptionOuter(int inp)
+        {
+            return ThrowException(inp);
+        }
+
+        public int ThrowException(int inp)
+        {
+            return 1/inp;
         }
 
         public void Write<T>(T input)

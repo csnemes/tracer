@@ -41,7 +41,7 @@ namespace Tracer.Log4Net.Adapters
                     var parameters = new StringBuilder();
                     for (int i = 0; i < paramNames.Length; i++)
                     {
-                        parameters.AppendFormat("{0}={1}", paramNames[i], paramValues[i] ?? NullString);
+                        parameters.AppendFormat("{0}={1}", paramNames[i],  GetRenderedFormat(paramValues[i], NullString));
                         if (i < paramNames.Length - 1) parameters.Append(", ");
                     }
                     Log(Level.Trace, methodInfo, String.Format("Entered into ({0}).", parameters));
@@ -63,7 +63,7 @@ namespace Tracer.Log4Net.Adapters
                     var parameters = new StringBuilder();
                     for (int i = 0; i < paramNames.Length; i++)
                     {
-                        parameters.AppendFormat("{0}={1}", paramNames[i] ?? "$return", paramValues[i] ?? NullString);
+                        parameters.AppendFormat("{0}={1}", paramNames[i] ?? "$return", GetRenderedFormat(paramValues[i], NullString));
                         if (i < paramNames.Length - 1) parameters.Append(", ");
                     }
                     returnValue = parameters.ToString();
@@ -367,23 +367,23 @@ namespace Tracer.Log4Net.Adapters
             {
                 LocationInfo = new LocationInfo(_typeName, methodInfo, "", ""),
                 Level = level,
-                Message = RenderedMessage(message),
+                Message = GetRenderedFormat(message),
                 TimeStamp = DateTime.Now,
                 LoggerName = _logger.Name,
                 ThreadName = Thread.CurrentThread.Name,
                 Domain = SystemInfo.ApplicationFriendlyName,
-                ExceptionString = RenderException(exception),
+                ExceptionString = GetRenderedFormat(exception),
                 Properties = properties ?? new PropertiesDictionary()
             };
 
             _logger.Log(new LoggingEvent(eventData));
         }
 
-        private string RenderedMessage(object message)
+        private string GetRenderedFormat(object message, string stringRepresentationOfNull = "")
         {
             if (message == null)
             {
-                return String.Empty;
+                return stringRepresentationOfNull;
             }
             else if (message is string)
             {
@@ -396,20 +396,6 @@ namespace Tracer.Log4Net.Adapters
             else
             {
                 return message.ToString();
-            }
-        }
-
-        private string RenderException(Exception exception)
-        {
-            if (exception == null) return String.Empty;
-
-            if (_logger.Repository != null)
-            {
-                return _logger.Repository.RendererMap.FindAndRender(exception);
-            }
-            else
-            {
-                return exception.ToString();
             }
         }
 

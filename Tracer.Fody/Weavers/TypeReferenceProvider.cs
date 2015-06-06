@@ -17,7 +17,8 @@ namespace Tracer.Fody.Weavers
         private readonly Lazy<TypeReference> _stringArray;
         private readonly Lazy<TypeReference> _objectArray;
         private readonly Lazy<TypeReference> _type;
-        private readonly Lazy<TypeReference> _stopwatch; 
+        private readonly Lazy<TypeReference> _stopwatch;
+        private readonly Lazy<TypeReference> _exception; 
         private readonly ModuleDefinition _moduleDefinition;
         private readonly TraceLoggingConfiguration _configuration;
         private readonly ILoggerAdapterMetadataScopeProvider _loggerAdapterMetadataScopeProvider;
@@ -31,6 +32,7 @@ namespace Tracer.Fody.Weavers
             _objectArray = new Lazy<TypeReference>(() => moduleDefinition.Import(typeof(object[])));
             _type = new Lazy<TypeReference>(() => moduleDefinition.Import(typeof(Type)));
             _stopwatch = new Lazy<TypeReference>(() => moduleDefinition.Import(typeof(Stopwatch)));
+            _exception = new Lazy<TypeReference>(() => moduleDefinition.Import(typeof(Exception)));
         }
 
         public TypeReference StringArray
@@ -55,6 +57,11 @@ namespace Tracer.Fody.Weavers
         public TypeReference Object
         {
             get { return _moduleDefinition.TypeSystem.Object; }
+        }
+
+        public TypeReference Exception
+        {
+            get { return _exception.Value; }
         }
 
         public TypeReference Void

@@ -46,6 +46,21 @@ namespace Tracer.Fody.Helpers
             }
         }
 
+        /// <summary>
+        /// Inserts the given instructions at the end of the method body keeping the debug sequence point intact, returning the first 
+        /// </summary>
+        /// <returns>
+        /// The first isntruction added
+        /// </returns>
+        public static Instruction AddAtTheEnd(this MethodBody body, IEnumerable<Instruction> instructions)
+        {
+            foreach (var instruction in instructions)
+            {
+                body.Instructions.Add(instruction);
+            }
+            return instructions.First();
+        }
+
         public static void Replace(this MethodBody body, Instruction instructionToReplace, ICollection<Instruction> newInstructions)
         {
             Replace(body.Instructions, instructionToReplace, newInstructions);

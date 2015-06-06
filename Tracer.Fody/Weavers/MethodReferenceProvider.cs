@@ -21,7 +21,7 @@ namespace Tracer.Fody.Weavers
             _typeReferenceProvider = typeReferenceProvider;
         }
 
-        public MethodReference GetTraceEnterWithParametersReference()
+        public MethodReference GetTraceEnterReference()
         {
             var logTraceEnterMethod = new MethodReference("TraceEnter", _moduleDefinition.TypeSystem.Void, _typeReferenceProvider.LogAdapterReference);
             logTraceEnterMethod.HasThis = true; //instance method
@@ -31,7 +31,7 @@ namespace Tracer.Fody.Weavers
             return logTraceEnterMethod;
         }
 
-        public MethodReference GetTraceLeaveWithReturnValueReference()
+        public MethodReference GetTraceLeaveReference()
         {
             var logTraceLeaveMethod = new MethodReference("TraceLeave", _moduleDefinition.TypeSystem.Void, _typeReferenceProvider.LogAdapterReference);
             logTraceLeaveMethod.HasThis = true; //instance method
@@ -39,15 +39,6 @@ namespace Tracer.Fody.Weavers
             logTraceLeaveMethod.Parameters.Add(new ParameterDefinition(_moduleDefinition.TypeSystem.Int64));
             logTraceLeaveMethod.Parameters.Add(new ParameterDefinition(_typeReferenceProvider.StringArray));
             logTraceLeaveMethod.Parameters.Add(new ParameterDefinition(_typeReferenceProvider.ObjectArray));
-            return logTraceLeaveMethod;
-        }
-
-        public MethodReference GetTraceLeaveWithoutReturnValueReference()
-        {
-            var logTraceLeaveMethod = new MethodReference("TraceLeave", _moduleDefinition.TypeSystem.Void, _typeReferenceProvider.LogAdapterReference);
-            logTraceLeaveMethod.HasThis = true; //instance method
-            logTraceLeaveMethod.Parameters.Add(new ParameterDefinition(_moduleDefinition.TypeSystem.String));
-            logTraceLeaveMethod.Parameters.Add(new ParameterDefinition(_moduleDefinition.TypeSystem.Int64));
             return logTraceLeaveMethod;
         }
 

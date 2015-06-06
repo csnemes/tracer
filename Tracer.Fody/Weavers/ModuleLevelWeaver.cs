@@ -47,6 +47,7 @@ namespace Tracer.Fody.Weavers
             catch (Exception ex)
             {
                 WeavingLog.LogError(String.Format("Tracer: Weaving failed with {0}", ex));
+                throw;
             }
         }
 

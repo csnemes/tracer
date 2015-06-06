@@ -78,6 +78,7 @@
     <Compile Include="MockLoggers\MockLogResult.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TraceTests\ByRefParamTests.cs" />
+    <Compile Include="TraceTests\ExceptionTests.cs" />
     <Compile Include="TraceTests\NoParamsNoRetvalTests.cs" />
     <Compile Include="TraceTests\NoParamsRetvalTests.cs" />
     <Compile Include="TraceTests\OutParamTests.cs" />
