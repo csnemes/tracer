@@ -159,7 +159,7 @@ namespace Tracer.Fody.Weavers
             {
                 instructions.Add(Instruction.Create(OpCodes.Stloc, returnValueDef)); //store it in local variable
             }
-            instructions.Add(Instruction.Create(OpCodes.Br, actualReturn));
+            instructions.Add(Instruction.Create(OpCodes.Leave, actualReturn));
 
             _body.Replace(@return, instructions);
         }
