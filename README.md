@@ -26,6 +26,8 @@ Version History:
 * 1.1.0
     - Trace leave now logs when a method is exited with an exception
     - Log4Net adapter uses the log4net rendering mechanism when logging arguments
+    - Bug fix on static log rewrites
+    - Tracer now creates verifiable code
 
 Notes:
 ---
