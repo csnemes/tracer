@@ -52,7 +52,7 @@ namespace Tracer.Fody.Weavers
             SearchForAndReplaceStaticLogCalls();
             
             _body.InitLocals = true;
-           // _body.OptimizeMacros();
+            _body.OptimizeMacros();
         }
 
         private void WeaveTraceEnter()
