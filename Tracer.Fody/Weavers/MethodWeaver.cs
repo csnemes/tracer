@@ -50,8 +50,9 @@ namespace Tracer.Fody.Weavers
             }
 
             SearchForAndReplaceStaticLogCalls();
-
-            _body.OptimizeMacros();
+            
+            _body.InitLocals = true;
+           // _body.OptimizeMacros();
         }
 
         private void WeaveTraceEnter()
@@ -146,12 +147,12 @@ namespace Tracer.Fody.Weavers
             
             foreach (var @return in allReturns)
             {
-                ChangeReturnToGotoLoggingReturn(@return, returnValueDef, loggingReturnStart);
+                ChangeReturnToLeaveLoggingReturn(@return, returnValueDef, loggingReturnStart);
             }
         }
 
         //redirect return to actualReturn
-        private void ChangeReturnToGotoLoggingReturn(Instruction @return, VariableDefinition returnValueDef, Instruction actualReturn)
+        private void ChangeReturnToLeaveLoggingReturn(Instruction @return, VariableDefinition returnValueDef, Instruction actualReturn)
         {
             var instructions = new List<Instruction>();
             
@@ -422,6 +423,11 @@ namespace Tracer.Fody.Weavers
             {
                 variables[idx] = new VariableDefinition(parameters[idx].ParameterType);
                 _body.Variables.Add(variables[idx]);
+            }
+
+            //store in reverse order
+            for (int idx = parameters.Count - 1; idx >= 0; idx--)
+            {
                 instructions.Add(Instruction.Create(OpCodes.Stloc, variables[idx]));
             }
 
@@ -429,7 +435,7 @@ namespace Tracer.Fody.Weavers
             instructions.Add(Instruction.Create(OpCodes.Ldsfld, _loggerProvider.StaticLogger));
             instructions.AddRange(LoadMethodNameOnStack());
 
-            for (int idx = parameters.Count - 1; idx >= 0; idx--)
+            for (int idx = 0; idx < parameters.Count; idx++)
             {
                 instructions.Add(Instruction.Create(OpCodes.Ldloc, variables[idx]));
             }

@@ -19,5 +19,8 @@ namespace Tracer.Fody.Tests.MockLoggers
 
         public static void Outer(string message, int i)
         {}
+
+        public static void Exception(string message, Exception exception)
+        {}
     }
 }

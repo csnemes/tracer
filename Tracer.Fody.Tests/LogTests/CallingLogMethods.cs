@@ -8,6 +8,31 @@ namespace Tracer.Fody.Tests.LogTests
     public class CallingLogMethods : TestBase
     {
         [Test]
+        public void Test_Logging_Exception()
+        {
+            string code = @"
+                using System;
+                using System.Diagnostics;
+                using Tracer.Fody.Tests.MockLoggers;
+
+                namespace First
+                {
+                    public class MyClass
+                    {
+                        public static void Main()
+                        {
+                            MockLog.Exception(""Hello"", new ApplicationException(""failed""));
+                        }
+                    }
+                }
+            ";
+
+            var result = this.RunTest(code, new PrivateOnlyTraceLoggingFilter(), "First.MyClass::Main");
+            result.Count.Should().Be(1);
+            result.ElementAt(0).ShouldBeLogCall("First.MyClass::Main", "MockLogException");
+        }
+
+        [Test]
         public void Test_Single_LogCall_NoParameter_NoTracing()
         {
             string code = @"
