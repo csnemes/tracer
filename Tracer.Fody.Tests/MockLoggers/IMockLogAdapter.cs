@@ -14,5 +14,6 @@ namespace Tracer.Fody.Tests.MockLoggers
         void MockLogOuterNoParam(string methodInfo);
         void MockLogOuter(string methodInfo, string message);
         void MockLogOuter(string methodInfo, string message, int i);
+        void MockLogException(string methodInfo, string message, Exception exception);
     }
 }

@@ -57,6 +57,12 @@ namespace Tracer.Fody.Tests.MockLoggers
             MockLogManagerAdapter.LogCalled(TypePrettyName, methodInfo, "MockLogOuter", new[] { message, i.ToString() });
         }
 
+        public void MockLogException(string methodInfo, string message, Exception exception)
+        {
+            MockLogManagerAdapter.LogCalled(TypePrettyName, methodInfo, "MockLogException", new[] { message, exception.ToString() });
+        }
+
+
         private string TypePrettyName
         {
             get 
