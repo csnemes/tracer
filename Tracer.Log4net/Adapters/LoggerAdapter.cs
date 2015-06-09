@@ -36,6 +36,10 @@ namespace Tracer.Log4Net.Adapters
         {
             if (_logger.IsEnabledFor(Level.Trace))
             {
+                string message;
+                var propDict = new PropertiesDictionary();
+                propDict["trace"] = "ENTER";
+
                 if (paramNames != null)
                 {
                     var parameters = new StringBuilder();
@@ -44,12 +48,15 @@ namespace Tracer.Log4Net.Adapters
                         parameters.AppendFormat("{0}={1}", paramNames[i],  GetRenderedFormat(paramValues[i], NullString));
                         if (i < paramNames.Length - 1) parameters.Append(", ");
                     }
-                    Log(Level.Trace, methodInfo, String.Format("Entered into ({0}).", parameters));
+                    var argInfo = parameters.ToString();
+                    propDict["arguments"] = argInfo;
+                    message = String.Format("Entered into {0} ({1}).", methodInfo, argInfo);
                 }
                 else
                 {
-                    Log(Level.Trace, methodInfo, "Entered into.");
+                    message = String.Format("Entered into {0}.", methodInfo);
                 }
+                Log(Level.Trace, methodInfo, message, null, propDict);
             }
         }
 
@@ -57,6 +64,9 @@ namespace Tracer.Log4Net.Adapters
         {
             if (_logger.IsEnabledFor(Level.Trace))
             {
+                var propDict = new PropertiesDictionary();
+                propDict["trace"] = "LEAVE";
+
                 string returnValue = null;
                 if (paramNames != null)
                 {
@@ -67,11 +77,15 @@ namespace Tracer.Log4Net.Adapters
                         if (i < paramNames.Length - 1) parameters.Append(", ");
                     }
                     returnValue = parameters.ToString();
+                    propDict["arguments"] = returnValue;
                 }
 
+                var timeTaken = ConvertTicksToMilliseconds(numberOfTicks);
+                propDict["timeTaken"] = timeTaken;
+
                 Log(Level.Trace, methodInfo,
-                    String.Format("Returned from. ({1}). Time taken: {0:0.00} ms.",
-                        ConvertTicksToMilliseconds(numberOfTicks), returnValue));
+                    String.Format("Returned from {1} ({2}). Time taken: {0:0.00} ms.",
+                        timeTaken, methodInfo, returnValue), null, propDict);
             }
         }
 
