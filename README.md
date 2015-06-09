@@ -19,15 +19,24 @@ To build:
 ---
 Use Visual Studio 2013
 
-Version History:
+Version History for Tracer:
 ---
 * 1.0.0 
     Initial release
 * 1.1.0
     - Trace leave now logs when a method is exited with an exception
-    - Log4Net adapter uses the log4net rendering mechanism when logging arguments
     - Bug fix on static log rewrites
     - Tracer now creates verifiable code
+
+Version History for Tracer.Log4Net:
+---
+* 1.0.0 
+    Initial release
+* 1.1.0
+    - Log4Net adapter uses the log4net rendering mechanism when logging arguments
+* 1.1.1
+    - Modified message now contains method name. 
+    - Added custom properties to support different logging format requirements.
 
 Notes:
 ---
