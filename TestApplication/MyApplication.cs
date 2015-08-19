@@ -92,6 +92,24 @@ namespace TestApplication
             Log.FatalFormat("A{0}-B{1}-C{2}", 1, 2, 3);
             Log.FatalFormat("A{0}-B{1}-C{2}-D{3}", 1, 2, 3, 4);
             Log.FatalFormat(new CultureInfo("en-us"), "A{0}-B{1}-C{2}-D{3}", 1, 2, 3, 4);
+
+            //closure
+            int idx = 1;
+            Action act = () =>
+            {
+                idx++;
+                Log.Debug("Closure log");
+            };
+
+            act();
+
+            //lambda w/out closure
+            Action act2 = () =>
+            {
+                Log.Debug("No closure log");
+            };
+
+            act2();
         }
 
         [TraceOn]

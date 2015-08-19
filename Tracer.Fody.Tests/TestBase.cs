@@ -166,11 +166,19 @@ namespace Tracer.Fody.Tests
 
         #region Various trace logging filters for testing
 
-        protected class NullTraceLoggingFilter : ITraceLoggingFilter
+        protected class AllTraceLoggingFilter : ITraceLoggingFilter
         {
             public bool ShouldAddTrace(MethodDefinition definition)
             {
                 return true;
+            }
+        }
+
+        protected class NoTraceLoggingFilter : ITraceLoggingFilter
+        {
+            public bool ShouldAddTrace(MethodDefinition definition)
+            {
+                return false;
             }
         }
 

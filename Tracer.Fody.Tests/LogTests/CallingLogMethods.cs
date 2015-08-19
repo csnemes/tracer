@@ -132,7 +132,7 @@ namespace Tracer.Fody.Tests.LogTests
                 }
             ";
 
-            var result = this.RunTest(code, new NullTraceLoggingFilter(), "First.MyClass::Main");
+            var result = this.RunTest(code, new AllTraceLoggingFilter(), "First.MyClass::Main");
             result.Count.Should().Be(4);
             result.ElementAt(0).ShouldBeTraceEnterInto("First.MyClass::Main");
             result.ElementAt(1).ShouldBeLogCall("First.MyClass::Main", "MockLogOuter", "Hello");
@@ -140,5 +140,126 @@ namespace Tracer.Fody.Tests.LogTests
             result.ElementAt(3).ShouldBeTraceLeaveFrom("First.MyClass::Main");
         }
 
+        [Test]
+        public void TestLoging_In_Constructor()
+        {
+            string code = @"
+                using System;
+                using System.Diagnostics;
+                using Tracer.Fody.Tests.MockLoggers;
+
+                namespace First
+                {
+                    public class MyClass
+                    {
+                        public MyClass()
+                        {
+                            MockLog.OuterNoParam();
+                        }
+
+                        public static void Main()
+                        {
+                            var myClass = new MyClass();
+                        }
+                    }
+                }
+            ";
+
+            var result = this.RunTest(code, new PrivateOnlyTraceLoggingFilter(), "First.MyClass::Main");
+            result.Count.Should().Be(1);
+            result.ElementAt(0).ShouldBeLogCall("First.MyClass::.ctor()", "MockLogOuterNoParam");
+        }
+
+        [Test]
+        public void TestLoging_In_StaticConstructor()
+        {
+            string code = @"
+                using System;
+                using System.Diagnostics;
+                using Tracer.Fody.Tests.MockLoggers;
+
+                namespace First
+                {
+                    public class MyClass
+                    {
+                        static MyClass()
+                        {
+                            MockLog.OuterNoParam();
+                        }
+
+                        public static void Main()
+                        {
+                            var myClass = new MyClass();
+                        }
+                    }
+                }
+            ";
+
+            var result = this.RunTest(code, new PrivateOnlyTraceLoggingFilter(), "First.MyClass::Main");
+            result.Count.Should().Be(1);
+            result.ElementAt(0).ShouldBeLogCall("First.MyClass::.cctor()", "MockLogOuterNoParam");
+        }
+
+        [Test]
+        public void TestLoging_In_Lambda()
+        {
+            string code = @"
+                using System;
+                using System.Diagnostics;
+                using Tracer.Fody.Tests.MockLoggers;
+
+                namespace First
+                {
+                    public class MyClass
+                    {
+                        public static void Main()
+                        {
+                            Action act = () => {
+                                MockLog.OuterNoParam();
+                            };
+                            act();
+                        }
+                    }
+                }
+            ";
+
+            var result = this.RunTest(code, new NoTraceLoggingFilter(), "First.MyClass::Main");
+            result.Count.Should().Be(1);
+            result.ElementAt(0).ShouldBeLogCall("First.MyClass::Main", "MockLogOuterNoParam");
+            result.ElementAt(0).ContainingMethod.Should().Be("Main()");
+        }
+
+        [Test]
+        public void TestLoging_In_Closure()
+        {
+            string code = @"
+                using System;
+                using System.Diagnostics;
+                using Tracer.Fody.Tests.MockLoggers;
+
+                namespace First
+                {
+                    public class MyClass
+                    {
+                        delegate void TestDelegate();
+
+                        public static void Main()
+                        {
+                            int foo = 1;
+                            TestDelegate dlg = () => {
+                                foo++;
+                                MockLog.OuterNoParam();
+                            };
+                            dlg();
+                        }
+                    }
+                }
+            ";
+
+            var result = this.RunTest(code, new NoTraceLoggingFilter(), "First.MyClass::Main");
+            result.Count.Should().Be(1);
+            result.ElementAt(0).ShouldBeLogCall("First.MyClass::Main", "MockLogOuterNoParam");
+            result.ElementAt(0).ContainingMethod.Should().Be("Main()");
+        }
     }
 }
