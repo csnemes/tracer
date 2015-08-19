@@ -59,18 +59,9 @@ namespace Tracer.Fody.Weavers
             var factory = new TypeWeaverFactory(_configuration.Filter, typeReferenceProvider, methodReferenceProvider);
             foreach (var type in _moduleDefinition.GetAllTypes())
             {
-                if (!HasCompilerGeneratedAttribute(type))
-                {
-                    var weaver = factory.Create(type);
-                    weaver.Execute();
-                }
+                var weaver = factory.Create(type);
+                weaver.Execute();
             }
-        }
-
-        private bool HasCompilerGeneratedAttribute(TypeDefinition type)
-        {
-            return type.HasCustomAttributes && type.CustomAttributes.
-                Any(attr => attr.AttributeType.FullName.Equals(typeof(CompilerGeneratedAttribute).FullName, StringComparison.Ordinal));
         }
 
         private IMetadataScope _loggerScope;

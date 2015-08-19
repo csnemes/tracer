@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
@@ -23,6 +24,7 @@ namespace Tracer.Fody.Weavers
         private readonly MethodReferenceProvider _methodReferenceProvider;
         private readonly Lazy<FieldReference> _staticLoggerField;
         private readonly MethodWeaverFactory _methodWeaverFactory;
+        private readonly Lazy<bool> _hasCompilerGeneratedAttribute;
 
         internal TypeWeaver(ITraceLoggingFilter filter, TypeReferenceProvider typeReferenceProvider, MethodReferenceProvider methodReferenceProvider,
             TypeDefinition typeDefinition)
@@ -33,18 +35,29 @@ namespace Tracer.Fody.Weavers
             _typeDefinition = typeDefinition;
             _staticLoggerField = new Lazy<FieldReference>(CreateLoggerStaticField);
             _methodWeaverFactory = new MethodWeaverFactory(typeReferenceProvider, methodReferenceProvider, this);
+            _hasCompilerGeneratedAttribute = new Lazy<bool>(() =>
+                _typeDefinition.HasCustomAttributes && _typeDefinition.CustomAttributes
+                    .Any(attr => attr.AttributeType.FullName.Equals(typeof(CompilerGeneratedAttribute).FullName, StringComparison.Ordinal)));
         }
 
         public void Execute()
         {
-            foreach (var method in _typeDefinition.GetMethods().Where(method => method.HasBody && !method.IsAbstract).ToList())
+            var methodsToVisit = _typeDefinition.GetMethods().Concat(_typeDefinition.GetConstructors())
+                .Where(method => method.HasBody && !method.IsAbstract);
+
+            foreach (var method in methodsToVisit.ToList())
             {
                 if (AlreadyWeaved(method)) continue;
-                
-                bool shouldAddTrace = _filter.ShouldAddTrace(method);
+
+                bool shouldAddTrace = !HasCompilerGeneratedAttribute && !method.IsConstructor && _filter.ShouldAddTrace(method);
                
                 _methodWeaverFactory.Create(method).Execute(shouldAddTrace);
             }
+        }
+
+        private bool HasCompilerGeneratedAttribute
+        {
+            get { return _hasCompilerGeneratedAttribute.Value; }
         }
 
         private bool AlreadyWeaved(MethodDefinition method)
@@ -97,9 +110,14 @@ namespace Tracer.Fody.Weavers
             //spec treatment for generic types 
             var loggerFieldRef = loggerField.FixFieldReferenceIfDeclaringTypeIsGeneric();
 
+            //if generated nested type use the declaring type as logger type as it is more natural from 
+            //end users perspective
+            var loggerTypeDefinition = HasCompilerGeneratedAttribute && _typeDefinition.IsNested
+                                                ? _typeDefinition.DeclaringType :  _typeDefinition;
+
             staticConstructor.Body.InsertAtTheBeginning(new[]
             {
-                Instruction.Create(OpCodes.Ldtoken, _typeDefinition.GetGenericInstantiationIfGeneric()),
+                Instruction.Create(OpCodes.Ldtoken, loggerTypeDefinition.GetGenericInstantiationIfGeneric()),
                 Instruction.Create(OpCodes.Call, getTypeFromHandleMethod),
                 Instruction.Create(OpCodes.Call, getLoggerMethod),
                 Instruction.Create(OpCodes.Stsfld, loggerFieldRef)

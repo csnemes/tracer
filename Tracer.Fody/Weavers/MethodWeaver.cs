@@ -474,7 +474,7 @@ namespace Tracer.Fody.Weavers
         private IEnumerable<Instruction> LoadMethodNameOnStack()
         {
             var sb = new StringBuilder();
-            sb.Append(_methodDefinition.Name);
+            sb.Append(PrettyMethodName);
             sb.Append("(");
             for (int i = 0; i < _methodDefinition.Parameters.Count; i++)
             {
@@ -489,6 +489,16 @@ namespace Tracer.Fody.Weavers
             {
                 Instruction.Create(OpCodes.Ldstr, sb.ToString())
             };
+        }
+
+        private string PrettyMethodName
+        {
+            get
+            {
+                //check if method name is generated and prettyfy it
+                var position = _methodDefinition.Name.IndexOf(">", StringComparison.OrdinalIgnoreCase);
+                return position > 1 ? _methodDefinition.Name.Substring(1, position - 1) : _methodDefinition.Name;
+            }
         }
 
         internal interface ILoggerProvider
