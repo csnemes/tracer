@@ -37,7 +37,7 @@ namespace Tracer.Fody.Tests.TraceTests
                 }
             ";
 
-            var result = this.RunTest(code, new NullTraceLoggingFilter(), "First.MyClass::Main");
+            var result = this.RunTest(code, new AllTraceLoggingFilter(), "First.MyClass::Main");
             result.Count.Should().Be(4);
             result.ElementAt(0).ShouldBeTraceEnterInto("First.MyClass::Main");
             result.ElementAt(1).ShouldBeTraceEnterInto("First.MyClass::MyStatic");
@@ -72,7 +72,7 @@ namespace Tracer.Fody.Tests.TraceTests
                 }
             ";
 
-            var result = this.RunTest(code, new NullTraceLoggingFilter(), "First.MyClass::Main");
+            var result = this.RunTest(code, new AllTraceLoggingFilter(), "First.MyClass::Main");
             result.Count.Should().Be(4);
             result.ElementAt(0).ShouldBeTraceEnterInto("First.MyClass::Main");
             result.ElementAt(1).ShouldBeTraceEnterInto("First.MyClass::Run");
@@ -110,7 +110,7 @@ namespace Tracer.Fody.Tests.TraceTests
                 }
             ";
 
-            var result = this.RunTest(code, new NullTraceLoggingFilter(), "First.MyClass::Main");
+            var result = this.RunTest(code, new AllTraceLoggingFilter(), "First.MyClass::Main");
             result.Count.Should().Be(6);
             result.ElementAt(0).ShouldBeTraceEnterInto("First.MyClass::Main");
             result.ElementAt(1).ShouldBeTraceEnterInto("First.MyClass::MyStatic");
@@ -148,7 +148,7 @@ namespace Tracer.Fody.Tests.TraceTests
                 }
             ";
 
-            var result = this.RunTest(code, new NullTraceLoggingFilter(), "First.MyClass::Main");
+            var result = this.RunTest(code, new AllTraceLoggingFilter(), "First.MyClass::Main");
             result.Count.Should().Be(6);
             result.ElementAt(0).ShouldBeTraceEnterInto("First.MyClass::Main");
             result.ElementAt(1).ShouldBeTraceEnterInto("First.MyClass::Run", "inp", "1");

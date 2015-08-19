@@ -35,8 +35,8 @@ namespace Tracer.Fody.Tests.TraceTests
 
             var testDllLocation = new Uri(Assembly.GetExecutingAssembly().CodeBase);
             var assemblyPath = Compile(code, "testasm", new[] { testDllLocation.AbsolutePath });
-            Rewrite(assemblyPath, new NullTraceLoggingFilter());
-            Rewrite(assemblyPath, new NullTraceLoggingFilter());
+            Rewrite(assemblyPath, new AllTraceLoggingFilter());
+            Rewrite(assemblyPath, new AllTraceLoggingFilter());
 
             var result = this.RunCode(assemblyPath, "First.MyClass", "Main");
 
