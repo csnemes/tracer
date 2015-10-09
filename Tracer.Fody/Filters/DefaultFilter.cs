@@ -164,7 +164,6 @@ namespace Tracer.Fody.Filters
 
         public enum TraceTargetVisibility
         {
-            None = -1,
             Public = 0,
             InternalOrMoreVisible = 1,
             ProtectedOrMoreVisible = 2,
@@ -209,7 +208,6 @@ namespace Tracer.Fody.Filters
                     case "internal": return TraceTargetVisibility.InternalOrMoreVisible;
                     case "protected": return TraceTargetVisibility.ProtectedOrMoreVisible;
                     case "private": return TraceTargetVisibility.All;
-                    case "none": return TraceTargetVisibility.None;
                     default:
                         throw new ApplicationException(String.Format("Tracer: TraceOn config element attribute {0} has an invalid value {1}.", attributeName, attribute.Value));
                 }

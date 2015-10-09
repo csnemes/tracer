@@ -60,7 +60,7 @@ namespace Tracer.Log4Net.Adapters
             }
         }
 
-        public void TraceLeave(string methodInfo, long numberOfTicks, string[] paramNames, object[] paramValues)
+        public void TraceLeave(string methodInfo, long startTicks, long endTicks, string[] paramNames, object[] paramValues)
         {
             if (_logger.IsEnabledFor(Level.Trace))
             {
@@ -80,7 +80,9 @@ namespace Tracer.Log4Net.Adapters
                     propDict["arguments"] = returnValue;
                 }
 
-                var timeTaken = ConvertTicksToMilliseconds(numberOfTicks);
+                var timeTaken = ConvertTicksToMilliseconds(endTicks - startTicks);
+                propDict["startTicks"] = startTicks;
+                propDict["endTicks"] = endTicks;
                 propDict["timeTaken"] = timeTaken;
 
                 Log(Level.Trace, methodInfo,
