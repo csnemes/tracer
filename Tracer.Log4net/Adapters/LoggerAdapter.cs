@@ -89,6 +89,37 @@ namespace Tracer.Log4Net.Adapters
             }
         }
 
+        public void TraceLeave(string methodInfo, long startTicks, long endTicks, string[] paramNames, object[] paramValues)
+        {
+            if (_logger.IsEnabledFor(Level.Trace))
+            {
+                var propDict = new PropertiesDictionary();
+                propDict["trace"] = "LEAVE";
+
+                string returnValue = null;
+                if (paramNames != null)
+                {
+                    var parameters = new StringBuilder();
+                    for (int i = 0; i < paramNames.Length; i++)
+                    {
+                        parameters.AppendFormat("{0}={1}", paramNames[i] ?? "$return", GetRenderedFormat(paramValues[i], NullString));
+                        if (i < paramNames.Length - 1) parameters.Append(", ");
+                    }
+                    returnValue = parameters.ToString();
+                    propDict["arguments"] = returnValue;
+                }
+
+                var timeTaken = ConvertTicksToMilliseconds(endTicks - startTicks);
+                propDict["startTicks"] = startTicks;
+                propDict["endTicks"] = endTicks;
+                propDict["timeTaken"] = timeTaken;
+
+                Log(Level.Trace, methodInfo,
+                    String.Format("Returned from {1} ({2}). Time taken: {0:0.00} ms.",
+                        timeTaken, methodInfo, returnValue), null, propDict);
+            }
+        }
+
         #endregion
 
         #region ILog methods
