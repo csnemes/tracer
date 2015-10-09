@@ -190,11 +190,9 @@ namespace Tracer.Fody.Weavers
             //build up Trace call
             instructions.Add(Instruction.Create(OpCodes.Ldsfld, _loggerProvider.StaticLogger));
             instructions.AddRange(LoadMethodNameOnStack());
-            //calculate ticks elapsed
-            instructions.Add(Instruction.Create(OpCodes.Call, _methodReferenceProvider.GetTimestampReference()));
+
             instructions.Add(Instruction.Create(OpCodes.Ldloc, _body.GetVariable("$startTick")));
-            instructions.Add(Instruction.Create(OpCodes.Sub));
-            //tick calc ends
+            instructions.Add(Instruction.Create(OpCodes.Call, _methodReferenceProvider.GetTimestampReference()));
 
             instructions.Add(Instruction.Create(OpCodes.Ldloc, paramNamesDef));
             instructions.Add(Instruction.Create(OpCodes.Ldloc, paramValuesDef));
@@ -240,11 +238,8 @@ namespace Tracer.Fody.Weavers
             //build up Trace call
             instructions.Add(Instruction.Create(OpCodes.Ldsfld, _loggerProvider.StaticLogger));
             instructions.AddRange(LoadMethodNameOnStack());
-            //calculate ticks elapsed
-            instructions.Add(Instruction.Create(OpCodes.Call, _methodReferenceProvider.GetTimestampReference()));
             instructions.Add(Instruction.Create(OpCodes.Ldloc, _body.GetVariable("$startTick")));
-            instructions.Add(Instruction.Create(OpCodes.Sub));
-            //tick calc ends
+            instructions.Add(Instruction.Create(OpCodes.Call, _methodReferenceProvider.GetTimestampReference()));
             instructions.Add(traceLeaveNeedsParamArray ? Instruction.Create(OpCodes.Ldloc, paramNamesDef) : Instruction.Create(OpCodes.Ldnull));
             instructions.Add(traceLeaveNeedsParamArray ? Instruction.Create(OpCodes.Ldloc, paramValuesDef) : Instruction.Create(OpCodes.Ldnull));
             instructions.Add(Instruction.Create(OpCodes.Callvirt, _methodReferenceProvider.GetTraceLeaveReference()));
