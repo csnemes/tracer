@@ -9,7 +9,7 @@ namespace Tracer.Fody.Tests.MockLoggers
     public interface IMockLogAdapter
     {
         void TraceEnter(string methodInfo, string[] paramNames, object[] paramValues);
-        void TraceLeave(string methodInfo, long numberOfTicks, string[] paramNames, object[] paramValues);
+        void TraceLeave(string methodInfo, long startTicks, long endTicks, string[] paramNames, object[] paramValues);
 
         void MockLogOuterNoParam(string methodInfo);
         void MockLogOuter(string methodInfo, string message);

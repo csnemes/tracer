@@ -29,8 +29,9 @@ namespace Tracer.Fody.Tests.MockLoggers
             }
         }
 
-        public void TraceLeave(string methodInfo, long numberOfTicks, string[] paramNames, object[] paramValues)
+        public void TraceLeave(string methodInfo, long startTicks, long endTicks, string[] paramNames, object[] paramValues)
         {
+            var numberOfTicks = endTicks - startTicks;
             if (paramNames != null)
             {
                 var stringValues = paramValues.Select(val => val != null ? val.ToString() : null).ToArray();

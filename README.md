@@ -17,7 +17,7 @@ To install:
 
 To build:
 ---
-Use Visual Studio 2013
+Use Visual Studio 2013 or higher
 
 Version History for Tracer:
 ---
@@ -29,6 +29,9 @@ Version History for Tracer:
     - Tracer now creates verifiable code
 * 1.1.1
     - Fixed static log rewrite for constructors and closures/lambdas
+* 1.2.0
+	- In the configuration TraceOn target value extended with 'none' which means no tracing by default
+	- Changed TraceLeave signature to receive start and end ticks instead of elapsed ticks
 
 Version History for Tracer.Log4Net:
 ---
@@ -39,6 +42,8 @@ Version History for Tracer.Log4Net:
 * 1.1.1
     - Modified message now contains method name. 
     - Added custom properties to support different logging format requirements.
-
+* 1.2.0
+	- Internal changes to support the changed TraceLeave signature
+	
 Notes:
 ---

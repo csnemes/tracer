@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Tracer.Log4Net.Fody</id>
-    <version>1.1.1</version>
+    <version>1.2.0</version>
     <authors>csnemes</authors>
     <owners>csnemes</owners>
     <projectUrl>https://github.com/csnemes/tracer</projectUrl>
@@ -14,7 +14,7 @@
     <tags>Fody, Logging, Tracing, Log4Net, ILWeaving, Cecil</tags>
     <dependencies>
       <group>
-        <dependency id="Tracer.Fody" version="1.1.0" />
+        <dependency id="Tracer.Fody" version="1.2.0" />
 		<dependency id="log4net" version="2.0.3" />
       </group>
     </dependencies>
