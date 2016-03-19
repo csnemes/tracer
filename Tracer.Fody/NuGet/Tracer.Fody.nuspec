@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Tracer.Fody</id>
-    <version>1.2.0</version>
+    <version>1.2.2</version>
     <authors>csnemes</authors>
     <owners>csnemes</owners>
     <projectUrl>https://github.com/csnemes/tracer</projectUrl>
@@ -16,7 +16,7 @@
 	<developmentDependency>true</developmentDependency>
     <dependencies>
       <group>
-        <dependency id="Fody" version="1.28.3" />
+        <dependency id="Fody" version="1.29.4" />
       </group>
     </dependencies>
     <references />
