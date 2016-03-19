@@ -1,4 +1,4 @@
-Tracer 1.2.0
+Tracer 1.2.2
 ======
 
 Tracing and logging rewriter using Fody. It adds trace enter and trace leave log entries for the methods specified. Such calls include incoming and outgoing arguments as well as time spent in the method. It also rewrites static log entries to properly configured log calls. Tracer is the rewriter core on which one of the specific adapters like Tracer.Log4Net is built uppon. Creating custom adapters for your specific needs is very easy. 
@@ -32,6 +32,8 @@ Version History for Tracer:
 * 1.2.0
 	- In the configuration TraceOn target value extended with 'none' which means no tracing by default
 	- Changed TraceLeave signature to receive start and end ticks instead of elapsed ticks
+* 1.2.2
+    - Updated to Fody 1.29.4
 
 Version History for Tracer.Log4Net:
 ---
@@ -43,7 +45,11 @@ Version History for Tracer.Log4Net:
     - Modified message now contains method name. 
     - Added custom properties to support different logging format requirements.
 * 1.2.0
-	- Internal changes to support the changed TraceLeave signature
-	
+    - Internal changes to support the changed TraceLeave signature
+* 1.2.1 
+    - Updated to log4net package 2.0.5 
+* 1.2.2
+    - Updated to Fody 1.29.4
+
 Notes:
 ---

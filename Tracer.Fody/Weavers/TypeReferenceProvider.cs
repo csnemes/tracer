@@ -28,11 +28,11 @@ namespace Tracer.Fody.Weavers
             _configuration = configuration;
             _moduleDefinition = moduleDefinition;
             _loggerAdapterMetadataScopeProvider = loggerAdapterMetadataScopeProvider;
-            _stringArray = new Lazy<TypeReference>(() => moduleDefinition.Import((typeof(string[]))));
-            _objectArray = new Lazy<TypeReference>(() => moduleDefinition.Import(typeof(object[])));
-            _type = new Lazy<TypeReference>(() => moduleDefinition.Import(typeof(Type)));
-            _stopwatch = new Lazy<TypeReference>(() => moduleDefinition.Import(typeof(Stopwatch)));
-            _exception = new Lazy<TypeReference>(() => moduleDefinition.Import(typeof(Exception)));
+            _stringArray = new Lazy<TypeReference>(() => moduleDefinition.ImportReference((typeof(string[]))));
+            _objectArray = new Lazy<TypeReference>(() => moduleDefinition.ImportReference(typeof(object[])));
+            _type = new Lazy<TypeReference>(() => moduleDefinition.ImportReference(typeof(Type)));
+            _stopwatch = new Lazy<TypeReference>(() => moduleDefinition.ImportReference(typeof(Stopwatch)));
+            _exception = new Lazy<TypeReference>(() => moduleDefinition.ImportReference(typeof(Exception)));
         }
 
         public TypeReference StringArray
