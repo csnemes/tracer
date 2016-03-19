@@ -2,20 +2,20 @@
 <package>
   <metadata>
     <id>Tracer.Log4Net.Fody</id>
-    <version>1.2.0</version>
+    <version>1.2.1</version>
     <authors>csnemes</authors>
     <owners>csnemes</owners>
     <projectUrl>https://github.com/csnemes/tracer</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Log4Net adapter for Tracer.Fody which is an ILWeaver adding trace enter and leave log entries to methods. This adapter redirects trace logs and
-    all other log calls to Log4Net.</description>
+    all other log calls to Log4Net. This version is for use with log4net package 2.0.5. For older log4net package use version 1.2.0 of this package.</description>
     <summary>Log4Net adapter for Tracer.Fody. Adds trace log entries and rewrite static log calls using Log4Net.</summary>
     <copyright>Copyright 2015</copyright>
     <tags>Fody, Logging, Tracing, Log4Net, ILWeaving, Cecil</tags>
     <dependencies>
       <group>
         <dependency id="Tracer.Fody" version="1.2.0" />
-		<dependency id="log4net" version="2.0.3" />
+		<dependency id="log4net" version="2.0.5" />
       </group>
     </dependencies>
     <references />
