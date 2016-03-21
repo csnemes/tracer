@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Tracer.Fody</id>
-    <version>1.2.2</version>
+    <version>1.2.3</version>
     <authors>csnemes</authors>
     <owners>csnemes</owners>
     <projectUrl>https://github.com/csnemes/tracer</projectUrl>
@@ -20,6 +20,23 @@
       </group>
     </dependencies>
     <references />
+	<releaseNotes>
+* 1.0.0 
+    Initial release 
+* 1.1.0 
+    - Trace leave now logs when a method is exited with an exception 
+    - Bug fix on static log rewrites 
+    - Tracer now creates verifiable code 
+* 1.1.1 
+    - Fixed static log rewrite for constructors and closures/lambdas 
+* 1.2.0 
+    - In the configuration TraceOn target value extended with 'none' which means no tracing by default 
+    - Changed TraceLeave signature to receive start and end ticks instead of elapsed ticks 
+* 1.2.2 
+	- Updated to Fody 1.29.4 	
+* 1.2.3
+	- Added support for strong named custom adapter assemblies
+	</releaseNotes>
   </metadata>
   <files>
     <file src="Tracer.Fody.dll" target="" />

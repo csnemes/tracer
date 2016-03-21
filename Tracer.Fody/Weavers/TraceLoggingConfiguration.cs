@@ -42,7 +42,10 @@ namespace Tracer.Fody.Weavers
         {
             get
             {
-                return new AssemblyNameReference(_adapterAssemblyName.Name, _adapterAssemblyName.Version);
+                return new AssemblyNameReference(_adapterAssemblyName.Name, _adapterAssemblyName.Version)
+                {
+                    PublicKeyToken = _adapterAssemblyName.GetPublicKeyToken()
+                };
             }
         }
 
