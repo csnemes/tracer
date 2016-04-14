@@ -25,8 +25,9 @@ namespace Tracer.Fody.Weavers
         private readonly Lazy<FieldReference> _staticLoggerField;
         private readonly MethodWeaverFactory _methodWeaverFactory;
         private readonly Lazy<bool> _hasCompilerGeneratedAttribute;
+        private readonly bool _shouldTraceConstructors;
 
-        internal TypeWeaver(ITraceLoggingFilter filter, TypeReferenceProvider typeReferenceProvider, MethodReferenceProvider methodReferenceProvider,
+        internal TypeWeaver(ITraceLoggingFilter filter, bool shouldTraceConstructors, TypeReferenceProvider typeReferenceProvider, MethodReferenceProvider methodReferenceProvider,
             TypeDefinition typeDefinition)
         {
             _filter = filter;
@@ -38,6 +39,7 @@ namespace Tracer.Fody.Weavers
             _hasCompilerGeneratedAttribute = new Lazy<bool>(() =>
                 _typeDefinition.HasCustomAttributes && _typeDefinition.CustomAttributes
                     .Any(attr => attr.AttributeType.FullName.Equals(typeof(CompilerGeneratedAttribute).FullName, StringComparison.Ordinal)));
+            _shouldTraceConstructors = shouldTraceConstructors;
         }
 
         public void Execute()
@@ -49,7 +51,9 @@ namespace Tracer.Fody.Weavers
             {
                 if (AlreadyWeaved(method)) continue;
 
-                bool shouldAddTrace = !HasCompilerGeneratedAttribute && !method.IsConstructor && _filter.ShouldAddTrace(method);
+                bool shouldAddTrace = !HasCompilerGeneratedAttribute 
+                    && (_shouldTraceConstructors || !method.IsConstructor)
+                    && _filter.ShouldAddTrace(method);
                
                 _methodWeaverFactory.Create(method).Execute(shouldAddTrace);
             }

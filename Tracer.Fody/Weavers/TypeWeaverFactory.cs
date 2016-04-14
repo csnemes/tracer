@@ -12,17 +12,22 @@ namespace Tracer.Fody.Weavers
         private readonly ITraceLoggingFilter _filter;
         private readonly TypeReferenceProvider _typeReferenceProvider;
         private readonly MethodReferenceProvider _methodReferenceProvider;
+        private readonly bool _shouldTraceConstructors;
 
-        public TypeWeaverFactory(ITraceLoggingFilter filter, TypeReferenceProvider typeReferenceProvider, MethodReferenceProvider methodReferenceProvider)
+        public TypeWeaverFactory(ITraceLoggingFilter filter, 
+            TypeReferenceProvider typeReferenceProvider, 
+            MethodReferenceProvider methodReferenceProvider,
+            bool shouldTraceConstructors)
         {
             _filter = filter;
             _typeReferenceProvider = typeReferenceProvider;
             _methodReferenceProvider = methodReferenceProvider;
+            _shouldTraceConstructors = shouldTraceConstructors;
         }
 
         public TypeWeaver Create(TypeDefinition typeDefinition)
         {
-            return new TypeWeaver(_filter, _typeReferenceProvider, _methodReferenceProvider, typeDefinition);
+            return new TypeWeaver(_filter, _shouldTraceConstructors, _typeReferenceProvider, _methodReferenceProvider, typeDefinition);
         }
     }
 }

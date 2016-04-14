@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Tracer.Fody</id>
-    <version>1.2.3</version>
+    <version>1.2.4</version>
     <authors>csnemes</authors>
     <owners>csnemes</owners>
     <projectUrl>https://github.com/csnemes/tracer</projectUrl>
@@ -11,7 +11,7 @@
     instance calls adding method information to the call in order to avoid costly stack walks in the logger. This is a general rewriter which can be adapted to different logging frameworks, do not use it directly.
 	Use one of the existing adapters in your project like Tracer.Log4Net.Fody or build your own.</description>
     <summary>ILWeaver for adding trace log entries and rewrite static log calls. Do NOT use this package directly, use one of its adapters like Tracer.Log4Net.Fody</summary>
-    <copyright>Copyright 2015</copyright>
+    <copyright>Copyright 2016</copyright>
     <tags>Fody, Logging, Tracing, ILWeaving, Cecil</tags>
 	<developmentDependency>true</developmentDependency>
     <dependencies>
@@ -36,6 +36,8 @@
 	- Updated to Fody 1.29.4 	
 * 1.2.3
 	- Added support for strong named custom adapter assemblies
+* 1.2.4
+	- Added option to trace log constructors with traceConstructors flag. 
 	</releaseNotes>
   </metadata>
   <files>

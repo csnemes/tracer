@@ -56,7 +56,7 @@ namespace Tracer.Fody.Weavers
             var typeReferenceProvider = new TypeReferenceProvider(_configuration, this, _moduleDefinition);
             var methodReferenceProvider = new MethodReferenceProvider(typeReferenceProvider, _moduleDefinition);
 
-            var factory = new TypeWeaverFactory(_configuration.Filter, typeReferenceProvider, methodReferenceProvider);
+            var factory = new TypeWeaverFactory(_configuration.Filter, typeReferenceProvider, methodReferenceProvider, _configuration.ShouldTraceConstructors);
             foreach (var type in _moduleDefinition.GetAllTypes())
             {
                 var weaver = factory.Create(type);
