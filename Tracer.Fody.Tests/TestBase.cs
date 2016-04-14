@@ -90,7 +90,7 @@ namespace Tracer.Fody.Tests
             return destPath;
         }
 
-        protected void Rewrite(string assemblyPath, ITraceLoggingFilter filter)
+        protected void Rewrite(string assemblyPath, ITraceLoggingFilter filter, bool traceConstructors = false)
         {
             //Set-up log adapter to our mock 
             var assembly = Assembly.GetExecutingAssembly();
@@ -101,11 +101,13 @@ namespace Tracer.Fody.Tests
                 .WithLogManager(typeof(MockLogManagerAdapter).FullName)
                 .WithLogger(typeof(IMockLogAdapter).FullName)
                 .WithStaticLogger(typeof(MockLog).FullName);
-                
+
+            if (traceConstructors) config.WithConstructorTraceOn();
+
             AssemblyWeaver.Execute(assemblyPath, config);
         }
 
-        protected MockLogResult RunTest(string source, ITraceLoggingFilter filter, string staticEntryPoint)
+        protected MockLogResult RunTest(string source, ITraceLoggingFilter filter, string staticEntryPoint, bool shouldTraceConstructors = false)
         {
             var splitEntry = staticEntryPoint.Split(new [] { "::" }, StringSplitOptions.RemoveEmptyEntries);
             if (splitEntry.Length != 2) throw new ApplicationException("Static entry point must be in a form Namesp.Namesp2.Class::Method");
@@ -115,7 +117,7 @@ namespace Tracer.Fody.Tests
             var testDllLocation = new Uri(Assembly.GetExecutingAssembly().CodeBase);
 
             var assemblyPath = Compile(source, "testasm", new []{ testDllLocation.AbsolutePath });
-            Rewrite(assemblyPath, filter);
+            Rewrite(assemblyPath, filter, shouldTraceConstructors);
 
             //----
             return RunCode(assemblyPath, entryClass, entryMethod);

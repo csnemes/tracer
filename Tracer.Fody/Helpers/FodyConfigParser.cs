@@ -20,6 +20,7 @@ namespace Tracer.Fody.Helpers
         private string _logManager;
         private string _logger;
         private string _staticLogger;
+        private bool _traceConstructorsFlag;
         private IEnumerable<XElement> _filterConfigElements;
 
         public static FodyConfigParser Parse(XElement element)
@@ -33,12 +34,17 @@ namespace Tracer.Fody.Helpers
         {
             get
             {
-                return TraceLoggingConfiguration.New
+                var result = TraceLoggingConfiguration.New
                     .WithAdapterAssembly(_adapterAssembly)
                     .WithFilter(new DefaultFilter(_filterConfigElements))
                     .WithLogger(_logger)
                     .WithLogManager(_logManager)
                     .WithStaticLogger(_staticLogger);
+
+                if (_traceConstructorsFlag) { result.WithConstructorTraceOn(); }
+                    else { result.WithConstructorTraceOff(); }
+
+                return result;
             }
         }
 
@@ -61,6 +67,7 @@ namespace Tracer.Fody.Helpers
                 _logManager = GetAttributeValue(element, "logManager", true);
                 _logger = GetAttributeValue(element, "logger", true);
                 _staticLogger = GetAttributeValue(element, "staticLogger", false);
+                _traceConstructorsFlag = Boolean.Parse(GetAttributeValueOrDefault(element, "traceConstructors", Boolean.FalseString));
                 _filterConfigElements = element.Descendants();
             }
             catch (Exception ex)
@@ -78,6 +85,12 @@ namespace Tracer.Fody.Helpers
             }
 
             return attribute != null ? attribute.Value : null;
+        }
+
+        private string GetAttributeValueOrDefault(XElement element, string attributeName, string defaultValue)
+        {
+            var attribute = element.Attribute(attributeName);
+            return attribute != null ? attribute.Value : defaultValue;
         }
     }
 }
