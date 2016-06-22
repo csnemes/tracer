@@ -126,5 +126,10 @@ namespace Tracer.Fody.Helpers
 
             return variable;
         }
+
+        public static bool IsPropertyAccessor(this MethodDefinition methodDefinition)
+        {
+            return (methodDefinition.IsGetter || methodDefinition.IsSetter);
+        }
     }
 }

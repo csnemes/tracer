@@ -7,7 +7,7 @@ namespace Tracer.Fody.Tests.MockLoggers
     {
         private static readonly List<MockCallInfo> Calls = new List<MockCallInfo>();
 
-        public static IMockLogAdapter GetLogger(Type type)
+        public static MockLogAdapter GetLogger(Type type)
         {
             return new MockLogAdapter(type);
         }
@@ -31,6 +31,11 @@ namespace Tracer.Fody.Tests.MockLoggers
              string[] paramValues = null)
         {
             Calls.Add(MockCallInfo.CreateLog(loggerName, containingMethod, logMethodCalled, paramValues));
+        }
+
+        public static void LogPropertyCalled(string loggerName, string logPropertyCalled)
+        {
+            Calls.Add(MockCallInfo.CreatePropertyAccess(loggerName, logPropertyCalled));
         }
     }
 }

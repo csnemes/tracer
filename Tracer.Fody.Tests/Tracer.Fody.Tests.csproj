@@ -72,7 +72,6 @@
     <Compile Include="Filters\TracerAttributes.cs" />
     <Compile Include="TestBase.cs" />
     <Compile Include="LogTests\CallingLogMethods.cs" />
-    <Compile Include="MockLoggers\IMockLogAdapter.cs" />
     <Compile Include="MockLoggers\MockCallInfo.cs" />
     <Compile Include="MockLoggers\MockLog.cs" />
     <Compile Include="MockLoggers\MockLogAdapter.cs" />

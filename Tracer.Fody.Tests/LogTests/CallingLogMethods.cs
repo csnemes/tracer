@@ -1,4 +1,5 @@
-﻿using FluentAssertions;
+﻿using System;
+using FluentAssertions;
 using NUnit.Framework;
 using Tracer.Fody.Tests.MockLoggers;
 
@@ -260,6 +261,55 @@ namespace Tracer.Fody.Tests.LogTests
             result.Count.Should().Be(1);
             result.ElementAt(0).ShouldBeLogCall("First.MyClass::Main", "MockLogOuterNoParam");
             result.ElementAt(0).ContainingMethod.Should().Be("Main()");
+        }
+
+        [Test]
+        public void TestStaticPropertyRewrite()
+        {
+            string code = @"
+                using System;
+                using System.Diagnostics;
+                using Tracer.Fody.Tests.MockLoggers;
+
+                namespace First
+                {
+                    public class MyClass
+                    {
+                        public static void Main()
+                        {
+                            var x = MockLog.IsEnabled;
+                        }
+                    }
+                }
+            ";
+
+            var result = this.RunTest(code, new PrivateOnlyTraceLoggingFilter(), "First.MyClass::Main");
+            result.Count.Should().Be(1);
+            result.ElementAt(0).ShouldBeLogProperty("First.MyClass", "IsEnabled");
+        }
+
+        [Test]
+        public void StaticPropertyWriteRewriteShouldFail()
+        {
+            string code = @"
+                using System;
+                using System.Diagnostics;
+                using Tracer.Fody.Tests.MockLoggers;
+
+                namespace First
+                {
+                    public class MyClass
+                    {
+                        public static void Main()
+                        {
+                            MockLog.ReadWrite = false;
+                        }
+                    }
+                }
+            ";
+
+            Action test = () => this.RunTest(code, new PrivateOnlyTraceLoggingFilter(), "First.MyClass::Main");
+            test.ShouldThrow<ApplicationException>().And.Message.Contains("not supported");
         }
     }
 }

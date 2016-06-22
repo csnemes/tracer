@@ -12,7 +12,8 @@ namespace Tracer.Fody.Tests.MockLoggers
         {
             TraceEnter = 1,
             TraceLeave = 2,
-            Log = 3
+            Log = 3,
+            PropertyAccess = 4
         }
 
 
@@ -51,7 +52,13 @@ namespace Tracer.Fody.Tests.MockLoggers
         {
             return new MockCallInfo(loggerName, MockCallType.Log, containingMethod, null, paramValues, logMethod, null);
         }
-        
+
+        public static MockCallInfo CreatePropertyAccess(string loggerName, string logProperty)
+        {
+            return new MockCallInfo(loggerName, MockCallType.PropertyAccess, null, null, null, logProperty, null);
+        }
+
+
         public string LoggerName
         {
             get { return _loggerName; }
@@ -210,6 +217,13 @@ namespace Tracer.Fody.Tests.MockLoggers
                     mock.ParamValues[idx].Should().Be(values[idx]);
                 }
             }
+        }
+
+        public static void ShouldBeLogProperty(this MockCallInfo mock, string loggerName, string propertyName)
+        {
+            mock.CallType.Should().Be(MockCallInfo.MockCallType.PropertyAccess);
+            mock.LoggerName.Should().Be(loggerName);
+            mock.LogMethod.Should().Contain(propertyName);
         }
     }
 }
