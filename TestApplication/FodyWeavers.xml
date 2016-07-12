@@ -5,7 +5,6 @@
         logger="Tracer.Log4Net.Adapters.LoggerAdapter"
         staticLogger="Tracer.Log4Net.Log"
         traceConstructors="true">
-    <TraceOn namespace="System.*" class="public" method="public" />
-    <NoTrace namespace="System.*" />
+    <TraceOn class="private" method="private" />
   </Tracer>
 </Weavers>

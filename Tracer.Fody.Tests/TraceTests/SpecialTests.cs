@@ -119,5 +119,8 @@ namespace Tracer.Fody.Tests.TraceTests
             var result = this.RunTest(code, new DefaultFilter(new[] { def }), "First.MyClass::Main");
             result.Count.Should().Be(0);
         }
+
+
+
     }
 }

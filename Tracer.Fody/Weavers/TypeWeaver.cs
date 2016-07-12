@@ -52,7 +52,7 @@ namespace Tracer.Fody.Weavers
                 if (AlreadyWeaved(method)) continue;
 
                 bool shouldAddTrace = !HasCompilerGeneratedAttribute 
-                    && (_shouldTraceConstructors || !method.IsConstructor)
+                    && ((method.IsConstructor && _shouldTraceConstructors && !method.IsStatic) || !method.IsConstructor)
                     && _filter.ShouldAddTrace(method);
                
                 _methodWeaverFactory.Create(method).Execute(shouldAddTrace);

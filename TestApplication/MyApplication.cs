@@ -14,6 +14,8 @@ namespace TestApplication
 {
     public class MyApplication
     {
+        private static string x = "abc";
+
         public void Run()
         {
             Thread.Sleep(500);
