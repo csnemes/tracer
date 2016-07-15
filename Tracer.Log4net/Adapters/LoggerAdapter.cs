@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Diagnostics;
@@ -434,7 +435,7 @@ namespace Tracer.Log4Net.Adapters
             {
                 return message as string;
             }
-            else if (message is IEnumerator)
+            else if (message is IEnumerator && _logger.Repository != null)
             {
                 var retVal = _logger.Repository.RendererMap.FindAndRender(message);
                 var enumerable = message as IEnumerator;
