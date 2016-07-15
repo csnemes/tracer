@@ -434,6 +434,13 @@ namespace Tracer.Log4Net.Adapters
             {
                 return message as string;
             }
+            else if (message is IEnumerator)
+            {
+                var retVal = _logger.Repository.RendererMap.FindAndRender(message);
+                var enumerable = message as IEnumerator;
+                enumerable.Reset();
+                return retVal;
+            }
             else if (_logger.Repository != null)
             {
                 return _logger.Repository.RendererMap.FindAndRender(message);
