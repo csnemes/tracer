@@ -20,7 +20,7 @@ namespace TracerAttributes
         }
     }
 
-    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = true, Inherited = true)]
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method | AttributeTargets.Property, AllowMultiple = true, Inherited = true)]
     public class NoTrace : Attribute
     {
     }

@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using Mono.Cecil;
+using Tracer.Fody.Helpers;
 using Tracer.Fody.Weavers;
 
 namespace Tracer.Fody.Filters
@@ -49,10 +50,26 @@ namespace Tracer.Fody.Filters
         
         private bool? ShouldTraceBasedOnMethodLevelInfo(MethodDefinition definition)
         {
-            if (definition.CustomAttributes.Any(attr => attr.AttributeType.FullName.Equals("TracerAttributes.TraceOn", StringComparison.Ordinal)))
-                return true;
-            if (definition.CustomAttributes.Any(attr => attr.AttributeType.FullName.Equals("TracerAttributes.NoTrace", StringComparison.Ordinal)))
-                return false;
+            if (!definition.IsPropertyAccessor())
+            {
+                if (definition.CustomAttributes.Any(attr => attr.AttributeType.FullName.Equals("TracerAttributes.TraceOn", StringComparison.Ordinal)))
+                    return true;
+                if (definition.CustomAttributes.Any(attr => attr.AttributeType.FullName.Equals("TracerAttributes.NoTrace", StringComparison.Ordinal)))
+                    return false;
+            }
+            else
+            { //its a property accessor check the prop for the attribute
+                var correspondingProp =
+                    definition.DeclaringType.Properties.FirstOrDefault(prop => prop.GetMethod == definition || prop.SetMethod == definition);
+                if (correspondingProp != null)
+                {
+                    if (correspondingProp.CustomAttributes.Any(attr => attr.AttributeType.FullName.Equals("TracerAttributes.TraceOn", StringComparison.Ordinal)))
+                        return true;
+                    if (correspondingProp.CustomAttributes.Any(attr => attr.AttributeType.FullName.Equals("TracerAttributes.NoTrace", StringComparison.Ordinal)))
+                        return false;
+                }
+            }
+
             return null;
         }
 

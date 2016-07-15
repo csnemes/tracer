@@ -55,7 +55,7 @@ namespace Tracer.Fody.Tests.TraceTests
 
                 namespace TracerAttributes
                 {
-                        [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = true, Inherited = true)]
+                        [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method| AttributeTargets.Property, AllowMultiple = true, Inherited = true)]
                         public class NoTrace : Attribute
                         {
                         }
@@ -93,7 +93,7 @@ namespace Tracer.Fody.Tests.TraceTests
 
                 namespace TracerAttributes
                 {
-                        [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = true, Inherited = true)]
+                        [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method | AttributeTargets.Property, AllowMultiple = true, Inherited = true)]
                         public class NoTrace : Attribute
                         {
                         }
@@ -120,5 +120,92 @@ namespace Tracer.Fody.Tests.TraceTests
             result.Count.Should().Be(0);
         }
 
+        [Test]
+        public void NoTrace_Attribute_On_Property_Skips_Getter()
+        {
+            string code = @"
+                using System;
+                using System.Diagnostics;
+
+                namespace TracerAttributes
+                {
+                        [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method | AttributeTargets.Property, AllowMultiple = true, Inherited = true)]
+                        public class NoTrace : Attribute
+                        {
+                        }
+                }
+
+                namespace First
+                {
+                    using TracerAttributes;
+
+                    public class MyClass
+                    {
+                        [NoTrace]
+                        public static void Main()
+                        {
+                            var mc = new MyClass(); 
+                            var i = mc.IntValue;
+                        }
+                        
+                        [NoTrace]
+                        private int IntValue
+                        {
+                            get { return 1; }
+                        }
+                    }
+                }
+            ";
+
+            var def = new AssemblyLevelTraceOnDefinition(NamespaceScope.All, TraceTargetVisibility.All,
+                TraceTargetVisibility.All);
+            var result = this.RunTest(code, new DefaultFilter(new[] { def }), "First.MyClass::Main");
+            result.Count.Should().Be(0);
+        }
+
+        [Test]
+        public void NoTrace_Attribute_On_Property_Skips_Setter()
+        {
+            string code = @"
+                using System;
+                using System.Diagnostics;
+
+                namespace TracerAttributes
+                {
+                        [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method | AttributeTargets.Property, AllowMultiple = true, Inherited = true)]
+                        public class NoTrace : Attribute
+                        {
+                        }
+                }
+
+                namespace First
+                {
+                    using TracerAttributes;
+
+                    public class MyClass
+                    {
+                        private int _intValue;
+
+                        [NoTrace]
+                        public static void Main()
+                        {
+                            var mc = new MyClass(); 
+                            mc.IntValue = 1;
+                        }
+                        
+                        [NoTrace]
+                        private int IntValue
+                        {
+                            set { _intValue = value; }
+                        }
+                    }
+                }
+            ";
+
+            var def = new AssemblyLevelTraceOnDefinition(NamespaceScope.All, TraceTargetVisibility.All,
+                TraceTargetVisibility.All);
+            var result = this.RunTest(code, new DefaultFilter(new[] { def }), "First.MyClass::Main");
+            result.Count.Should().Be(0);
+        }
     }
 }
