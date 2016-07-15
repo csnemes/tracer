@@ -27,6 +27,7 @@ namespace TestApplication
             GenericMethodTests();
             GenericClassTests();
 
+            StaticLogPropertyRewrites();
             StaticLogRewrites();
 
             OutParamLogs();
@@ -39,6 +40,30 @@ namespace TestApplication
 
             var perfComp = new PerfComp();
             perfComp.SpeedTest();
+        }
+
+        public void StaticLogPropertyRewrites()
+        {
+            if (Log.IsDebugEnabled)
+            {
+                Log.Debug("Debug is on");
+            }
+            if (Log.IsErrorEnabled)
+            {
+                Log.Error("Error is on");
+            }
+            if (Log.IsFatalEnabled)
+            {
+                Log.Fatal("Fatal is on");
+            }
+            if (Log.IsInfoEnabled)
+            {
+                Log.Info("Info is on");
+            }
+            if (Log.IsWarnEnabled)
+            {
+                Log.Warn("Warn is on");
+            }
         }
 
         public void OutParamLogs()

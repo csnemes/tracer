@@ -123,7 +123,7 @@ namespace Tracer.Log4Net.Adapters
 
         #endregion
 
-        #region ILog methods
+        #region ILog methods and properties
 
         public void LogDebug(string methodInfo, object message)
         {
@@ -403,6 +403,31 @@ namespace Tracer.Log4Net.Adapters
             {
                 Log(Level.Fatal, methodInfo, String.Format(provider, format, args));
             }
+        }
+
+        public bool LogIsDebugEnabled
+        {
+            get { return _logger.IsEnabledFor(Level.Debug); }
+        }
+
+        public bool LogIsInfoEnabled
+        {
+            get { return _logger.IsEnabledFor(Level.Info); }
+        }
+
+        public bool LogIsWarnEnabled
+        {
+            get { return _logger.IsEnabledFor(Level.Warn); }
+        }
+
+        public bool LogIsErrorEnabled
+        {
+            get { return _logger.IsEnabledFor(Level.Error); }
+        }
+
+        public bool LogIsFatalEnabled
+        {
+            get { return _logger.IsEnabledFor(Level.Fatal); }
         }
 
         #endregion
