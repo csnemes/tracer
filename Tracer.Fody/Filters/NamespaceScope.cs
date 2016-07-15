@@ -8,9 +8,9 @@ namespace Tracer.Fody.Filters
     /// <summary>
     /// Class representing the namespace scope of assembly level TraceOn and NoTrace definitions
     /// </summary>
-    internal class NamespaceScope
+    internal class NamespaceScope : IComparable<NamespaceScope>
     {
-        public static NamespaceScope All = new NamespaceScope(null, MatchMode.SelfAndChildren);
+        public static NamespaceScope All = new NamespaceScope(String.Empty, MatchMode.SelfAndChildren); //empty namespace means all match
 
         private enum MatchMode
         {
@@ -61,6 +61,53 @@ namespace Tracer.Fody.Filters
             }
             
             return new NamespaceScope(namespc, matchMode);
+        }
+
+        public int CompareTo(NamespaceScope other)
+        {
+            //for ordering from more specific to least specific
+            var dotCnt = _namespace.Count(chr => chr == '.');
+            var otherDotCnt = other._namespace.Count(chr => chr == '.');
+
+            if (dotCnt != otherDotCnt)
+            {
+                return Math.Sign(otherDotCnt - dotCnt);
+            }
+
+            //match mode order is exact, children, selfandchildren
+            return _matchMode.CompareTo(other._matchMode);
+        }
+
+        public override string ToString()
+        {
+            return String.Format("{0}{1}", _namespace, _matchMode == MatchMode.OnlyChildren ? ".*" : (_matchMode == MatchMode.SelfAndChildren ? "+*" : ""));
+        }
+
+        public bool IsMatching(string ns)
+        {
+            //check for ALL
+            if (String.IsNullOrEmpty(_namespace)) return true;
+
+            switch (_matchMode)
+            {
+                case MatchMode.ExactMatch:
+                {
+                    return String.Equals(_namespace, ns, StringComparison.OrdinalIgnoreCase);
+                }          
+                case MatchMode.OnlyChildren:
+                {
+                    if (!ns.StartsWith(_namespace, StringComparison.OrdinalIgnoreCase)) return false;
+                    if (ns.Length == _namespace.Length) return false;
+                    return ns[_namespace.Length] == '.';
+                }    
+                case MatchMode.SelfAndChildren:
+                {
+                    if (!ns.StartsWith(_namespace, StringComparison.OrdinalIgnoreCase)) return false;
+                    if (ns.Length == _namespace.Length) return true;
+                    return ns[_namespace.Length] == '.';
+                }
+            }
+            throw new ApplicationException("Unknown match mode");
         }
     }
 }

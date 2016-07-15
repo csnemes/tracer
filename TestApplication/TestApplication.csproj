@@ -49,6 +49,7 @@
   <ItemGroup>
     <Compile Include="GenericClass.cs" />
     <Compile Include="MyApplication.cs" />
+    <Compile Include="NotTraced.cs" />
     <Compile Include="OutParamClass.cs" />
     <Compile Include="PerfComp.cs" />
     <Compile Include="Program.cs" />

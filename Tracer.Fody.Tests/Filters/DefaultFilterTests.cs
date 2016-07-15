@@ -15,6 +15,95 @@ namespace Tracer.Fody.Tests.Filters
     public class DefaultFilterTests : TestBase
     {
         [Test]
+        public void Parse_MostBasicConfiguration()
+        {
+            var result = DefaultFilter.ParseConfig(XElement.Parse(@"<root>
+                <TraceOn class=""public"" method =""public"" />
+            </root>").Descendants()).ToList();
+
+            result.Count.Should().Be(1);
+            result[0].Should().BeOfType<AssemblyLevelTraceOnDefinition>();
+        }
+
+        [Test]
+        public void Parse_MultiElement_Configuration()
+        {
+            var result = DefaultFilter.ParseConfig(XElement.Parse(@"<root>
+                <TraceOn class=""public"" method =""public"" />
+                <TraceOn namespace=""rootnamespace"" class=""public"" method =""public"" />
+                <NoTrace namespace=""rootnamespace.other"" />
+            </root>").Descendants()).ToList();
+
+            result.Count.Should().Be(3);
+            result[0].Should().BeOfType<AssemblyLevelTraceOnDefinition>();
+            result[1].Should().BeOfType<AssemblyLevelTraceOnDefinition>();
+            result[2].Should().BeOfType<AssemblyLevelNoTraceDefinition>();
+        }
+
+        [Test]
+        public void Creation_MultiElementConfig()
+        {
+            var filter = new DefaultFilter(XElement.Parse(@"<root>
+                <TraceOn class=""public"" method =""public"" />
+                <TraceOn namespace=""rootnamespace"" class=""public"" method =""public"" />
+                <NoTrace namespace=""rootnamespace.other"" />
+            </root>").Descendants());
+
+            string code = @"
+                using TracerAttributes;
+
+                namespace rootnamespace
+                {
+                    public class MyClass
+                    {
+                        public void PublicMethod()
+                        {}
+
+                        internal void InternalMethod()
+                        {}
+
+                        protected void ProtectedMethod()
+                        {}
+
+                        private void PrivateMethod()
+                        {}
+                    }
+                }
+
+                namespace rootnamespace.other
+                {
+                    public class OtherClass
+                    {
+                        public void OtherPublicMethod()
+                        {}
+                    }
+                }
+
+                namespace rootnamespace.another
+                {
+                    public class AnotherClass
+                    {
+                        public void AnotherPublicMethod()
+                        {}
+                    }
+                }
+            ";
+
+            var publicMethodDef = GetMethodDefinition(code, "PublicMethod");
+            var internalMethodDef = GetMethodDefinition(code, "InternalMethod");
+
+            filter.ShouldAddTrace(publicMethodDef).Should().BeTrue();
+            filter.ShouldAddTrace(internalMethodDef).Should().BeFalse();
+
+            var otherPublicMethodDef = GetMethodDefinition(code, "OtherPublicMethod");
+            filter.ShouldAddTrace(otherPublicMethodDef).Should().BeFalse();
+
+            var anotherPublicMethodDef = GetMethodDefinition(code, "AnotherPublicMethod");
+            filter.ShouldAddTrace(anotherPublicMethodDef).Should().BeTrue();
+        }
+
+
+        [Test]
         public void AssemblyLevelSpecification_PublicClass_PublicFilter()
         {
             string code = @"
@@ -43,7 +132,7 @@ namespace Tracer.Fody.Tests.Filters
             var internalMethodDef = GetMethodDefinition(code, "InternalMethod");
             var protectedMethodDef = GetMethodDefinition(code, "ProtectedMethod");
             var privateMethodDef = GetMethodDefinition(code, "PrivateMethod");
-            var filter = GetDefaultFilter(DefaultFilter.TraceTargetVisibility.Public, DefaultFilter.TraceTargetVisibility.Public);
+            var filter = GetDefaultFilter(TraceTargetVisibility.Public, TraceTargetVisibility.Public);
             filter.ShouldAddTrace(publicMethodDef).Should().BeTrue("public");
             filter.ShouldAddTrace(internalMethodDef).Should().BeFalse("internal");
             filter.ShouldAddTrace(protectedMethodDef).Should().BeFalse("protected");
@@ -79,7 +168,7 @@ namespace Tracer.Fody.Tests.Filters
             var internalMethodDef = GetMethodDefinition(code, "InternalMethod");
             var protectedMethodDef = GetMethodDefinition(code, "ProtectedMethod");
             var privateMethodDef = GetMethodDefinition(code, "PrivateMethod");
-            var filter = GetDefaultFilter(DefaultFilter.TraceTargetVisibility.Public, DefaultFilter.TraceTargetVisibility.All);
+            var filter = GetDefaultFilter(TraceTargetVisibility.Public, TraceTargetVisibility.All);
             filter.ShouldAddTrace(publicMethodDef).Should().BeTrue("public");
             filter.ShouldAddTrace(internalMethodDef).Should().BeTrue("internal");
             filter.ShouldAddTrace(protectedMethodDef).Should().BeTrue("protected");
@@ -115,7 +204,7 @@ namespace Tracer.Fody.Tests.Filters
             var internalMethodDef = GetMethodDefinition(code, "InternalMethod");
             var protectedMethodDef = GetMethodDefinition(code, "ProtectedMethod");
             var privateMethodDef = GetMethodDefinition(code, "PrivateMethod");
-            var filter = GetDefaultFilter(DefaultFilter.TraceTargetVisibility.Public, DefaultFilter.TraceTargetVisibility.All);
+            var filter = GetDefaultFilter(TraceTargetVisibility.Public, TraceTargetVisibility.All);
             filter.ShouldAddTrace(publicMethodDef).Should().BeFalse("public");
             filter.ShouldAddTrace(internalMethodDef).Should().BeFalse("internal");
             filter.ShouldAddTrace(protectedMethodDef).Should().BeFalse("protected");
@@ -151,7 +240,7 @@ namespace Tracer.Fody.Tests.Filters
             var internalMethodDef = GetMethodDefinition(code, "InternalMethod");
             var protectedMethodDef = GetMethodDefinition(code, "ProtectedMethod");
             var privateMethodDef = GetMethodDefinition(code, "PrivateMethod");
-            var filter = GetDefaultFilter(DefaultFilter.TraceTargetVisibility.All, DefaultFilter.TraceTargetVisibility.ProtectedOrMoreVisible);
+            var filter = GetDefaultFilter(TraceTargetVisibility.All, TraceTargetVisibility.ProtectedOrMoreVisible);
             filter.ShouldAddTrace(publicMethodDef).Should().BeTrue("public");
             filter.ShouldAddTrace(internalMethodDef).Should().BeTrue("internal");
             filter.ShouldAddTrace(protectedMethodDef).Should().BeTrue("protected");
@@ -176,7 +265,7 @@ namespace Tracer.Fody.Tests.Filters
             ";
 
             var methodDef = GetMethodDefinition(code, "MyMethod");
-            var filter = GetDefaultFilter(DefaultFilter.TraceTargetVisibility.Public, DefaultFilter.TraceTargetVisibility.Public);
+            var filter = GetDefaultFilter(TraceTargetVisibility.Public, TraceTargetVisibility.Public);
             filter.ShouldAddTrace(methodDef).Should().BeTrue();
         }
 
@@ -199,7 +288,7 @@ namespace Tracer.Fody.Tests.Filters
             ";
 
             var methodDef = GetMethodDefinition(code, "MyMethod");
-            var filter = GetDefaultFilter(DefaultFilter.TraceTargetVisibility.Public, DefaultFilter.TraceTargetVisibility.Public);
+            var filter = GetDefaultFilter(TraceTargetVisibility.Public, TraceTargetVisibility.Public);
             filter.ShouldAddTrace(methodDef).Should().BeTrue();
         }
 
@@ -221,7 +310,7 @@ namespace Tracer.Fody.Tests.Filters
             ";
 
             var methodDef = GetMethodDefinition(code, "MyMethod");
-            var filter = GetDefaultFilter(DefaultFilter.TraceTargetVisibility.Public, DefaultFilter.TraceTargetVisibility.Public);
+            var filter = GetDefaultFilter(TraceTargetVisibility.Public, TraceTargetVisibility.Public);
             filter.ShouldAddTrace(methodDef).Should().BeFalse();
         }
 
@@ -255,7 +344,7 @@ namespace Tracer.Fody.Tests.Filters
             var internalMethodDef = GetMethodDefinition(code, "InternalMethod");
             var protectedMethodDef = GetMethodDefinition(code, "ProtectedMethod");
             var privateMethodDef = GetMethodDefinition(code, "PrivateMethod");
-            var filter = GetDefaultFilter(DefaultFilter.TraceTargetVisibility.Public, DefaultFilter.TraceTargetVisibility.Public);
+            var filter = GetDefaultFilter(TraceTargetVisibility.Public, TraceTargetVisibility.Public);
             filter.ShouldAddTrace(publicMethodDef).Should().BeTrue("public");
             filter.ShouldAddTrace(internalMethodDef).Should().BeTrue("internal");
             filter.ShouldAddTrace(protectedMethodDef).Should().BeTrue("protected");
@@ -292,7 +381,7 @@ namespace Tracer.Fody.Tests.Filters
             var internalMethodDef = GetMethodDefinition(code, "InternalMethod");
             var protectedMethodDef = GetMethodDefinition(code, "ProtectedMethod");
             var privateMethodDef = GetMethodDefinition(code, "PrivateMethod");
-            var filter = GetDefaultFilter(DefaultFilter.TraceTargetVisibility.Public, DefaultFilter.TraceTargetVisibility.All);
+            var filter = GetDefaultFilter(TraceTargetVisibility.Public, TraceTargetVisibility.All);
             filter.ShouldAddTrace(publicMethodDef).Should().BeTrue("public");
             filter.ShouldAddTrace(internalMethodDef).Should().BeTrue("internal");
             filter.ShouldAddTrace(protectedMethodDef).Should().BeFalse("protected");
@@ -329,7 +418,7 @@ namespace Tracer.Fody.Tests.Filters
             var internalMethodDef = GetMethodDefinition(code, "InternalMethod");
             var protectedMethodDef = GetMethodDefinition(code, "ProtectedMethod");
             var privateMethodDef = GetMethodDefinition(code, "PrivateMethod");
-            var filter = GetDefaultFilter(DefaultFilter.TraceTargetVisibility.Public, DefaultFilter.TraceTargetVisibility.All);
+            var filter = GetDefaultFilter(TraceTargetVisibility.Public, TraceTargetVisibility.All);
             filter.ShouldAddTrace(publicMethodDef).Should().BeTrue("public");
             filter.ShouldAddTrace(internalMethodDef).Should().BeFalse("internal");
             filter.ShouldAddTrace(protectedMethodDef).Should().BeFalse("protected");
@@ -366,7 +455,7 @@ namespace Tracer.Fody.Tests.Filters
             var internalMethodDef = GetMethodDefinition(code, "InternalMethod");
             var protectedMethodDef = GetMethodDefinition(code, "ProtectedMethod");
             var privateMethodDef = GetMethodDefinition(code, "PrivateMethod");
-            var filter = GetDefaultFilter(DefaultFilter.TraceTargetVisibility.Public, DefaultFilter.TraceTargetVisibility.All);
+            var filter = GetDefaultFilter(TraceTargetVisibility.Public, TraceTargetVisibility.All);
             filter.ShouldAddTrace(publicMethodDef).Should().BeFalse("public");
             filter.ShouldAddTrace(internalMethodDef).Should().BeFalse("internal");
             filter.ShouldAddTrace(protectedMethodDef).Should().BeFalse("protected");
@@ -398,7 +487,7 @@ namespace Tracer.Fody.Tests.Filters
 
             var publicMethodDef = GetMethodDefinition(code, "PublicMethod");
             var publicMethodDef2 = GetMethodDefinition(code, "PublicMethod");
-            var filter = GetDefaultFilter(DefaultFilter.TraceTargetVisibility.Public, DefaultFilter.TraceTargetVisibility.All);
+            var filter = GetDefaultFilter(TraceTargetVisibility.Public, TraceTargetVisibility.All);
             filter.ShouldAddTrace(publicMethodDef).Should().BeFalse("public");
             filter.ShouldAddTrace(publicMethodDef2).Should().BeFalse("public");
         }
@@ -436,7 +525,7 @@ namespace Tracer.Fody.Tests.Filters
             var internalMethodDef = GetMethodDefinition(code, "InternalMethod");
             var protectedMethodDef = GetMethodDefinition(code, "ProtectedMethod");
             var privateMethodDef = GetMethodDefinition(code, "PrivateMethod");
-            var filter = GetDefaultFilter(DefaultFilter.TraceTargetVisibility.Public, DefaultFilter.TraceTargetVisibility.All);
+            var filter = GetDefaultFilter(TraceTargetVisibility.Public, TraceTargetVisibility.All);
             filter.ShouldAddTrace(publicMethodDef).Should().BeTrue("public");
             filter.ShouldAddTrace(internalMethodDef).Should().BeTrue("internal");
             filter.ShouldAddTrace(protectedMethodDef).Should().BeTrue("protected");
@@ -452,8 +541,9 @@ namespace Tracer.Fody.Tests.Filters
 
             var parseResult = DefaultFilter.ParseConfig(input.Descendants()).ToList();
             parseResult.Count.Should().Be(1);
-            parseResult[0].TargetClass.Should().Be(DefaultFilter.TraceTargetVisibility.Public);
-            parseResult[0].TargetMethod.Should().Be(DefaultFilter.TraceTargetVisibility.Public);
+            parseResult[0].Should().BeOfType<AssemblyLevelTraceOnDefinition>();
+            ((AssemblyLevelTraceOnDefinition)parseResult[0]).TargetClass.Should().Be(TraceTargetVisibility.Public);
+            ((AssemblyLevelTraceOnDefinition)parseResult[0]).TargetMethod.Should().Be(TraceTargetVisibility.Public);
         }
 
         [Test]
@@ -465,8 +555,9 @@ namespace Tracer.Fody.Tests.Filters
 
             var parseResult = DefaultFilter.ParseConfig(input.Descendants()).ToList();
             parseResult.Count.Should().Be(1);
-            parseResult[0].TargetClass.Should().Be(DefaultFilter.TraceTargetVisibility.InternalOrMoreVisible);
-            parseResult[0].TargetMethod.Should().Be(DefaultFilter.TraceTargetVisibility.All);
+            parseResult[0].Should().BeOfType<AssemblyLevelTraceOnDefinition>();
+            ((AssemblyLevelTraceOnDefinition)parseResult[0]).TargetClass.Should().Be(TraceTargetVisibility.InternalOrMoreVisible);
+            ((AssemblyLevelTraceOnDefinition)parseResult[0]).TargetMethod.Should().Be(TraceTargetVisibility.All);
         }
 
         [Test]
@@ -492,10 +583,10 @@ namespace Tracer.Fody.Tests.Filters
         }
 
 
-        private ITraceLoggingFilter GetDefaultFilter(DefaultFilter.TraceTargetVisibility classTarget,
-            DefaultFilter.TraceTargetVisibility methodTarget)
+        private ITraceLoggingFilter GetDefaultFilter(TraceTargetVisibility classTarget,
+            TraceTargetVisibility methodTarget)
         {
-            var config = new[] {new DefaultFilter.AssemblyLevelTraceDefinition(classTarget, methodTarget)};
+            var config = new[] {new AssemblyLevelTraceOnDefinition(NamespaceScope.All, classTarget, methodTarget)};
             return new DefaultFilter(config);
         }
     }

@@ -59,7 +59,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AssemblyWeaver.cs" />
+    <Compile Include="Filters\AssemblyLevelTraceDefinition.cs" />
+    <Compile Include="Filters\AssemblyLevelNoTraceDefinition.cs" />
+    <Compile Include="Filters\AssemblyLevelTraceDefinitionComparer.cs" />
+    <Compile Include="Filters\AssemblyLevelTraceOnDefinition.cs" />
     <Compile Include="Filters\DefaultFilter.cs" />
+    <Compile Include="Filters\NamespaceScope.cs" />
+    <Compile Include="Filters\Visibility.cs" />
     <Compile Include="Helpers\CecilExtensions.cs" />
     <Compile Include="Helpers\FodyConfigParser.cs" />
     <Compile Include="Helpers\IWeavingLogger.cs" />

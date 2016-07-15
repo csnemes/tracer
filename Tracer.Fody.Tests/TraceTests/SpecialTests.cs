@@ -76,8 +76,8 @@ namespace Tracer.Fody.Tests.TraceTests
                 }
             ";
 
-            var def = new DefaultFilter.AssemblyLevelTraceDefinition(DefaultFilter.TraceTargetVisibility.All,
-                DefaultFilter.TraceTargetVisibility.Public);
+            var def = new AssemblyLevelTraceOnDefinition(NamespaceScope.All,  TraceTargetVisibility.All, 
+                TraceTargetVisibility.Public);
             var result = this.RunTest(code, new DefaultFilter(new [] { def }), "First.MyClass::Main");
             result.Count.Should().Be(0);
         }
@@ -114,8 +114,8 @@ namespace Tracer.Fody.Tests.TraceTests
                 }
             ";
 
-            var def = new DefaultFilter.AssemblyLevelTraceDefinition(DefaultFilter.TraceTargetVisibility.All,
-                DefaultFilter.TraceTargetVisibility.Public);
+            var def = new AssemblyLevelTraceOnDefinition(NamespaceScope.All, TraceTargetVisibility.All,
+                TraceTargetVisibility.Public);
             var result = this.RunTest(code, new DefaultFilter(new[] { def }), "First.MyClass::Main");
             result.Count.Should().Be(0);
         }

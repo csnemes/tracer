@@ -1,19 +1,21 @@
 ﻿using System;
 using System.Xml.Linq;
+using Mono.Cecil;
 
 namespace Tracer.Fody.Filters
 {
-    internal class AssemblyLevelTraceOnDefinition : AssemblyLevelDefinition
+    /// <summary>
+    /// Specifies that the namespace should be traced for the given class and method visibility level.
+    /// </summary>
+    internal class AssemblyLevelTraceOnDefinition : AssemblyLevelTraceDefinition
     {
         private readonly TraceTargetVisibility _targetClass;
         private readonly TraceTargetVisibility _targetMethod;
-        private readonly NamespaceScope _namespace;
 
-        internal AssemblyLevelTraceOnDefinition(NamespaceScope namespc, TraceTargetVisibility targetClass, TraceTargetVisibility targetMethod)
+        internal AssemblyLevelTraceOnDefinition(NamespaceScope namespc, TraceTargetVisibility targetClass, TraceTargetVisibility targetMethod) : base(namespc)
         {
             _targetClass = targetClass;
             _targetMethod = targetMethod;
-            _namespace = namespc;
         }
 
         internal static AssemblyLevelTraceOnDefinition ParseFromConfig(XElement element)
@@ -21,26 +23,12 @@ namespace Tracer.Fody.Filters
             return new AssemblyLevelTraceOnDefinition(ParseNamespaceScope(element), ParseTraceTargetVisibility(element, "class"), ParseTraceTargetVisibility(element, "method"));
         }
 
-        private static NamespaceScope ParseNamespaceScope(XElement element)
-        {
-            var attribute = element.Attribute("namespace");
-            if (attribute == null) return NamespaceScope.All;
-            try
-            {
-                return NamespaceScope.Parse(attribute.Value);
-            }
-            catch (Exception ex)
-            {
-                throw new ApplicationException(String.Format("Failed to parse configuration line {0}. See inner exception for details.", element.ToString()), ex);
-            }
-        }
-
         private static TraceTargetVisibility ParseTraceTargetVisibility(XElement element, string attributeName)
         {
             var attribute = element.Attribute(attributeName);
             if (attribute == null)
             {
-                throw new ApplicationException(String.Format("Tracer: TraceOn config element missing attribute {0}.", attributeName));
+                throw new ApplicationException(String.Format("Tracer: TraceOn config element missing attribute '{0}'.", attributeName));
             }
 
             switch (attribute.Value.ToLower())
@@ -51,7 +39,7 @@ namespace Tracer.Fody.Filters
                 case "private": return TraceTargetVisibility.All;
                 case "none": return TraceTargetVisibility.None;
                 default:
-                    throw new ApplicationException(String.Format("Tracer: TraceOn config element attribute {0} has an invalid value {1}.", attributeName, attribute.Value));
+                    throw new ApplicationException(String.Format("Tracer: TraceOn config element attribute '{0}' has an invalid value '{1}'.", attributeName, attribute.Value));
             }
         }
 
@@ -65,14 +53,27 @@ namespace Tracer.Fody.Filters
             get { return _targetMethod; }
         }
 
-        public NamespaceScope NamespaceScope
+        internal override bool IsMatching(MethodDefinition methodDefinition)
         {
-            get { return _namespace; }
+            if (base.IsMatching(methodDefinition))
+            {
+                var declaringType = methodDefinition.DeclaringType;
+                var typeVisibility = VisibilityHelper.GetTypeVisibilityLevel(declaringType);
+                var methodVisibilityLevel = VisibilityHelper.GetMethodVisibilityLevel(methodDefinition);
+
+                //check type visibility
+                if ((int)typeVisibility > (int)_targetClass) return false;
+
+                //then method visibility will decide
+                return ((int)methodVisibilityLevel <= (int)_targetMethod);
+            }
+            return false;
         }
+
 
         protected bool Equals(AssemblyLevelTraceOnDefinition other)
         {
-            return _targetClass == other._targetClass && _targetMethod == other._targetMethod;
+            return _targetClass == other._targetClass && _targetMethod == other._targetMethod && NamespaceScope == other.NamespaceScope;
         }
 
         public override bool Equals(object obj)
@@ -99,6 +100,11 @@ namespace Tracer.Fody.Filters
         public static bool operator !=(AssemblyLevelTraceOnDefinition left, AssemblyLevelTraceOnDefinition right)
         {
             return !Equals(left, right);
+        }
+
+        internal override bool ShouldTrace()
+        {
+            return true;
         }
     }
 }

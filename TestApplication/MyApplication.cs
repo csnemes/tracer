@@ -20,6 +20,8 @@ namespace TestApplication
         {
             Thread.Sleep(500);
 
+            NotTracedNamespace.NotTraced.SomeMethod("Hello");
+
             ExceptionTests();
 
             GenericMethodTests();

@@ -6,5 +6,6 @@
         staticLogger="Tracer.Log4Net.Log"
         traceConstructors="true">
     <TraceOn class="private" method="private" />
+    <NoTrace namespace="NotTracedNamespace+*" />
   </Tracer>
 </Weavers>
