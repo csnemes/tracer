@@ -67,6 +67,10 @@
       <Project>{c2b16352-62ae-4207-ba69-d02be7082c17}</Project>
       <Name>Tracer.Log4Net</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Tracer.OutputWindow\Tracer.OutputWindow.csproj">
+      <Project>{42163bf9-1afc-4426-9b04-74c53e696f43}</Project>
+      <Name>Tracer.OutputWindow</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Content Include="FodyWeavers.xml" />

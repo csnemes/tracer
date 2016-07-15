@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.31101.0
+# Visual Studio 14
+VisualStudioVersion = 14.0.23107.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tracer.Fody", "Tracer.Fody\Tracer.Fody.csproj", "{5E36561F-EA14-49A3-AA84-63176C256A30}"
 EndProject
@@ -14,6 +14,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tracer.Fody.Tests", "Tracer.Fody.Tests\Tracer.Fody.Tests.csproj", "{9F57E29D-3731-42F8-8426-EE19EBF03A64}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tracer.Log4Net.Tests", "Tracer.Log4Net.Tests\Tracer.Log4Net.Tests.csproj", "{00587743-F2C1-45CB-9BFD-49D1C9976042}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tracer.OutputWindow", "Tracer.OutputWindow\Tracer.OutputWindow.csproj", "{42163BF9-1AFC-4426-9B04-74C53E696F43}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -41,6 +43,10 @@ Global
 		{00587743-F2C1-45CB-9BFD-49D1C9976042}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{00587743-F2C1-45CB-9BFD-49D1C9976042}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{00587743-F2C1-45CB-9BFD-49D1C9976042}.Release|Any CPU.Build.0 = Release|Any CPU
+		{42163BF9-1AFC-4426-9B04-74C53E696F43}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{42163BF9-1AFC-4426-9B04-74C53E696F43}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{42163BF9-1AFC-4426-9B04-74C53E696F43}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{42163BF9-1AFC-4426-9B04-74C53E696F43}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
