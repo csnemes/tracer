@@ -120,7 +120,5 @@ namespace Tracer.Fody.Tests.TraceTests
             result.Count.Should().Be(0);
         }
 
-
-
     }
 }
