@@ -6,7 +6,7 @@ using System.Text;
 // ReSharper disable once CheckNamespace
 namespace TracerAttributes
 {
-    [AttributeUsage(AttributeTargets.Class|AttributeTargets.Method, AllowMultiple = true, Inherited = true)]
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method | AttributeTargets.Property, AllowMultiple = true, Inherited = true)]
     public class TraceOn : Attribute
     {
         public TraceTarget Target { get; set; }

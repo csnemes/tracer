@@ -207,5 +207,60 @@ namespace Tracer.Fody.Tests.TraceTests
             var result = this.RunTest(code, new DefaultFilter(new[] { def }), "First.MyClass::Main");
             result.Count.Should().Be(0);
         }
+
+        [Test]
+        public void TraceOn_Attribute_On_Property_Adds_Getter_And_Setter()
+        {
+            string code = @"
+                using System;
+                using System.Diagnostics;
+
+                namespace TracerAttributes
+                {
+                    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method | AttributeTargets.Property, AllowMultiple = true, Inherited = true)]
+                    public class TraceOn : Attribute
+                    {
+                        public TraceTarget Target { get; set; }
+
+                        public TraceOn()
+                        {}
+
+                        public TraceOn(TraceTarget traceTarget)
+                        {
+                            Target = traceTarget;
+                        }
+                    }
+                }
+
+                namespace First
+                {
+                    using TracerAttributes;
+
+                    public class MyClass
+                    {
+                        private int _intValue;
+
+                        public static void Main()
+                        {
+                            var mc = new MyClass(); 
+                            var i = mc.IntValue;
+                            mc.IntValue = 2;
+                        }
+                        
+                        [TraceOn]
+                        private int IntValue
+                        {
+                            get { return 1; }
+                            set { _intValue = value; }
+                        }
+                    }
+                }
+            ";
+
+            var def = new AssemblyLevelTraceOnDefinition(NamespaceScope.All, TraceTargetVisibility.Public,
+                TraceTargetVisibility.Public);
+            var result = this.RunTest(code, new DefaultFilter(new[] { def }), "First.MyClass::Main");
+            result.Count.Should().Be(6);
+        }
     }
 }
