@@ -26,9 +26,9 @@ namespace Tracer.Fody.Weavers
         private readonly MethodWeaverFactory _methodWeaverFactory;
         private readonly Lazy<bool> _hasCompilerGeneratedAttribute;
         private readonly bool _shouldTraceConstructors;
-        private readonly bool _shouldTraceProperties = true;
+        private readonly bool _shouldTraceProperties;
 
-        internal TypeWeaver(ITraceLoggingFilter filter, bool shouldTraceConstructors, TypeReferenceProvider typeReferenceProvider, MethodReferenceProvider methodReferenceProvider,
+        internal TypeWeaver(ITraceLoggingFilter filter, bool shouldTraceConstructors, bool shouldTraceProperties, TypeReferenceProvider typeReferenceProvider, MethodReferenceProvider methodReferenceProvider,
             TypeDefinition typeDefinition)
         {
             _filter = filter;
@@ -41,6 +41,7 @@ namespace Tracer.Fody.Weavers
                 _typeDefinition.HasCustomAttributes && _typeDefinition.CustomAttributes
                     .Any(attr => attr.AttributeType.FullName.Equals(typeof(CompilerGeneratedAttribute).FullName, StringComparison.Ordinal)));
             _shouldTraceConstructors = shouldTraceConstructors;
+            _shouldTraceProperties = shouldTraceProperties;
         }
 
         public void Execute()

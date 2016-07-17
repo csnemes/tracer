@@ -4,7 +4,8 @@
         logManager="Tracer.Log4Net.Adapters.LogManagerAdapter"
         logger="Tracer.Log4Net.Adapters.LoggerAdapter"
         staticLogger="Tracer.Log4Net.Log"
-        traceConstructors="true">
+        traceConstructors="true"
+        traceProperties="false">
     <TraceOn class="private" method="private" />
     <NoTrace namespace="NotTracedNamespace+*" />
   </Tracer>

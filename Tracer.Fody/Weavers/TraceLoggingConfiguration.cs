@@ -16,9 +16,11 @@ namespace Tracer.Fody.Weavers
         private readonly string _logManagerAdapterTypeFullName;
         private readonly string _staticLoggerTypeFullName;
         private readonly bool _traceConstructors;
+        private readonly bool _traceProperties;
 
         private TraceLoggingConfiguration(ITraceLoggingFilter filter, string adapterAssemblyDisplayName, 
-            string loggerAdapterTypeName, string logManagerAdapterTypeName, string staticLoggerTypeFullName, bool traceConstructors)
+            string loggerAdapterTypeName, string logManagerAdapterTypeName, string staticLoggerTypeFullName, bool traceConstructors
+            ,bool traceProperties)
         {
             _filter = filter ?? NullFilter.Instance;
             _adapterAssemblyName = new AssemblyName(adapterAssemblyDisplayName ?? "Tracer.LogAdapter, Version=1.0.0.0");
@@ -28,6 +30,7 @@ namespace Tracer.Fody.Weavers
             _logManagerAdapterTypeFullName = logManagerAdapterTypeName ?? "Tracer.LogAdapter.LogManager";
             _staticLoggerTypeFullName = staticLoggerTypeFullName ?? "Tracer.LogAdapter.Log";
             _traceConstructors = traceConstructors;
+            _traceProperties = traceProperties;
         }
 
         public static TraceLoggingConfigurationBuilder New
@@ -78,6 +81,11 @@ namespace Tracer.Fody.Weavers
         public bool ShouldTraceConstructors
         {
             get { return _traceConstructors; }
+        }
+
+        public bool ShouldTraceProperties
+        {
+            get {  return _traceProperties; }
         }
 
         public class TypeName
@@ -131,6 +139,7 @@ namespace Tracer.Fody.Weavers
             private string _logManagerAdapterTypeName;
             private string _staticLoggerTypeName;
             private bool _traceConstructors = false;
+            private bool _traceProperties = true;
 
             public static implicit operator TraceLoggingConfiguration(TraceLoggingConfigurationBuilder builder)
             {
@@ -140,7 +149,8 @@ namespace Tracer.Fody.Weavers
                     builder._loggerAdapterTypeName,
                     builder._logManagerAdapterTypeName,
                     builder._staticLoggerTypeName,
-                    builder._traceConstructors);
+                    builder._traceConstructors,
+                    builder._traceProperties);
             }
 
             public TraceLoggingConfigurationBuilder WithFilter(ITraceLoggingFilter filter)
@@ -182,6 +192,18 @@ namespace Tracer.Fody.Weavers
             public TraceLoggingConfigurationBuilder WithConstructorTraceOff()
             {
                 _traceConstructors = false;
+                return this;
+            }
+
+            public TraceLoggingConfigurationBuilder WithPropertiesTraceOn()
+            {
+                _traceProperties = true;
+                return this;
+            }
+
+            public TraceLoggingConfigurationBuilder WithPropertiesTraceOff()
+            {
+                _traceProperties = false;
                 return this;
             }
         }

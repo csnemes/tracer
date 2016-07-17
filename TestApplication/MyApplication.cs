@@ -16,6 +16,14 @@ namespace TestApplication
     {
         private static string x = "abc";
 
+        private string _testProperty;
+
+        public string TestProperty
+        {
+            get { return _testProperty; }
+            set { _testProperty = value; }
+        }
+
         public void Run()
         {
             Thread.Sleep(500);
@@ -23,6 +31,8 @@ namespace TestApplication
             NotTracedNamespace.NotTraced.SomeMethod("Hello");
 
             ExceptionTests();
+
+            PropertyTests();
 
             GenericMethodTests();
             GenericClassTests();
@@ -40,6 +50,12 @@ namespace TestApplication
 
             var perfComp = new PerfComp();
             perfComp.SpeedTest();
+        }
+
+        public void PropertyTests()
+        {
+            this.TestProperty = "Hello";
+            var val = this.TestProperty;
         }
 
         public void StaticLogPropertyRewrites()
