@@ -17,6 +17,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tracer.Log4Net.Tests", "Tra
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tracer.OutputWindow", "Tracer.OutputWindow\Tracer.OutputWindow.csproj", "{42163BF9-1AFC-4426-9B04-74C53E696F43}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tracer.Observable", "Tracer.ReactiveUI\Tracer.Observable.csproj", "{2CF6AD48-28B0-49CB-84C5-74A091ED5805}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReactiveTracer.Wpf", "ReactiveTracer.Wpf\ReactiveTracer.Wpf.csproj", "{4C0DB122-9AE4-4C9F-B0A9-331708141EA9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -47,11 +51,20 @@ Global
 		{42163BF9-1AFC-4426-9B04-74C53E696F43}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{42163BF9-1AFC-4426-9B04-74C53E696F43}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{42163BF9-1AFC-4426-9B04-74C53E696F43}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2CF6AD48-28B0-49CB-84C5-74A091ED5805}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2CF6AD48-28B0-49CB-84C5-74A091ED5805}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2CF6AD48-28B0-49CB-84C5-74A091ED5805}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2CF6AD48-28B0-49CB-84C5-74A091ED5805}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4C0DB122-9AE4-4C9F-B0A9-331708141EA9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4C0DB122-9AE4-4C9F-B0A9-331708141EA9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4C0DB122-9AE4-4C9F-B0A9-331708141EA9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4C0DB122-9AE4-4C9F-B0A9-331708141EA9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{03D6FD5E-FC66-4840-89CC-74F62C686EAA} = {56CD446F-8047-4916-83AA-9B99A2F73DFF}
+		{4C0DB122-9AE4-4C9F-B0A9-331708141EA9} = {56CD446F-8047-4916-83AA-9B99A2F73DFF}
 	EndGlobalSection
 EndGlobal

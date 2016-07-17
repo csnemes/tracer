@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <Weavers>
-  <Tracer adapterAssembly="Tracer.OutputWindow"
+  <!--<Tracer adapterAssembly="Tracer.OutputWindow"
         logManager="Tracer.OutputWindow.Adapters.LogManagerAdapter"
         logger="Tracer.OutputWindow.Adapters.LoggerAdapter"
         traceConstructors="true">
     <TraceOn class="public" method="public" />
-  </Tracer>
+  </Tracer>-->
 
-  <!--<Tracer adapterAssembly="Tracer.Log4Net"
+  <Tracer adapterAssembly="Tracer.Log4Net"
         logManager="Tracer.Log4Net.Adapters.LogManagerAdapter"
         logger="Tracer.Log4Net.Adapters.LoggerAdapter"
         staticLogger="Tracer.Log4Net.Log"
         traceConstructors="true">
     <TraceOn class="public" method="public" />
   </Tracer>
-  -->
+  
   
 </Weavers>

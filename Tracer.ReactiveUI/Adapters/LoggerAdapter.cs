@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Reactive.Subjects;
 using System.Text;
 
-namespace Tracer.OutputWindow.Adapters
 {
-    public class LoggerAdapter
+    public class LoggerAdapter 
     {
+        //public static IObservable<string> ReactiveTracer { get; } = Observable.Start<string>(Function);
+        public static Subject<string> TracerSubject { get; } = new Subject<string>();
+
         private const string NullString = "<NULL>";
         private readonly Type _type;
 
@@ -29,14 +32,15 @@ namespace Tracer.OutputWindow.Adapters
                     if (i < paramNames.Length - 1) parameters.Append(", ");
                 }
                 string argInfo = parameters.ToString();
-                message = String.Format("Entered into {0} ({1}).", methodInfo, argInfo);
+                message = String.Format("Entered into {2} {0} ({1}).", _type,  argInfo, methodInfo);
             }
             else
             {
-                message = String.Format("Entered into {0}.", methodInfo);
+                message = String.Format("Entered into {1} {0}.", _type, methodInfo);
             }
 
-            Debug.WriteLine(message);
+            TracerSubject.OnNext(message);
+            
         }
 
         public void TraceLeave(string methodInfo, long startTicks, long endTicks, string[] paramNames,
@@ -57,10 +61,10 @@ namespace Tracer.OutputWindow.Adapters
 
             double timeTaken = ConvertTicksToMilliseconds(endTicks - startTicks);
 
-            string message = String.Format("Returned from {1} ({2}). Time taken: {0:0.00} ms.", timeTaken, methodInfo,
-                returnValue);
+            string message = String.Format("Returned from {3} {1} ({2}). Time taken: {0:0.00} ms.", timeTaken, methodInfo,
+                returnValue, _type);
 
-            Debug.WriteLine(message);
+            TracerSubject.OnNext(message);
         }
 
         #endregion

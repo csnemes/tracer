@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Tracer.OutputWindow.Adapters
+namespace Tracer.Observable.Adapters
 {
     public static class LogManagerAdapter
     {

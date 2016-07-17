@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Weavers>
+        traceConstructors="true">
+    <TraceOn class="public" method="public" />
+  </Tracer>
+
+</Weavers>
