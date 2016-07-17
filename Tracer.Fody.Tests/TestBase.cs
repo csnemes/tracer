@@ -99,7 +99,7 @@ namespace Tracer.Fody.Tests
                 .WithFilter(filter)
                 .WithAdapterAssembly(assembly.GetName().FullName)
                 .WithLogManager(typeof(MockLogManagerAdapter).FullName)
-                .WithLogger(typeof(IMockLogAdapter).FullName)
+                .WithLogger(typeof(MockLogAdapter).FullName)
                 .WithStaticLogger(typeof(MockLog).FullName);
 
             if (traceConstructors) config.WithConstructorTraceOn();

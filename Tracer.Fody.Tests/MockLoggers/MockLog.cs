@@ -22,5 +22,10 @@ namespace Tracer.Fody.Tests.MockLoggers
 
         public static void Exception(string message, Exception exception)
         {}
+
+        //When rewriting properties static property get will be rewritten to instance call
+        public static bool IsEnabled { get; }
+
+        public static bool ReadWrite { get; set; }
     }
 }

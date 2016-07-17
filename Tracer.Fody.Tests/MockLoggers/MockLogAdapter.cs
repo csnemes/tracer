@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Tracer.Fody.Tests.MockLoggers
 {
-    public class MockLogAdapter : IMockLogAdapter
+    public class MockLogAdapter
     {
         private readonly Type _type;
 
@@ -63,6 +63,15 @@ namespace Tracer.Fody.Tests.MockLoggers
             MockLogManagerAdapter.LogCalled(TypePrettyName, methodInfo, "MockLogException", new[] { message, exception.ToString() });
         }
 
+        public bool MockLogIsEnabled {
+            get
+            {
+                MockLogManagerAdapter.LogPropertyCalled(TypePrettyName, "MockLogIsEnabled");
+                return true;
+            }
+        }
+
+        public bool MockLogReadWrite { get; set; }
 
         private string TypePrettyName
         {

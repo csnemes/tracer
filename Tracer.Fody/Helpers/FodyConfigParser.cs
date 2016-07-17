@@ -21,6 +21,7 @@ namespace Tracer.Fody.Helpers
         private string _logger;
         private string _staticLogger;
         private bool _traceConstructorsFlag;
+        private bool _tracePropertiesFlag = true;
         private IEnumerable<XElement> _filterConfigElements;
 
         public static FodyConfigParser Parse(XElement element)
@@ -43,6 +44,9 @@ namespace Tracer.Fody.Helpers
 
                 if (_traceConstructorsFlag) { result.WithConstructorTraceOn(); }
                     else { result.WithConstructorTraceOff(); }
+
+                if (_tracePropertiesFlag) { result.WithPropertiesTraceOn(); }
+                else { result.WithPropertiesTraceOff(); }
 
                 return result;
             }
@@ -68,6 +72,7 @@ namespace Tracer.Fody.Helpers
                 _logger = GetAttributeValue(element, "logger", true);
                 _staticLogger = GetAttributeValue(element, "staticLogger", false);
                 _traceConstructorsFlag = Boolean.Parse(GetAttributeValueOrDefault(element, "traceConstructors", Boolean.FalseString));
+                _tracePropertiesFlag = Boolean.Parse(GetAttributeValueOrDefault(element, "traceProperties", Boolean.TrueString));
                 _filterConfigElements = element.Descendants();
             }
             catch (Exception ex)

@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using Mono.Cecil;
+using Tracer.Fody.Helpers;
 using Tracer.Fody.Weavers;
 
 namespace Tracer.Fody.Filters
@@ -13,8 +15,8 @@ namespace Tracer.Fody.Filters
     {
         private readonly List<AssemblyLevelTraceDefinition> _assemblyLevelTraceDefinitions;
 
-        private static readonly List<AssemblyLevelTraceDefinition> DefaultAssemblyLevelTraceDefinitions = new List
-            <AssemblyLevelTraceDefinition> { new AssemblyLevelTraceDefinition(TraceTargetVisibility.Public, TraceTargetVisibility.Public) };
+        private static readonly List<AssemblyLevelTraceOnDefinition> DefaultAssemblyLevelTraceDefinitions = new List
+            <AssemblyLevelTraceOnDefinition> { new AssemblyLevelTraceOnDefinition(NamespaceScope.All, TraceTargetVisibility.Public, TraceTargetVisibility.Public) };
 
         private readonly Dictionary<string, TraceAttributeInfo> _traceAttributeCache = new Dictionary<string, TraceAttributeInfo>();
 
@@ -24,14 +26,16 @@ namespace Tracer.Fody.Filters
         public DefaultFilter(IEnumerable<AssemblyLevelTraceDefinition> configDefinitions)
         {
             //sort from most specific to least specific
-            _assemblyLevelTraceDefinitions = (configDefinitions.Any() ? configDefinitions : DefaultAssemblyLevelTraceDefinitions)
-                .OrderBy(def => (int)def.TargetClass).ToList();
+            _assemblyLevelTraceDefinitions = (configDefinitions.Any() ? configDefinitions : DefaultAssemblyLevelTraceDefinitions).ToList();
+            _assemblyLevelTraceDefinitions.Sort(AssemblyLevelTraceDefinitionComparer.Instance);
         }
 
         internal static IEnumerable<AssemblyLevelTraceDefinition> ParseConfig(IEnumerable<XElement> configElements)
         {
             return configElements.Where(elem => elem.Name.LocalName.Equals("TraceOn", StringComparison.OrdinalIgnoreCase))
-                    .Select(AssemblyLevelTraceDefinition.ParseFromConfig).ToList();
+                    .Select(AssemblyLevelTraceOnDefinition.ParseFromConfig).Cast<AssemblyLevelTraceDefinition>()
+                .Concat(configElements.Where(elem => elem.Name.LocalName.Equals("NoTrace", StringComparison.OrdinalIgnoreCase))
+                .Select(AssemblyLevelNoTraceDefinition.ParseFromConfig)).ToList();
         }
 
         public bool ShouldAddTrace(MethodDefinition definition)
@@ -46,10 +50,26 @@ namespace Tracer.Fody.Filters
         
         private bool? ShouldTraceBasedOnMethodLevelInfo(MethodDefinition definition)
         {
-            if (definition.CustomAttributes.Any(attr => attr.AttributeType.FullName.Equals("TracerAttributes.TraceOn", StringComparison.Ordinal)))
-                return true;
-            if (definition.CustomAttributes.Any(attr => attr.AttributeType.FullName.Equals("TracerAttributes.NoTrace", StringComparison.Ordinal)))
-                return false;
+            if (!definition.IsPropertyAccessor())
+            {
+                if (definition.CustomAttributes.Any(attr => attr.AttributeType.FullName.Equals("TracerAttributes.TraceOn", StringComparison.Ordinal)))
+                    return true;
+                if (definition.CustomAttributes.Any(attr => attr.AttributeType.FullName.Equals("TracerAttributes.NoTrace", StringComparison.Ordinal)))
+                    return false;
+            }
+            else
+            { //its a property accessor check the prop for the attribute
+                var correspondingProp =
+                    definition.DeclaringType.Properties.FirstOrDefault(prop => prop.GetMethod == definition || prop.SetMethod == definition);
+                if (correspondingProp != null)
+                {
+                    if (correspondingProp.CustomAttributes.Any(attr => attr.AttributeType.FullName.Equals("TracerAttributes.TraceOn", StringComparison.Ordinal)))
+                        return true;
+                    if (correspondingProp.CustomAttributes.Any(attr => attr.AttributeType.FullName.Equals("TracerAttributes.NoTrace", StringComparison.Ordinal)))
+                        return false;
+                }
+            }
+
             return null;
         }
 
@@ -62,7 +82,7 @@ namespace Tracer.Fody.Filters
                 if (attributeInfo.IsNoTrace) { return false; }
 
                 var targetVisibility = attributeInfo.TargetVisibility;
-                var methodVisibility = GetMethodVisibilityLevel(definition);
+                var methodVisibility = VisibilityHelper.GetMethodVisibilityLevel(definition);
                 return ((int)targetVisibility >= (int)methodVisibility);
 
             }
@@ -122,139 +142,16 @@ namespace Tracer.Fody.Filters
 
         private bool ShouldTraceBasedOnAssemblyLevelInfo(MethodDefinition definition)
         {
-            var declaringType = definition.DeclaringType;
-            
-            //get matching assembly level rule (note that defs are ordered from public to private)
+            //get matching assembly level rule (note that defs are ordered from more specific to least specific. On same level noTrace trumps traceOn)
             var rule = _assemblyLevelTraceDefinitions.FirstOrDefault(
-                def => (int)def.TargetClass >= (int)GetTypeVisibilityLevel(declaringType));
+                    def => def.IsMatching(definition));
 
             if (rule != null)
             {
-                var methodVisibility = GetMethodVisibilityLevel(definition);
-                return ((int)rule.TargetMethod >= (int)methodVisibility);
+                return rule.ShouldTrace();
             }
 
             return false;
-        }
-
-        private VisibilityLevel GetTypeVisibilityLevel(TypeDefinition typeDefinition)
-        {
-            if (typeDefinition.IsNested)
-            {
-                if (typeDefinition.IsNestedPublic) return VisibilityLevel.Public;
-                if (typeDefinition.IsNestedAssembly) return VisibilityLevel.Internal;
-                if (typeDefinition.IsNestedFamilyOrAssembly) return VisibilityLevel.Internal; //protected internal
-                if (typeDefinition.IsNestedFamily) return VisibilityLevel.Protected;
-                return VisibilityLevel.Private;
-            }
-            if (typeDefinition.IsPublic) return VisibilityLevel.Public;
-            return VisibilityLevel.Internal;
-        }
-
-        private VisibilityLevel GetMethodVisibilityLevel(MethodDefinition methodDefinition)
-        {
-            if (methodDefinition.IsPublic) return VisibilityLevel.Public;
-            if (methodDefinition.IsAssembly) return VisibilityLevel.Internal;
-            if (methodDefinition.IsFamilyOrAssembly) return VisibilityLevel.Internal;
-            if (methodDefinition.IsFamily) return VisibilityLevel.Protected;
-            return VisibilityLevel.Private;
-        }
-
-
-
-        public enum TraceTargetVisibility
-        {
-            None = -1,
-            Public = 0,
-            InternalOrMoreVisible = 1,
-            ProtectedOrMoreVisible = 2,
-            All = 3
-        }
-
-        private enum VisibilityLevel
-        {
-            Public = 0,
-            Internal = 1,
-            Protected = 2,
-            Private = 3
-        }
-
-        internal class AssemblyLevelTraceDefinition
-        {
-            private readonly TraceTargetVisibility _targetClass;
-            private readonly TraceTargetVisibility _targetMethod;
-
-            internal AssemblyLevelTraceDefinition(TraceTargetVisibility targetClass, TraceTargetVisibility targetMethod)
-            {
-                _targetClass = targetClass;
-                _targetMethod = targetMethod;
-            }
-
-            internal static AssemblyLevelTraceDefinition ParseFromConfig(XElement element)
-            {
-                return new AssemblyLevelTraceDefinition(ParseTraceTargetVisibility(element, "class"), ParseTraceTargetVisibility(element, "method"));
-            }
-
-            private static TraceTargetVisibility ParseTraceTargetVisibility(XElement element, string attributeName)
-            {
-                var attribute = element.Attribute(attributeName);
-                if (attribute == null)
-                {
-                    throw new ApplicationException(String.Format("Tracer: TraceOn config element missing attribute {0}.", attributeName));
-                }
-
-                switch (attribute.Value.ToLower())
-                {
-                    case "public": return TraceTargetVisibility.Public;
-                    case "internal": return TraceTargetVisibility.InternalOrMoreVisible;
-                    case "protected": return TraceTargetVisibility.ProtectedOrMoreVisible;
-                    case "private": return TraceTargetVisibility.All;
-                    case "none": return TraceTargetVisibility.None;
-                    default:
-                        throw new ApplicationException(String.Format("Tracer: TraceOn config element attribute {0} has an invalid value {1}.", attributeName, attribute.Value));
-                }
-            }
-
-            public TraceTargetVisibility TargetClass
-            {
-                get { return _targetClass; }
-            }
-
-            public TraceTargetVisibility TargetMethod
-            {
-                get { return _targetMethod; }
-            }
-
-            protected bool Equals(AssemblyLevelTraceDefinition other)
-            {
-                return _targetClass == other._targetClass && _targetMethod == other._targetMethod;
-            }
-
-            public override bool Equals(object obj)
-            {
-                if (ReferenceEquals(null, obj)) return false;
-                if (ReferenceEquals(this, obj)) return true;
-                if (obj.GetType() != this.GetType()) return false;
-                return Equals((AssemblyLevelTraceDefinition) obj);
-            }
-
-            public override int GetHashCode()
-            {
-                unchecked
-                {
-                    return ((int) _targetClass*397) ^ (int) _targetMethod;
-                }
-            }
-
-            public static bool operator ==(AssemblyLevelTraceDefinition left, AssemblyLevelTraceDefinition right)
-            {
-                return Equals(left, right);
-            }
-
-            public static bool operator !=(AssemblyLevelTraceDefinition left, AssemblyLevelTraceDefinition right)
-            {
-                return !Equals(left, right);
-            }
         }
 
         private class TraceAttributeInfo
@@ -298,4 +195,5 @@ namespace Tracer.Fody.Filters
             }
         }
     }
+
 }

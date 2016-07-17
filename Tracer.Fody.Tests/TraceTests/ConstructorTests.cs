@@ -135,5 +135,36 @@ namespace Tracer.Fody.Tests.TraceTests
             result.ElementAt(1).ShouldBeTraceLeaveFrom("First.MyClass::.ctor");
             result.ElementAt(1).NumberOfTicks.Should().BeGreaterThan(0);
         }
+
+        [Test]
+        public void Test_StaticConstructor_MustNotBeTraced()
+        {
+            string code = @"
+                using System;
+                using System.Diagnostics;
+
+                namespace First
+                {
+                    public class MyClass
+                    {
+                        private static string x = ""abc"";
+
+                        private MyClass(string inp)
+                        {
+                        }
+
+                        public static void Main()
+                        {
+                            var mc = new MyClass(""Hello"");
+                        }
+                    }
+                }
+            ";
+
+            var result = this.RunTest(code, new PrivateOnlyTraceLoggingFilter(), "First.MyClass::Main", true);
+            result.Count.Should().Be(2);
+            result.ElementAt(0).ShouldBeTraceEnterInto("First.MyClass::.ctor", "inp", "Hello");
+            result.ElementAt(1).ShouldBeTraceLeaveFrom("First.MyClass::.ctor");
+        }
     }
 }

@@ -1,4 +1,4 @@
-Tracer 1.2.4
+Tracer 1.3.0
 ======
 
 Tracing and logging rewriter using Fody. It adds trace enter and trace leave log entries for the methods specified. Such calls include incoming and outgoing arguments as well as time spent in the method. It also rewrites static log entries to properly configured log calls. Tracer is the rewriter core on which one of the specific adapters like Tracer.Log4Net is built uppon. Creating custom adapters for your specific needs is very easy. 
@@ -38,7 +38,14 @@ Version History for Tracer:
     - Added support for strong named custom adapters 
 * 1.2.4
 	  - Added option to trace log constructors with traceConstructors flag. Just add traceConstructors="true" to Tracer element in weaver config file. 
-
+* 1.3.0
+    - Static log rewrite now supports rewriting static property getters (e.g one can use Log.IsDebug to avoid costly calls)
+    - Fix: Static constructors are excluded from tracing
+    - Assembly level xml trace configuration is extended. Multiple TraceOn and NoTrace elements can be specified. Both supports
+    namespace attribute which defines the scope of the configuration set. See documentation for more details.
+    - property getter/setter rewriting can be turned off using traceProperties flag in xml configuration
+    - NoTrace and TraceOn attributes now can be also applied on properties
+      
 Version History for Tracer.Log4Net:
 ---
 * 1.0.0 
@@ -54,6 +61,9 @@ Version History for Tracer.Log4Net:
     - Updated to log4net package 2.0.5 
 * 1.2.2
     - Updated to Fody 1.29.4
-
+* 1.3.0
+    - Adapter and Log class extended with properties from ILog interface (IsError, IsDebug, etc.)
+    - Fix: fixed an issue with logging IEnumerators. Logger now properly resets the enumerator after logging.
+    
 Notes:
 ---

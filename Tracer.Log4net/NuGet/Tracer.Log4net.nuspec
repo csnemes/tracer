@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Tracer.Log4Net.Fody</id>
-    <version>1.2.2</version>
+    <version>1.3.0</version>
     <authors>csnemes</authors>
     <owners>csnemes</owners>
     <projectUrl>https://github.com/csnemes/tracer</projectUrl>
@@ -14,10 +14,28 @@
     <tags>Fody, Logging, Tracing, Log4Net, ILWeaving, Cecil</tags>
     <dependencies>
       <group>
-        <dependency id="Tracer.Fody" version="1.2.2" />
+        <dependency id="Tracer.Fody" version="1.3.0" />
 		<dependency id="log4net" version="2.0.5" />
       </group>
     </dependencies>
     <references />
+    	<releaseNotes>
+* 1.0.0 
+    Initial release
+* 1.1.0
+    - Log4Net adapter uses the log4net rendering mechanism when logging arguments
+* 1.1.1
+    - Modified message now contains method name. 
+    - Added custom properties to support different logging format requirements.
+* 1.2.0
+    - Internal changes to support the changed TraceLeave signature
+* 1.2.1 
+    - Updated to log4net package 2.0.5 
+* 1.2.2
+    - Updated to Fody 1.29.4
+* 1.3.0
+    - Adapter and Log class extended with properties from ILog interface (IsError, IsDebug, etc.)
+    - Fix: fixed an issue with logging IEnumerators. Logger now properly resets the enumerator after logging.
+	</releaseNotes>
   </metadata>
 </package>

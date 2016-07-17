@@ -44,6 +44,10 @@ namespace Tracer.Log4Net
         public static void FatalFormat(string format, object arg0, object arg1){ }
         public static void FatalFormat(string format, object arg0, object arg1, object arg2){ }
         public static void FatalFormat(IFormatProvider provider, string format, params object[] args){ }
-
+        public static bool IsDebugEnabled { get; }
+        public static bool IsInfoEnabled { get; }
+        public static bool IsWarnEnabled { get; }
+        public static bool IsErrorEnabled { get; }
+        public static bool IsFatalEnabled { get; }
     }
 }

@@ -68,11 +68,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Filters\AssemblyLevelTraceDefinitionTests.cs" />
     <Compile Include="Filters\DefaultFilterTests.cs" />
+    <Compile Include="Filters\NamespaceScopeTests.cs" />
     <Compile Include="Filters\TracerAttributes.cs" />
     <Compile Include="TestBase.cs" />
     <Compile Include="LogTests\CallingLogMethods.cs" />
-    <Compile Include="MockLoggers\IMockLogAdapter.cs" />
     <Compile Include="MockLoggers\MockCallInfo.cs" />
     <Compile Include="MockLoggers\MockLog.cs" />
     <Compile Include="MockLoggers\MockLogAdapter.cs" />
@@ -87,6 +88,7 @@
     <Compile Include="TraceTests\OutParamTests.cs" />
     <Compile Include="TraceTests\ParamsNoRetvalTests.cs" />
     <Compile Include="TraceTests\ParamsRetvalTests.cs" />
+    <Compile Include="TraceTests\PropertyTests.cs" />
     <Compile Include="TraceTests\ScopeTests.cs" />
     <Compile Include="TraceTests\SpecialTests.cs" />
   </ItemGroup>

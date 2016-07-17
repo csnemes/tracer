@@ -59,6 +59,8 @@ function Update-FodyConfig($addinName, $project)
 		$newNode.SetAttribute("logManager", $LogManager)
 		$newNode.SetAttribute("logger", $Logger)
 		$newNode.SetAttribute("staticLogger", $StaticLogger)
+        $newNode.SetAttribute("traceConstructors", "false")
+        $newNode.SetAttribute("traceProperties", "true")
 		
 		$traceOnNode = $xml.CreateElement("TraceOn")
 		$traceOnNode.SetAttribute("class", "public") 
