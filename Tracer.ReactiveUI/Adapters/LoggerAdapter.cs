@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Reactive.Subjects;
 using System.Text;
 
+namespace Tracer.Observable.Adapters
 {
     public class LoggerAdapter 
     {
