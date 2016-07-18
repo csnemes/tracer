@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <Weavers>
-        traceConstructors="true">
+  <Tracer adapterAssembly="Tracer.Observable"
+        logManager="Tracer.Observable.Adapters.LogManagerAdapter"
+        logger="Tracer.Observable.Adapters.LoggerAdapter"
+        traceConstructors="true"
+        traceProperties="false">
     <TraceOn class="public" method="public" />
   </Tracer>
-
 </Weavers>

@@ -129,7 +129,9 @@
     <Resource Include="FodyWeavers.xml" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Tracer.ReactiveUI\Tracer.Observable.csproj">
       <Project>{2cf6ad48-28b0-49cb-84c5-74a091ed5805}</Project>
+      <Name>Tracer.Observable</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
