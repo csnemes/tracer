@@ -428,26 +428,21 @@ namespace Tracer.Log4Net.Adapters
         {
             if (message == null)
             {
-                return stringRepresentationOfNull;
+              return stringRepresentationOfNull;
             }
-            else if (message is string)
+
+            var type = message.GetType();
+            if (message is string)
             {
-                return message as string;
+              return message as string;
             }
-            else if (message is IEnumerator)
+            else if (type.IsPrimitive && _logger.Repository != null)
             {
-                var retVal = _logger.Repository.RendererMap.FindAndRender(message);
-                var enumerable = message as IEnumerator;
-                enumerable.Reset();
-                return retVal;
-            }
-            else if (_logger.Repository != null)
-            {
-                return _logger.Repository.RendererMap.FindAndRender(message);
+              return _logger.Repository.RendererMap.FindAndRender(message);
             }
             else
             {
-                return message.ToString();
+              return type.Name;
             }
         }
 
