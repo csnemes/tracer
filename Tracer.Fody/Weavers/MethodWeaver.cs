@@ -410,13 +410,13 @@ namespace Tracer.Fody.Weavers
         /// then call the instance log method reading the parameters from these variables.
         /// A better solution would be to figure out where the call really begins (where is the bottom of the stack)
         /// and insert the instance ref there plus change the call instraction
-        private void ChangeStaticLogCallWithParameter(Instruction oldInstruction, bool isPropertyCall = false)
+        private void ChangeStaticLogCallWithParameter(Instruction oldInstruction)
         {
             var instructions = new List<Instruction>();
             var methodReference = (MethodReference)oldInstruction.Operand;
-            var methodDef = methodReference.Resolve();
+            var methodReferenceInfo = new MethodReferenceInfo(methodReference);
 
-            if (methodDef.IsPropertyAccessor() && methodDef.IsSetter)
+            if (methodReferenceInfo.IsPropertyAccessor() && methodReferenceInfo.IsSetter)
             {
                 throw new ApplicationException("Rewriting static property setters is not supported.");
             }
@@ -447,7 +447,7 @@ namespace Tracer.Fody.Weavers
                 instructions.Add(Instruction.Create(OpCodes.Ldloc, variables[idx]));
             }
 
-            instructions.Add(Instruction.Create(OpCodes.Callvirt, _methodReferenceProvider.GetInstanceLogMethodWithParameter(methodDef, parameters)));
+            instructions.Add(Instruction.Create(OpCodes.Callvirt, _methodReferenceProvider.GetInstanceLogMethodWithParameter(methodReferenceInfo, parameters)));
 
             _body.Replace(oldInstruction, instructions);
         }
@@ -457,16 +457,16 @@ namespace Tracer.Fody.Weavers
             var instructions = new List<Instruction>();
 
             var methodReference = (MethodReference)oldInstruction.Operand;
-            var methodDef = methodReference.Resolve();
+            var methodReferenceInfo = new MethodReferenceInfo(methodReference);
 
             instructions.Add(Instruction.Create(OpCodes.Ldsfld, _loggerProvider.StaticLogger));
 
-            if (!methodDef.IsPropertyAccessor())
+            if (!methodReferenceInfo.IsPropertyAccessor())
             {
                 instructions.AddRange(LoadMethodNameOnStack());
             }
 
-            instructions.Add(Instruction.Create(OpCodes.Callvirt, _methodReferenceProvider.GetInstanceLogMethodWithoutParameter(methodDef)));
+            instructions.Add(Instruction.Create(OpCodes.Callvirt, _methodReferenceProvider.GetInstanceLogMethodWithoutParameter(methodReferenceInfo)));
 
             _body.Replace(oldInstruction, instructions);
         }

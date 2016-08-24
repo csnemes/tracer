@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Security.Principal;
@@ -22,6 +23,7 @@ namespace Tracer.Log4Net.Adapters
         private readonly Type _type;
         private readonly string _typeName;
         private readonly string _typeNamespace;
+        private readonly Func<object, string, string> _renderParameterMethod;
 
         public LoggerAdapter(Type type)
         {
@@ -29,6 +31,16 @@ namespace Tracer.Log4Net.Adapters
             _typeName = PrettyFormat(type);
             _typeNamespace = type.Namespace;
             _logger = LogManager.GetLogger(type).Logger;
+            var config = ConfigurationManager.AppSettings["LogUseSafeParameterRendering"];
+
+            if (config != null && config.Equals("true", StringComparison.OrdinalIgnoreCase))
+            {
+                _renderParameterMethod = GetSafeRenderedFormat;
+            }
+            else
+            {
+                _renderParameterMethod = GetRenderedFormat;
+            }
         }
 
         #region Methods required for trace enter and leave
@@ -46,7 +58,7 @@ namespace Tracer.Log4Net.Adapters
                     var parameters = new StringBuilder();
                     for (int i = 0; i < paramNames.Length; i++)
                     {
-                        parameters.AppendFormat("{0}={1}", paramNames[i],  GetRenderedFormat(paramValues[i], NullString));
+                        parameters.AppendFormat("{0}={1}", paramNames[i], _renderParameterMethod(paramValues[i], NullString));
                         if (i < paramNames.Length - 1) parameters.Append(", ");
                     }
                     var argInfo = parameters.ToString();
@@ -61,35 +73,6 @@ namespace Tracer.Log4Net.Adapters
             }
         }
 
-        //public void TraceLeave(string methodInfo, long numberOfTicks, string[] paramNames, object[] paramValues)
-        //{
-        //    if (_logger.IsEnabledFor(Level.Trace))
-        //    {
-        //        var propDict = new PropertiesDictionary();
-        //        propDict["trace"] = "LEAVE";
-
-        //        string returnValue = null;
-        //        if (paramNames != null)
-        //        {
-        //            var parameters = new StringBuilder();
-        //            for (int i = 0; i < paramNames.Length; i++)
-        //            {
-        //                parameters.AppendFormat("{0}={1}", paramNames[i] ?? "$return", GetRenderedFormat(paramValues[i], NullString));
-        //                if (i < paramNames.Length - 1) parameters.Append(", ");
-        //            }
-        //            returnValue = parameters.ToString();
-        //            propDict["arguments"] = returnValue;
-        //        }
-
-        //        var timeTaken = ConvertTicksToMilliseconds(numberOfTicks);
-        //        propDict["timeTaken"] = timeTaken;
-
-        //        Log(Level.Trace, methodInfo,
-        //            String.Format("Returned from {1} ({2}). Time taken: {0:0.00} ms.",
-        //                timeTaken, methodInfo, returnValue), null, propDict);
-        //    }
-        //}
-
         public void TraceLeave(string methodInfo, long startTicks, long endTicks, string[] paramNames, object[] paramValues)
         {  
             if (_logger.IsEnabledFor(Level.Trace))  
@@ -103,7 +86,7 @@ namespace Tracer.Log4Net.Adapters
                     var parameters = new StringBuilder();  
                     for (int i = 0; i<paramNames.Length; i++)  
                     {  
-                        parameters.AppendFormat("{0}={1}", paramNames[i] ?? "$return", GetRenderedFormat(paramValues[i], NullString));  
+                        parameters.AppendFormat("{0}={1}", paramNames[i] ?? "$return", _renderParameterMethod(paramValues[i], NullString));  
                         if (i<paramNames.Length - 1) parameters.Append(", ");  
                     }  
                     returnValue = parameters.ToString();  
@@ -450,6 +433,37 @@ namespace Tracer.Log4Net.Adapters
             _logger.Log(new LoggingEvent(eventData));
         }
 
+        private string GetSafeRenderedFormat(object message, string stringRepresentationOfNull = "")
+        {
+            if (message == null)
+            {
+                return stringRepresentationOfNull;
+            }
+
+            var str = message as string;
+            if (str != null)
+            {
+                return str;
+            }
+
+            if (_logger.Repository != null)
+            {
+                //try to escape the default renderer
+                var renderer = _logger.Repository.RendererMap.Get(message);
+                if (renderer != null && renderer != _logger.Repository.RendererMap.DefaultRenderer)
+                {
+
+                    var stringWriter = new StringWriter(System.Globalization.CultureInfo.InvariantCulture);
+                    renderer.RenderObject(_logger.Repository.RendererMap, message, stringWriter);
+                    return stringWriter.ToString();
+                }
+
+                return message.ToString();
+            }
+
+            return message.ToString();
+        }
+
         private string GetRenderedFormat(object message, string stringRepresentationOfNull = "")
         {
             if (message == null)
@@ -458,12 +472,12 @@ namespace Tracer.Log4Net.Adapters
             }
             else if (message is string)
             {
-                return message as string;
+                return (string)message;
             }
             else if (message is IEnumerator && _logger.Repository != null)
             {
                 var retVal = _logger.Repository.RendererMap.FindAndRender(message);
-                var enumerable = message as IEnumerator;
+                var enumerable = (IEnumerator)message;
                 enumerable.Reset();
                 return retVal;
             }
