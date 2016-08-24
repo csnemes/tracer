@@ -28,6 +28,8 @@ namespace TestApplication
         {
             Thread.Sleep(500);
 
+            Enumerable(new[] {"hi", "there", "!"});
+
             NotTracedNamespace.NotTraced.SomeMethod("Hello");
 
             ExceptionTests();
@@ -208,6 +210,11 @@ namespace TestApplication
         public int Add(int i1, int i2)
         {
             return i1 + i2;
+        }
+
+        public int Enumerable(IEnumerable<string> inp)
+        {
+            return inp.Count();
         }
 
         private class MyClass
