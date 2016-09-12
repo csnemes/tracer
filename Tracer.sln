@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.23107.0
+VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tracer.Fody", "Tracer.Fody\Tracer.Fody.csproj", "{5E36561F-EA14-49A3-AA84-63176C256A30}"
 EndProject
@@ -20,6 +20,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tracer.Observable", "Tracer.ReactiveUI\Tracer.Observable.csproj", "{2CF6AD48-28B0-49CB-84C5-74A091ED5805}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReactiveTracer.Wpf", "ReactiveTracer.Wpf\ReactiveTracer.Wpf.csproj", "{4C0DB122-9AE4-4C9F-B0A9-331708141EA9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tracer.NLog", "Tracer.NLog\Tracer.NLog.csproj", "{FC641A04-BE10-4505-955B-4BABC1224B5E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -59,6 +61,10 @@ Global
 		{4C0DB122-9AE4-4C9F-B0A9-331708141EA9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4C0DB122-9AE4-4C9F-B0A9-331708141EA9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4C0DB122-9AE4-4C9F-B0A9-331708141EA9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FC641A04-BE10-4505-955B-4BABC1224B5E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FC641A04-BE10-4505-955B-4BABC1224B5E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FC641A04-BE10-4505-955B-4BABC1224B5E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FC641A04-BE10-4505-955B-4BABC1224B5E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
