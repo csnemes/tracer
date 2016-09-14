@@ -7,8 +7,9 @@ assembly_info:
 nuget:
   account_feed: true
   project_feed: true
+
 before_build:
-- cmd: nuget restore
+  - nuget restore
   - ps: gitversion /l console /output buildserver /updateAssemblyInfo
 build:
   project: Tracer.sln
