@@ -1,9 +1,9 @@
 ﻿param($installPath, $toolsPath, $package, $project)
 
-$AdapterAssembly = "Tracer.Log4Net"
-$LogManager = "Tracer.Log4Net.Adapters.LogManagerAdapter"
-$Logger = "Tracer.Log4Net.Adapters.LoggerAdapter"
-$StaticLogger = "Tracer.Log4Net.Log"
+$AdapterAssembly = "Tracer.NLog"
+$LogManager = "Tracer.NLog.Adapters.LogManagerAdapter"
+$Logger = "Tracer.NLog.Adapters.LoggerAdapter"
+$StaticLogger = "Tracer.NLog.Log"
 
 function RemoveForceProjectLevelHack($project)
 {
