@@ -1,0 +1,17 @@
+install:
+  - choco install gitversion.portable -pre -y
+
+assembly_info:
+  patch: false
+
+nuget:
+  account_feed: true
+  project_feed: true
+before_build:
+- cmd: nuget restore
+  - ps: gitversion /l console /output buildserver /updateAssemblyInfo
+build:
+  project: Tracer.sln
+after_build:
+  - cmd: nuget pack .\Tracer.NLog\NuGet\Tracer.NLog.nuspec -version "%GitVersion_NuGetVersion%" -prop "target=%CONFIGURATION%"
+  - cmd: appveyor PushArtifact "Tracer.NLog.%GitVersion_NuGetVersion%.nupkg"
