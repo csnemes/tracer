@@ -15,7 +15,7 @@ namespace Tracer.NLog.Adapters
 
         public LoggerAdapter(Type type)
         {
-            _logger = LogManager.GetLogger(type.Name, type);
+            _logger = LogManager.GetLogger(type.Name);
             var config = ConfigurationManager.AppSettings["LogUseSafeParameterRendering"];
 
             if ((config != null) && config.Equals("true", StringComparison.OrdinalIgnoreCase))
