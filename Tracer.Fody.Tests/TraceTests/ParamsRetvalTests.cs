@@ -1,4 +1,5 @@
-﻿using FluentAssertions;
+﻿using System.Threading;
+using FluentAssertions;
 using NUnit.Framework;
 using Tracer.Fody.Tests.MockLoggers;
 
@@ -104,7 +105,7 @@ namespace Tracer.Fody.Tests.TraceTests
             result.Count.Should().Be(4);
             result.ElementAt(0).ShouldBeTraceEnterInto("First.MyClass::CallMe", "param", "Hello", "param2", "Hello2", "paraNum", "42");
             result.ElementAt(1).ShouldBeTraceLeaveFrom("First.MyClass::CallMe", "Hello2!");
-            result.ElementAt(2).ShouldBeTraceEnterInto("First.MyClass::CallMe", "param", "Ahoy", "param2", "Ahoy2", "paraNum", "0,5");
+            result.ElementAt(2).ShouldBeTraceEnterInto("First.MyClass::CallMe", "param", "Ahoy", "param2", "Ahoy2", "paraNum", $"0{Thread.CurrentThread.CurrentCulture.NumberFormat.NumberDecimalSeparator}5");
             result.ElementAt(3).ShouldBeTraceLeaveFrom("First.MyClass::CallMe", "Ahoy2!");
         }
 
