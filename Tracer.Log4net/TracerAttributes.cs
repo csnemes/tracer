@@ -6,6 +6,9 @@ using System.Text;
 // ReSharper disable once CheckNamespace
 namespace TracerAttributes
 {
+    /// <summary>
+    /// This attributes specifies that the marked element(s) should be traced.
+    /// </summary>
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method | AttributeTargets.Property, AllowMultiple = true, Inherited = true)]
     public class TraceOn : Attribute
     {
@@ -20,6 +23,9 @@ namespace TracerAttributes
         }
     }
 
+    /// <summary>
+    /// This attribute excludes the marked element from tracing.
+    /// </summary>
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method | AttributeTargets.Property, AllowMultiple = true, Inherited = true)]
     public class NoTrace : Attribute
     {

@@ -44,6 +44,9 @@ namespace Tracer.Fody.Weavers
             _shouldTraceProperties = shouldTraceProperties;
         }
 
+        /// <summary>
+        /// Runs the waving on the type linked to this instance (via <see cref="TypeDefinition"/>).
+        /// </summary>
         public void Execute()
         {
             var methodsToVisit = _typeDefinition.GetMethods().Concat(_typeDefinition.GetConstructors())

@@ -11,6 +11,10 @@ using Tracer.Fody.Weavers;
 
 namespace Tracer.Fody.Filters
 {
+    /// <summary>
+    /// The default filter used for weaving. It processes information from the FodyWeavers.xml belonging to Tracer to 
+    /// identify which methods/classes the weaver needs to trace.
+    /// </summary>
     internal class DefaultFilter : ITraceLoggingFilter
     {
         private readonly List<AssemblyLevelTraceDefinition> _assemblyLevelTraceDefinitions;
