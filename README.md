@@ -4,6 +4,14 @@ Tracer 1.3.1
 Tracing and logging rewriter using Fody. It adds trace enter and trace leave log entries for the methods specified. Such calls include incoming and outgoing arguments as well as time spent in the method. It also rewrites static log entries to properly configured log calls. Tracer is the rewriter core on which one of the specific adapters like Tracer.Log4Net is built uppon. Creating custom adapters for your specific needs is very easy. 
 See [Wiki](https://github.com/csnemes/tracer/wiki) for details.
 
+Existing adapters are:
+
+|Adapter     |NuGet package       |Version |
+|------------|--------------------|-------:|
+|Log4Net     |Tracer.Log4Net.Fody | 1.3.2  |
+|Serilog     |Tracer.Serilog.Fody | 1.0.0  |
+|NLog        |not released yet    |        |
+
 Should you have any question/problem send an email to csaba.nemes@outlook.com or add an issue/request.
 
 Compatibility:
@@ -68,6 +76,11 @@ Version History for Tracer.Log4Net:
     - Fix: fixed an issue with logging IEnumerators. Logger now properly resets the enumerator after logging.
 * 1.3.1
     - adding LogUseSafeParameterRendering key to appSettings with a true value will esacpe log4net's DefaultRenderer during trace parameter rendering.
- 
+
+Version History for Tracer.Serilog:
+---
+* 1.0.0 
+    Initial release
+    
 Notes:
 ---

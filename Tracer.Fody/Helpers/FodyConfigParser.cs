@@ -10,6 +10,9 @@ using Tracer.Fody.Weavers;
 
 namespace Tracer.Fody.Helpers
 {
+    /// <summary>
+    /// Class that parses the fody configuration belonging to tracer (in FodyWeavers.xml file).
+    /// </summary>
     internal class FodyConfigParser
     {
         private FodyConfigParser()

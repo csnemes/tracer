@@ -5,6 +5,9 @@ using System.Text;
 
 namespace Tracer.Fody.Filters
 {
+    /// <summary>
+    /// Comparer to compare two <see cref="AssemblyLevelTraceDefinition"/> instances.
+    /// </summary>
     internal class AssemblyLevelTraceDefinitionComparer : IComparer<AssemblyLevelTraceDefinition>
     {
         public static readonly IComparer<AssemblyLevelTraceDefinition> Instance = new AssemblyLevelTraceDefinitionComparer();

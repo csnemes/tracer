@@ -20,7 +20,11 @@ namespace Tracer.Fody
     {
         public ModuleDefinition ModuleDefinition { get; set; }
 
-
+        /// <summary>
+        /// Weaves the tracer to a the module specified in <see cref="ModuleDefinition"/> property. It adds a trace enter and trace leave call to all methods defined by the filter.
+        /// It also replaces static Log calls to logger instance calls and extends the call parameters with method name information.
+        /// It uses the configuration to identify the exact weaver behavior.  
+        /// </summary>
         public void Execute()
         {
             WeavingLog.SetLogger(this);
