@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Tracer.Serilog.Fody</id>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
     <authors>csnemes</authors>
     <owners>csnemes</owners>
     <projectUrl>https://github.com/csnemes/tracer</projectUrl>
@@ -22,6 +22,8 @@
     	<releaseNotes>
 * 1.0.0 
     Initial release
+* 1.0.1
+    Framework version set to 4.5
 	</releaseNotes>
   </metadata>
 </package>
