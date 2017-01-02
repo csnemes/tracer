@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0"?>
 <package>
   <metadata>
-    <id>Tracer.NLog.Fody</id>
+    <id>Tracer.4NLog.Fody</id>
     <version>1.0.0</version>
     <authors>csnemes</authors>
     <owners>csnemes</owners>
@@ -11,7 +11,7 @@
     to calls to NLog.</description>
     <summary>NLog adapter for Tracer.Fody. Adds trace log entries and rewrite static log calls using NLog.</summary>
     <copyright>Copyright 2016</copyright>
-    <tags>Fody, Logging, Tracing, NLog, ILWeaving, Cecil</tags>
+    <tags>Fody, Logging, Tracing, NLog, ILWeaving, Cecil, 4NLog</tags>
     <dependencies>
       <group>
         <dependency id="Tracer.Fody" version="1.4.0" />

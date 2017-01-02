@@ -10,7 +10,7 @@ Existing adapters are:
 |------------|--------------------|-------:|
 |Log4Net     |Tracer.Log4Net.Fody | 1.3.2  |
 |Serilog     |Tracer.Serilog.Fody | 1.0.0  |
-|NLog        |Tracer.NLog.Fody    | 1.0.0  |
+|NLog        |Tracer.4NLog.Fody   | 1.0.0  |
 
 Should you have any question/problem send an email to csaba.nemes@outlook.com or add an issue/request.
 
@@ -84,7 +84,7 @@ Version History for Tracer.Serilog:
 * 1.0.0 
     Initial release
     
-Version History for Tracer.NLog:
+Version History for Tracer.4NLog:
 ---
 * 1.0.0 
     Initial release
