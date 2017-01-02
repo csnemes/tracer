@@ -27,5 +27,14 @@ namespace Tracer.Fody.Tests.MockLoggers
         public static bool IsEnabled { get; }
 
         public static bool ReadWrite { get; set; }
+
+        public static void GenericOuter<T>()
+        {}
+
+        public static void GenericOuter<T>(T message)
+        {}
+
+        public static void GenericOuter<T, K>(K num1, T message, K num2)
+        {}
     }
 }

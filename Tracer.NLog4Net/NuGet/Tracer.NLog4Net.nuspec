@@ -1,20 +1,20 @@
 ﻿<?xml version="1.0"?>
 <package>
   <metadata>
-    <id>Tracer.NLog.Fody</id>
+    <id>Tracer.NLog4Net.Fody</id>
     <version>1.0.0</version>
     <authors>csnemes</authors>
     <owners>csnemes</owners>
     <projectUrl>https://github.com/csnemes/tracer</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>NLog adapter for Tracer.Fody (which is an ILWeaver adding trace enter and leave log entries to methods). This adapter offers trace and static logging calls and changes them
-    to calls to NLog.</description>
-    <summary>NLog adapter for Tracer.Fody. Adds trace log entries and rewrite static log calls using NLog.</summary>
+    <description>NLog adapter based on Log4Net signature log calls using Tracer.Fody (which is an ILWeaver adding trace enter and leave log entries to methods). This adapter offers logging calls using Log4Net signature and redirects 
+    these log calls to NLog.</description>
+    <summary>NLog4Net adapter for Tracer.Fody. Adds trace log entries and rewrite static Log4Net's signature log calls using NLog.</summary>
     <copyright>Copyright 2016</copyright>
     <tags>Fody, Logging, Tracing, NLog, ILWeaving, Cecil</tags>
     <dependencies>
       <group>
-        <dependency id="Tracer.Fody" version="1.4.0" />
+        <dependency id="Tracer.Fody" version="1.3.1" />
 	    	<dependency id="NLog" version="4.3.8" />
       </group>
     </dependencies>
