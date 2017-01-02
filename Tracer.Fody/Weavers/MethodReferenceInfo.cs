@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Mono.Cecil;
+using Mono.Collections.Generic;
 using Tracer.Fody.Helpers;
 
 namespace Tracer.Fody.Weavers
@@ -53,6 +54,26 @@ namespace Tracer.Fody.Weavers
 
                 //lame fallback 
                 return _methodReference.Name.StartsWith("set_", StringComparison.OrdinalIgnoreCase);
+            }
+        }
+
+        public bool IsGeneric
+        {
+            get { return _methodDefinition.HasGenericParameters; }
+        }
+
+        public Collection<GenericParameter> GenericParameters
+        {
+            get { return _methodDefinition.GenericParameters; }
+        }
+
+        public Collection<TypeReference> GenericArguments
+        {
+            get
+            {
+                var genericMethodRef = _methodReference as GenericInstanceMethod;
+                if (genericMethodRef == null) return new Collection<TypeReference>();
+                return genericMethodRef.GenericArguments;
             }
         }
     }

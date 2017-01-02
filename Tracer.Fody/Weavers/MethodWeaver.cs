@@ -428,7 +428,7 @@ namespace Tracer.Fody.Weavers
 
             for (int idx = 0; idx < parameters.Count; idx++)
             {
-                variables[idx] = new VariableDefinition(parameters[idx].ParameterType);
+                variables[idx] = GetVariableDefinitionForType(parameters[idx].ParameterType, methodReference);
                 _body.Variables.Add(variables[idx]);
             }
 
@@ -447,9 +447,30 @@ namespace Tracer.Fody.Weavers
                 instructions.Add(Instruction.Create(OpCodes.Ldloc, variables[idx]));
             }
 
-            instructions.Add(Instruction.Create(OpCodes.Callvirt, _methodReferenceProvider.GetInstanceLogMethodWithParameter(methodReferenceInfo, parameters)));
+            instructions.Add(Instruction.Create(OpCodes.Callvirt, _methodReferenceProvider.GetInstanceLogMethod(methodReferenceInfo, parameters)));
 
             _body.Replace(oldInstruction, instructions);
+        }
+
+        private VariableDefinition GetVariableDefinitionForType(TypeReference typeRef, MethodReference methodReference)
+        {
+            var genericParameter = typeRef as GenericParameter;
+            //if not generic param or a type defined generic param or generic defined in host method return normally
+            if (genericParameter == null || 
+                genericParameter.DeclaringType != null ||
+                (genericParameter.DeclaringMethod == _methodDefinition)) return new VariableDefinition(typeRef);
+           
+            //generic is defined in the called method
+            var genericMethod = methodReference as GenericInstanceMethod;
+            if (genericMethod == null) throw new ApplicationException("Generic parameter for a non generic method."); //should not happen
+
+            int idx;
+            if (!Int32.TryParse(genericParameter.Name.Replace('!', ' '), out idx))
+            {
+                throw new ApplicationException(String.Format("Generic parameter {0} cannot be parsed for index.", genericParameter.Name));
+            }
+
+            return new VariableDefinition(genericMethod.GenericArguments[idx]);
         }
 
         private void ChangeStaticLogCallWithoutParameter(Instruction oldInstruction)
@@ -466,7 +487,7 @@ namespace Tracer.Fody.Weavers
                 instructions.AddRange(LoadMethodNameOnStack());
             }
 
-            instructions.Add(Instruction.Create(OpCodes.Callvirt, _methodReferenceProvider.GetInstanceLogMethodWithoutParameter(methodReferenceInfo)));
+            instructions.Add(Instruction.Create(OpCodes.Callvirt, _methodReferenceProvider.GetInstanceLogMethod(methodReferenceInfo)));
 
             _body.Replace(oldInstruction, instructions);
         }

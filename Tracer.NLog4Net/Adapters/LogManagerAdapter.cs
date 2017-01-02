@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
-namespace Tracer.NLog.Adapters
+namespace Tracer.NLog4Net.Adapters
 {
     public static class LogManagerAdapter
     {

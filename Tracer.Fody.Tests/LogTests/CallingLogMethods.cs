@@ -296,7 +296,7 @@ namespace Tracer.Fody.Tests.LogTests
                 using System.Diagnostics;
                 using Tracer.Fody.Tests.MockLoggers;
 
-                namespace First
+                namespace First       
                 {
                     public class MyClass
                     {
@@ -310,6 +310,81 @@ namespace Tracer.Fody.Tests.LogTests
 
             Action test = () => this.RunTest(code, new PrivateOnlyTraceLoggingFilter(), "First.MyClass::Main");
             test.ShouldThrow<ApplicationException>().And.Message.Contains("not supported");
+        }
+
+        [Test]
+        public void Test_GenericLogCall()
+        {
+            string code = @"
+                using System;
+                using System.Diagnostics;
+                using Tracer.Fody.Tests.MockLoggers;
+
+                namespace First
+                {
+                    public class MyClass
+                    {
+                        public static void Main()
+                        {
+                            MockLog.GenericOuter<string>(""Hello"");
+                        }
+                    }
+                }
+            ";
+
+            var result = this.RunTest(code, new PrivateOnlyTraceLoggingFilter(), "First.MyClass::Main");
+            result.Count.Should().Be(1);
+            result.ElementAt(0).ShouldBeLogCall("First.MyClass::Main", "MockLogGenericOuter", "Hello");
+        }
+
+        [Test]
+        public void Test_MultiGenericLogCall()
+        {
+            string code = @"
+                using System;
+                using System.Diagnostics;
+                using Tracer.Fody.Tests.MockLoggers;
+
+                namespace First
+                {
+                    public class MyClass
+                    {
+                        public static void Main()
+                        {
+                            MockLog.GenericOuter<string, int>(4, ""Hello"", 2);
+                        }
+                    }
+                }
+            ";
+
+            var result = this.RunTest(code, new PrivateOnlyTraceLoggingFilter(), "First.MyClass::Main");
+            result.Count.Should().Be(1);
+            result.ElementAt(0).ShouldBeLogCall("First.MyClass::Main", "MockLogGenericOuter", "4", "Hello", "2");
+        }
+
+        [Test]
+        public void Test_GenericLogCallWithoutParameters()
+        {
+            string code = @"
+                using System;
+                using System.Diagnostics;
+                using Tracer.Fody.Tests.MockLoggers;
+
+                namespace First
+                {
+                    public class MyClass
+                    {
+                        public static void Main()
+                        {
+                            MockLog.GenericOuter<string>();
+                        }
+                    }
+                }
+            ";
+
+            var result = this.RunTest(code, new PrivateOnlyTraceLoggingFilter(), "First.MyClass::Main");
+            result.Count.Should().Be(1);
+            result.ElementAt(0).ShouldBeLogCall("First.MyClass::Main", "MockLogGenericOuter", "String");
         }
     }
 }

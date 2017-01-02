@@ -54,14 +54,40 @@ namespace Tracer.Fody.Weavers
             return _moduleDefinition.ImportReference(typeof(Stopwatch).GetMethod("GetTimestamp", BindingFlags.Public | BindingFlags.Static));
         }
 
-        public MethodReference GetInstanceLogMethodWithoutParameter(MethodReferenceInfo methodReferenceInfo)
+        public MethodReference GetInstanceLogMethod(MethodReferenceInfo methodReferenceInfo, IEnumerable<ParameterDefinition> parameters = null)
         {
+            parameters = parameters ?? new ParameterDefinition[0];
+
             var logMethod = new MethodReference(GetInstanceLogMethodName(methodReferenceInfo), methodReferenceInfo.ReturnType, _typeReferenceProvider.LogAdapterReference);
             logMethod.HasThis = true; //instance method
 
+            //check if accessor
             if (!methodReferenceInfo.IsPropertyAccessor())
             {
                 logMethod.Parameters.Add(new ParameterDefinition(_moduleDefinition.TypeSystem.String));
+            }
+
+            foreach (var parameter in parameters)
+            {
+                logMethod.Parameters.Add(parameter);
+            }
+
+            //handle generics
+            if (methodReferenceInfo.IsGeneric)
+            {
+                foreach (var genericParameter in methodReferenceInfo.GenericParameters)
+                {
+                    var gp = new GenericParameter(genericParameter.Name, logMethod);
+                    gp.Name = genericParameter.Name;
+                    logMethod.GenericParameters.Add(gp);
+                }
+                logMethod.CallingConvention = MethodCallingConvention.Generic;
+
+                logMethod = new GenericInstanceMethod(logMethod);
+                foreach (var genericArgument in methodReferenceInfo.GenericArguments)
+                {
+                    ((GenericInstanceMethod)logMethod).GenericArguments.Add(genericArgument);
+                }
             }
 
             return logMethod;
@@ -82,20 +108,5 @@ namespace Tracer.Fody.Weavers
             }
         }
 
-        public MethodReference GetInstanceLogMethodWithParameter(MethodReferenceInfo methodReferenceInfo, IEnumerable<ParameterDefinition> parameters)
-        {
-            var logMethod = new MethodReference(GetInstanceLogMethodName(methodReferenceInfo), methodReferenceInfo.ReturnType, _typeReferenceProvider.LogAdapterReference);
-            logMethod.HasThis = true; //instance method
-            if (!methodReferenceInfo.IsPropertyAccessor())
-            {
-                logMethod.Parameters.Add(new ParameterDefinition(_moduleDefinition.TypeSystem.String));
-            }
-
-            foreach (var parameter in parameters)
-            {
-                logMethod.Parameters.Add(parameter);
-            }
-            return logMethod;
-        }
     }
 }
