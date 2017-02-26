@@ -12,7 +12,6 @@ namespace TestApplication.Serilog
     {
         public void Run()
         {
-
             Log.Verbose("message");
             Log.Verbose("Logging integer {intVal} and string {stringVal}", 42, "hello");
             Log.Verbose("StructLog {@destr}", new { StringVal = "hello", IntVal = 42 });
@@ -62,6 +61,15 @@ namespace TestApplication.Serilog
             var result = DoSomething(42, "John");
 
             OutParamLogs();
+
+            ReceivingStructures(new MyClass());
+
+            MyClass mClass;
+            ReturningStructures("input", out mClass);
+
+            ReturningStructures2("input");
+
+            NullInOut(null);
         }
 
         public string DoSomething(int inp, string name)
@@ -77,5 +85,56 @@ namespace TestApplication.Serilog
             int outInt;
             op.SetParamInt("42", out outInt);
         }
+
+        public MyClass ReturningStructures(string input, out MyClass myClass)
+        {
+            myClass = new MyClass();
+            return new MyClass();
+        }
+
+        public SomeOtherClass ReturningStructures2(string input)
+        {
+            return new SomeOtherClass() {StringValue = "hello" };
+        }
+
+        public void ReceivingStructures(MyClass myClass)
+        {
+            var x = myClass.StringValue;
+        }
+
+        public string NullInOut(string inp)
+        {
+            return null;
+        }
+    }
+
+    [Destructure]
+    public class MyClass
+    {
+        public MyClass()
+        {
+            StringValue = "LoremIpsum";
+            NumericValue = 42;
+            InnerClass = new MyInnerClass()
+            {
+                StringValue = "Inner",
+                NumericValue = 43
+            };
+        }
+
+        public string StringValue { get; set; }
+        public int NumericValue { get; set; }
+        public MyInnerClass InnerClass { get; set; }
+    }
+
+    public class MyInnerClass
+    {
+        public string StringValue { get; set; }
+        public int NumericValue { get; set; }
+    }
+
+    public class SomeOtherClass
+    {
+        public string StringValue { get; set; }
     }
 }
