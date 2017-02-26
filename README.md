@@ -9,7 +9,7 @@ Existing adapters are:
 |Adapter     |NuGet package       |Version |
 |------------|--------------------|-------:|
 |Log4Net     |Tracer.Log4Net.Fody | 1.3.2  |
-|Serilog     |Tracer.Serilog.Fody | 1.0.0  |
+|Serilog     |Tracer.Serilog.Fody | 1.1.0  |
 |NLog        |Tracer.4NLog.Fody   | 1.0.0  |
 
 Should you have any question/problem send an email to csaba.nemes@outlook.com or add an issue/request.
@@ -78,11 +78,17 @@ Version History for Tracer.Log4Net:
     - Fix: fixed an issue with logging IEnumerators. Logger now properly resets the enumerator after logging.
 * 1.3.1
     - adding LogUseSafeParameterRendering key to appSettings with a true value will esacpe log4net's DefaultRenderer during trace parameter rendering.
+* 1.3.2
+    - documentation added to Log methods    
 
 Version History for Tracer.Serilog:
 ---
 * 1.0.0 
     Initial release
+* 1.0.1
+    Framework version set to 4.5
+* 1.1.0
+    Added the ability to destructure types in trace enter and leave. Use DestructureAttribute to mark a type as target for destructuring.
     
 Version History for Tracer.4NLog:
 ---
