@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
@@ -18,10 +20,13 @@ namespace Tracer.Serilog.Adapters
         private readonly SL.ILogger _logger;
         private readonly string _typeName;
         private const string NullString = "<NULL>";
-        private readonly Func<object, string, string> _renderParameterMethod;
 
-        private readonly static MessageTemplate _traceEnterTemplate;
-        private readonly static MessageTemplate _traceLeaveTemplate;
+        private static readonly MessageTemplate _traceEnterTemplate;
+        private static readonly MessageTemplate _traceLeaveTemplate;
+        private static readonly ConcurrentDictionary<Type, bool> _destructureFlags = new ConcurrentDictionary<Type, bool>();
+        private static readonly ConcurrentDictionary<Assembly, byte> _assembliesParsedForDestructureTypeAttribute = new ConcurrentDictionary<Assembly, byte>(); //value doesnt really matter
+        
+        private readonly Func<object, string, string> _renderParameterMethod;
 
         static LoggerAdapter()
         {
@@ -34,6 +39,9 @@ namespace Tracer.Serilog.Adapters
         {
             _logger = SL.Log.Logger.ForContext(type);
             _typeName = PrettyFormat(type);
+
+            _assembliesParsedForDestructureTypeAttribute.GetOrAdd(type.Assembly, SeekForDestructureTypeAttribute);
+
             var config = ConfigurationManager.AppSettings["LogUseSafeParameterRendering"];
 
             if ((config != null) && config.Equals("true", StringComparison.OrdinalIgnoreCase))
@@ -301,7 +309,18 @@ namespace Tracer.Serilog.Adapters
                 {
                     for (var i = 0; i < paramNames.Length; i++)
                     {
-                        props.Add(new LogEventProperty(paramNames[i], new ScalarValue(_renderParameterMethod(paramValues[i], NullString))));
+                        if (paramValues[i] != null && ShouldDestructure(paramValues[i].GetType()))
+                        {
+                            LogEventProperty prop;
+                            if (_logger.BindProperty(paramNames[i], paramValues[i] ?? NullString, true, out prop))
+                            {
+                                props.Add(prop);
+                            }
+                        }
+                        else
+                        {
+                            props.Add(new LogEventProperty(paramNames[i], new ScalarValue(_renderParameterMethod(paramValues[i], NullString))));
+                        }
                     }
                 }
 
@@ -330,7 +349,18 @@ namespace Tracer.Serilog.Adapters
                 {
                     for (var i = 0; i < paramNames.Length; i++)
                     {
-                        props.Add(new LogEventProperty(paramNames[i] ?? "$return", new ScalarValue(_renderParameterMethod(paramValues[i], NullString))));
+                        if (paramValues[i] != null && ShouldDestructure(paramValues[i].GetType()))
+                        {
+                            LogEventProperty prop;
+                            if (_logger.BindProperty(paramNames[i] ?? "$return", paramValues[i] ?? NullString, true, out prop))
+                            {
+                                props.Add(prop);
+                            }
+                        }
+                        else
+                        {
+                            props.Add(new LogEventProperty(paramNames[i] ?? "$return", new ScalarValue(_renderParameterMethod(paramValues[i], NullString))));
+                        }
                     }
                 }
 
@@ -354,6 +384,21 @@ namespace Tracer.Serilog.Adapters
             }
         }
 
+        private bool ShouldDestructure(Type type)
+        {
+            return _destructureFlags.GetOrAdd(type, it => it.GetCustomAttribute<DestructureAttribute>() != null);
+        }
+
+        private byte SeekForDestructureTypeAttribute(Assembly asm)
+        {
+            var attribs = asm.GetCustomAttributes(typeof(DestructureTypeAttribute), false).Cast<DestructureTypeAttribute>();
+            foreach (var attrib in attribs)
+            {
+                _destructureFlags.AddOrUpdate(attrib.TypeToDestructure, it => true, (it, old) => true);
+            }
+            return 0;
+        }
+
         private static void AddGenericPrettyFormat(StringBuilder sb, Type[] genericArgumentTypes)
         {
             sb.Append("<");
@@ -374,7 +419,7 @@ namespace Tracer.Serilog.Adapters
         private static string PrettyFormat(Type type)
         {
             var sb = new StringBuilder();
-            if (type.IsGenericType)
+            if (type.IsGenericType && type.Name.Contains('`'))
             {
                 sb.Append(type.Name.Remove(type.Name.IndexOf('`')));
                 AddGenericPrettyFormat(sb, type.GetGenericArguments());

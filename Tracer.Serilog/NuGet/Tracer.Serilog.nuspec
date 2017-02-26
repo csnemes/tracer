@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Tracer.Serilog.Fody</id>
-    <version>1.0.1</version>
+    <version>1.1.0</version>
     <authors>csnemes</authors>
     <owners>csnemes</owners>
     <projectUrl>https://github.com/csnemes/tracer</projectUrl>
@@ -10,11 +10,11 @@
     <description>Serilog adapter for Tracer.Fody which is an ILWeaver adding trace enter and leave log entries to methods. This adapter redirects trace logs and
     all other log calls to Serilog.</description>
     <summary>Serilog adapter for Tracer.Fody. Adds trace log entries and rewrite static log calls using Serilog.</summary>
-    <copyright>Copyright 2015</copyright>
+    <copyright>Copyright 2017</copyright>
     <tags>Fody, Logging, Tracing, Serilog, ILWeaving, Cecil</tags>
     <dependencies>
       <group>
-        <dependency id="Tracer.Fody" version="1.3.0" />
+        <dependency id="Tracer.Fody" version="1.4.0" />
 		    <dependency id="Serilog" version="2.3.0" />
       </group>
     </dependencies>
@@ -24,6 +24,9 @@
     Initial release
 * 1.0.1
     Framework version set to 4.5
+* 1.1.0
+    Added the ability to destructure types in trace enter and leave. Use DestructureAttribute to mark a type as target for destructuring.
+    Use the assembly level DestructureTypeAttribute to mark types outside of your codebase.
 	</releaseNotes>
   </metadata>
 </package>
