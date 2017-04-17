@@ -87,7 +87,7 @@ namespace Tracer.Fody.Weavers
             }
 
             //do the exit logging
-            setResultInstr.InsertAfter(processor, CreateTraceReturnLoggingInstructions(returnValueDef));
+            setResultInstr.InsertBefore(processor, CreateTraceReturnLoggingInstructions(returnValueDef));
 
             //do the exception exit logging
             VariableDefinition exceptionValueDef = _moveNextBody.GetOrDeclareVariable("$exception",
@@ -100,7 +100,7 @@ namespace Tracer.Fody.Weavers
             };
 
             setExceptionInstr.InsertBefore(processor, exceptionDupInstructions);
-            setExceptionInstr.InsertAfter(processor, CreateTraceReturnWithExceptionLoggingInstructions(exceptionValueDef));
+            setExceptionInstr.InsertBefore(processor, CreateTraceReturnWithExceptionLoggingInstructions(exceptionValueDef));
 
             //search and replace static log calls in moveNext
             SearchForAndReplaceStaticLogCallsInMoveNext();

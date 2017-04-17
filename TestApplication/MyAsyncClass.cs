@@ -18,6 +18,15 @@ namespace TestApplication
 
             var xC = new GenericClassWithAsync<int>();
             var x4 = xC.DoAsync(42).Result;
+
+            //exception
+            try
+            {
+                NoRetvalAsync(null, 42).Wait();
+
+            }
+            catch (Exception)
+            {}
         }
 
         public async Task<string> StringRetvalAsync(string input)
@@ -35,6 +44,7 @@ namespace TestApplication
         public async Task<int> IntRetvalAsync(string inp1)
         {
             await Task.Run(() => Thread.Sleep(10));
+            if (inp1 == null) throw new ApplicationException("Failure");
             return 42;
         }
 
