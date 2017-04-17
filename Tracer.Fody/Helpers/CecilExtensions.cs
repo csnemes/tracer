@@ -26,6 +26,17 @@ namespace Tracer.Fody.Helpers
         }
 
         /// <summary>
+        /// Inserts the given instructions after the current (this) instruction using the given processor
+        /// </summary>
+        public static void InsertAfter(this Instruction instruction, ILProcessor processor, IEnumerable<Instruction> instructions)
+        {
+            foreach (var newInstruction in instructions.Reverse())
+            {
+                processor.InsertAfter(instruction, newInstruction);
+            }
+        }
+
+        /// <summary>
         /// Inserts the given instructions at the beginning of the method body keeping the debug sequence point intact
         /// </summary>
         public static void InsertAtTheBeginning(this MethodBody body, IEnumerable<Instruction> instructions)
