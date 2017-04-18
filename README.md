@@ -1,4 +1,4 @@
-Tracer 1.4.0
+Tracer 1.5.0
 ======
 
 Tracing and logging rewriter using Fody. It adds trace enter and trace leave log entries for the methods specified. Such calls include incoming and outgoing arguments as well as time spent in the method. It also rewrites static log entries to properly configured log calls. Tracer is the rewriter core on which one of the specific adapters like Tracer.Log4Net is built uppon. Creating custom adapters for your specific needs is very easy. 
@@ -16,7 +16,7 @@ Should you have any question/problem send an email to csaba.nemes@outlook.com or
 
 Compatibility:
 ---
-  - .NET Framework 4.0+
+  - .NET Framework 4.5+ (.NET Framework 4.0+ before 1.5.0)
 
 To install:
 ---
@@ -25,7 +25,7 @@ To install:
 
 To build:
 ---
-Use Visual Studio 2013 or higher
+Use Visual Studio 2015 or higher
 
 Version History for Tracer:
 ---
@@ -45,7 +45,7 @@ Version History for Tracer:
 * 1.2.3
     - Added support for strong named custom adapters 
 * 1.2.4
-	  - Added option to trace log constructors with traceConstructors flag. Just add traceConstructors="true" to Tracer element in weaver config file. 
+	- Added option to trace log constructors with traceConstructors flag. Just add traceConstructors="true" to Tracer element in weaver config file. 
 * 1.3.0
     - Static log rewrite now supports rewriting static property getters (e.g one can use Log.IsDebug to avoid costly calls)
     - Fix: Static constructors are excluded from tracing
@@ -57,6 +57,8 @@ Version History for Tracer:
     - bug fix: on some machines resolving method reference of static log methods did not work properly
 * 1.4.0
     - Static log rewrite now supports rewriting static generic methods (only instantiated calls)
+* 1.5.0
+    - Added support for trace logging async methods
       
 Version History for Tracer.Log4Net:
 ---
