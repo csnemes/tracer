@@ -34,6 +34,8 @@ namespace TestApplication
 
             ExceptionTests();
 
+            AsyncTests();
+
             PropertyTests();
 
             GenericMethodTests();
@@ -52,6 +54,12 @@ namespace TestApplication
 
             var perfComp = new PerfComp();
             perfComp.SpeedTest();
+        }
+
+        public void AsyncTests()
+        {
+            var x = new MyAsyncClass();
+            x.Run();
         }
 
         public void PropertyTests()

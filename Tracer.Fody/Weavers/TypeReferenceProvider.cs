@@ -18,7 +18,9 @@ namespace Tracer.Fody.Weavers
         private readonly Lazy<TypeReference> _objectArray;
         private readonly Lazy<TypeReference> _type;
         private readonly Lazy<TypeReference> _stopwatch;
-        private readonly Lazy<TypeReference> _exception; 
+        private readonly Lazy<TypeReference> _exception;
+        private readonly Lazy<TypeReference> _asyncStateMachineAttribute;
+        private readonly Lazy<TypeReference> _task;
         private readonly ModuleDefinition _moduleDefinition;
         private readonly TraceLoggingConfiguration _configuration;
         private readonly ILoggerAdapterMetadataScopeProvider _loggerAdapterMetadataScopeProvider;
@@ -33,6 +35,9 @@ namespace Tracer.Fody.Weavers
             _type = new Lazy<TypeReference>(() => moduleDefinition.ImportReference(typeof(Type)));
             _stopwatch = new Lazy<TypeReference>(() => moduleDefinition.ImportReference(typeof(Stopwatch)));
             _exception = new Lazy<TypeReference>(() => moduleDefinition.ImportReference(typeof(Exception)));
+            _asyncStateMachineAttribute = new Lazy<TypeReference>(() => moduleDefinition.ImportReference(
+                typeof(System.Runtime.CompilerServices.AsyncStateMachineAttribute)));
+            _task = new Lazy<TypeReference>(() => moduleDefinition.ImportReference(typeof(Task)));
         }
 
         public TypeReference StringArray
@@ -59,6 +64,11 @@ namespace Tracer.Fody.Weavers
             get { return _moduleDefinition.TypeSystem.Object; }
         }
 
+        public TypeReference AsyncStateMachineAttribute
+        {
+            get { return _asyncStateMachineAttribute.Value; }
+        }
+
         public TypeReference Exception
         {
             get { return _exception.Value; }
@@ -72,6 +82,11 @@ namespace Tracer.Fody.Weavers
         public TypeReference Long
         {
             get { return _moduleDefinition.TypeSystem.Int64; }
+        }
+
+        public TypeReference Task
+        {
+            get { return _task.Value; }
         }
 
         public TypeReference LogAdapterReference

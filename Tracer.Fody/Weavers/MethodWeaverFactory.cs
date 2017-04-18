@@ -11,19 +11,29 @@ namespace Tracer.Fody.Weavers
     {
         private readonly TypeReferenceProvider _typeReferenceProvider;
         private readonly MethodReferenceProvider _methodReferenceProvider;
-        private readonly MethodWeaver.ILoggerProvider _loggerProvider;
+        private readonly MethodWeaverBase.ILoggerProvider _loggerProvider;
 
         public MethodWeaverFactory(TypeReferenceProvider typeReferenceProvider, MethodReferenceProvider methodReferenceProvider,
-            MethodWeaver.ILoggerProvider loggerProvider)
+            MethodWeaverBase.ILoggerProvider loggerProvider)
         {
             _typeReferenceProvider = typeReferenceProvider;
             _methodReferenceProvider = methodReferenceProvider;
             _loggerProvider = loggerProvider;
         }
 
-        public MethodWeaver Create(MethodDefinition methodDefinition)
+        public MethodWeaverBase Create(MethodDefinition methodDefinition)
         {
+            if (IsAsyncMethod(methodDefinition))
+            {
+                return new AsyncMethodWeaver(_typeReferenceProvider, _methodReferenceProvider, _loggerProvider, methodDefinition);
+            }
             return new MethodWeaver(_typeReferenceProvider, _methodReferenceProvider, _loggerProvider, methodDefinition);
+        }
+
+        private bool IsAsyncMethod(MethodDefinition methodDefinition)
+        {
+            return
+                methodDefinition.CustomAttributes.Any(it => it.AttributeType.FullName.Equals(_typeReferenceProvider.AsyncStateMachineAttribute.FullName));
         }
     }
 }
