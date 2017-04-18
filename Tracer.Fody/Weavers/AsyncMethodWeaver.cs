@@ -25,6 +25,7 @@ namespace Tracer.Fody.Weavers
         {
             var asyncAttribute = methodDefinition.CustomAttributes.Single(it => it.AttributeType.FullName.Equals(_typeReferenceProvider.AsyncStateMachineAttribute.FullName));
             _generatedType = asyncAttribute.ConstructorArguments[0].Value as TypeDefinition;
+            WeavingLog.LogDebug($"Weaving {methodDefinition.FullName}");
         }
 
         protected override void WeaveTraceEnter()
@@ -79,28 +80,34 @@ namespace Tracer.Fody.Weavers
             VariableDefinition returnValueDef = null;
             var processor = _moveNextBody.GetILProcessor();
 
-            //if we have return value store it in a local var
-            if (HasReturnValue)
+            if (setResultInstr != null) //rarely it might happen that there is not SetResult
             {
-                var retvalDupInstructions = CreateReturnValueSavingInstructions(out returnValueDef);
-                setResultInstr.InsertBefore(processor, retvalDupInstructions);
+                //if we have return value store it in a local var
+                if (HasReturnValue)
+                {
+                    var retvalDupInstructions = CreateReturnValueSavingInstructions(out returnValueDef);
+                    setResultInstr.InsertBefore(processor, retvalDupInstructions);
+                }
+
+                //do the exit logging
+                setResultInstr.InsertBefore(processor, CreateTraceReturnLoggingInstructions(returnValueDef));
             }
 
-            //do the exit logging
-            setResultInstr.InsertBefore(processor, CreateTraceReturnLoggingInstructions(returnValueDef));
-
-            //do the exception exit logging
-            VariableDefinition exceptionValueDef = _moveNextBody.GetOrDeclareVariable("$exception",
-                _typeReferenceProvider.Exception);
-
-            var exceptionDupInstructions = new List<Instruction>()
+            if (setExceptionInstr != null)
             {
+                //do the exception exit logging
+                VariableDefinition exceptionValueDef = _moveNextBody.GetOrDeclareVariable("$exception",
+                    _typeReferenceProvider.Exception);
+
+                var exceptionDupInstructions = new List<Instruction>()
+                {
                     Instruction.Create(OpCodes.Dup),
                     Instruction.Create(OpCodes.Stloc, exceptionValueDef)
-            };
+                };
 
-            setExceptionInstr.InsertBefore(processor, exceptionDupInstructions);
-            setExceptionInstr.InsertBefore(processor, CreateTraceReturnWithExceptionLoggingInstructions(exceptionValueDef));
+                setExceptionInstr.InsertBefore(processor, exceptionDupInstructions);
+                setExceptionInstr.InsertBefore(processor, CreateTraceReturnWithExceptionLoggingInstructions(exceptionValueDef));
+            }
 
             //search and replace static log calls in moveNext
             SearchForAndReplaceStaticLogCallsInMoveNext();
