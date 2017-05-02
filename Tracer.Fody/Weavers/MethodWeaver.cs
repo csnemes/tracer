@@ -48,7 +48,7 @@ namespace Tracer.Fody.Weavers
             if (HasReturnValue)
             {
                 //Declare local variable for the return value
-                returnValueDef = _body.GetOrDeclareVariable("$returnValue", ReturnType);
+                returnValueDef = _body.DeclareVariable("$returnValue", ReturnType);
             }
 
             var allReturns = _body.Instructions.Where(instr => instr.OpCode == OpCodes.Ret).ToList();
@@ -95,15 +95,12 @@ namespace Tracer.Fody.Weavers
             var instructions = new List<Instruction>();
 
             //store the exception
-            var exceptionValue = _body.GetOrDeclareVariable("$exceptionValue", _typeReferenceProvider.Object);
+            var exceptionValue = _body.DeclareVariable("$exceptionValue", _typeReferenceProvider.Object);
             instructions.Add(Instruction.Create(OpCodes.Stloc, exceptionValue));
 
             //do the logging 
-            VariableDefinition paramNamesDef = null;
-            VariableDefinition paramValuesDef = null;
-
-            paramNamesDef = _body.GetOrDeclareVariable("$paramNames", _typeReferenceProvider.StringArray);
-            paramValuesDef = _body.GetOrDeclareVariable("$paramValues", _typeReferenceProvider.ObjectArray);
+            var paramNamesDef = ParamNamesVariable;
+            var paramValuesDef = ParamValuesVariable;
 
             instructions.AddRange(InitArray(paramNamesDef, 1, _typeReferenceProvider.String));
             instructions.AddRange(InitArray(paramValuesDef, 1, _typeReferenceProvider.Object));
@@ -116,7 +113,7 @@ namespace Tracer.Fody.Weavers
             instructions.AddRange(LoadMethodNameOnStack());
 
             //start ticks
-            instructions.Add(Instruction.Create(OpCodes.Ldloc, _body.GetVariable(StartTickVarName)));
+            instructions.Add(Instruction.Create(OpCodes.Ldloc, StartTickVariable));
             //end ticks
             instructions.Add(Instruction.Create(OpCodes.Call, _methodReferenceProvider.GetTimestampReference()));
 
@@ -143,8 +140,8 @@ namespace Tracer.Fody.Weavers
             if (traceLeaveNeedsParamArray)
             {
                 //Get local variables for the arrays or declare them if they not exist
-                paramNamesDef = _body.GetOrDeclareVariable("$paramNames", _typeReferenceProvider.StringArray);
-                paramValuesDef = _body.GetOrDeclareVariable("$paramValues", _typeReferenceProvider.ObjectArray);
+                paramNamesDef = ParamNamesVariable;
+                paramValuesDef = ParamValuesVariable;
 
                 //init arrays
                 instructions.AddRange(InitArray(paramNamesDef, traceLeaveParamArraySize, _typeReferenceProvider.String));
@@ -166,7 +163,7 @@ namespace Tracer.Fody.Weavers
             instructions.AddRange(LoadMethodNameOnStack());
 
             //start ticks
-            instructions.Add(Instruction.Create(OpCodes.Ldloc, _body.GetVariable(StartTickVarName)));
+            instructions.Add(Instruction.Create(OpCodes.Ldloc, StartTickVariable));
             //end ticks
             instructions.Add(Instruction.Create(OpCodes.Call, _methodReferenceProvider.GetTimestampReference()));
 

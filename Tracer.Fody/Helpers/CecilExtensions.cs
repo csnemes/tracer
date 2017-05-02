@@ -41,12 +41,26 @@ namespace Tracer.Fody.Helpers
         /// </summary>
         public static void InsertAtTheBeginning(this MethodBody body, IEnumerable<Instruction> instructions)
         {
+            var debugInfo = body.Method?.DebugInformation;
             var processor = body.GetILProcessor();
             if (body.Instructions.Count > 0)
             {
-                var enteringSeqPoint = body.Instructions[0].SequencePoint;
+                var seqPointToReplace = debugInfo?.GetSequencePoint(body.Instructions[0]);
                 body.Instructions[0].InsertBefore(processor, instructions);
-                body.Instructions[0].SequencePoint = enteringSeqPoint;
+
+                if (seqPointToReplace != null)
+                {
+                    var newSeqPoint = new SequencePoint(body.Instructions[0], seqPointToReplace.Document)
+                    {
+                        StartColumn = seqPointToReplace.StartColumn,
+                        EndColumn = seqPointToReplace.EndColumn,
+                        StartLine = seqPointToReplace.StartLine,
+                        EndLine = seqPointToReplace.EndLine
+                    };
+                    var idx = debugInfo.SequencePoints.IndexOf(seqPointToReplace);
+                    debugInfo.SequencePoints[idx] = newSeqPoint;
+                }
+
             }
             else
             {
@@ -115,26 +129,12 @@ namespace Tracer.Fody.Helpers
             return fieldReference;
         }
 
-        public static VariableDefinition GetOrDeclareVariable(this MethodBody body, string name, TypeReference type)
+        public static VariableDefinition DeclareVariable(this MethodBody body, string name, TypeReference type)
         {
-            var variable = body.Variables.FirstOrDefault(p => p.Name.Equals(name));
-            if (variable == null)
-            {
-                variable = new VariableDefinition(name, type);
-                body.Variables.Add(variable);
-            }
-
-            return variable;
-        }
-
-        public static VariableDefinition GetVariable(this MethodBody body, string name)
-        {
-            var variable = body.Variables.FirstOrDefault(p => p.Name.Equals(name));
-            if (variable == null)
-            {
-                throw new ArgumentException(String.Format("Variable {0} not found in method {1}", name, body.Method.Name));
-            }
-
+            var variable = new VariableDefinition(type);
+            body.Variables.Add(variable);
+            var variableDebug = new VariableDebugInformation(variable, name);
+            body.Method?.DebugInformation?.Scope?.Variables?.Add(variableDebug);
             return variable;
         }
 

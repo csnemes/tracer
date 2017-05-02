@@ -62,32 +62,34 @@ namespace Tracer.Fody.Tests
         {
             var destPath = GetDestinationFilePath(assemblyName);
 
-            var provider = new CSharpCodeProvider();
-            var parameters = new CompilerParameters {OutputAssembly = destPath, IncludeDebugInformation = true};
-
-            parameters.ReferencedAssemblies.Add("System.dll");
-            parameters.ReferencedAssemblies.Add("System.Core.dll");
-            parameters.ReferencedAssemblies.Add("System.Data.dll");
-            if (additonalAssemblies != null)
-                parameters.ReferencedAssemblies.AddRange(additonalAssemblies);
-
-            var results = provider.CompileAssemblyFromSource(parameters, source);
-
-            if (results.Errors.HasErrors)
+            using (var provider = new CSharpCodeProvider())
             {
-                var sb = new StringBuilder();
+                var parameters = new CompilerParameters { OutputAssembly = destPath, IncludeDebugInformation = true };
 
-                foreach (CompilerError error in results.Errors)
+                parameters.ReferencedAssemblies.Add("System.dll");
+                parameters.ReferencedAssemblies.Add("System.Core.dll");
+                parameters.ReferencedAssemblies.Add("System.Data.dll");
+                if (additonalAssemblies != null)
+                    parameters.ReferencedAssemblies.AddRange(additonalAssemblies);
+
+                var results = provider.CompileAssemblyFromSource(parameters, source);
+
+                if (results.Errors.HasErrors)
                 {
-                    sb.AppendLine(String.Format("Error ({0}): {1}", error.ErrorNumber, error.ErrorText));
+                    var sb = new StringBuilder();
+
+                    foreach (CompilerError error in results.Errors)
+                    {
+                        sb.AppendLine(String.Format("Error ({0}): {1}", error.ErrorNumber, error.ErrorText));
+                    }
+
+                    throw new InvalidOperationException(sb.ToString());
                 }
 
-                throw new InvalidOperationException(sb.ToString());
+                Debug.Write(String.Format("Dll compiled to {0}", destPath));
+
+                return destPath;
             }
-
-            Debug.Write(String.Format("Dll compiled to {0}", destPath));
-
-            return destPath;
         }
 
         protected void Rewrite(string assemblyPath, ITraceLoggingFilter filter, bool traceConstructors = false)
@@ -143,10 +145,12 @@ namespace Tracer.Fody.Tests
         {
             var testDllLocation = new Uri(Assembly.GetExecutingAssembly().CodeBase);
             var assemblyPath = Compile(source, "testasm", new[] { testDllLocation.AbsolutePath });
-            var moduleDef = ModuleDefinition.ReadModule(assemblyPath);
 
-            return moduleDef.GetAllTypes().SelectMany(typeDef => typeDef.Methods)
-                .FirstOrDefault(methodDef => methodDef.Name.Equals(methodName, StringComparison.OrdinalIgnoreCase));
+            using (var moduleDef = ModuleDefinition.ReadModule(assemblyPath))
+            {
+                return moduleDef.GetAllTypes().SelectMany(typeDef => typeDef.Methods)
+                    .FirstOrDefault(methodDef => methodDef.Name.Equals(methodName, StringComparison.OrdinalIgnoreCase));
+            }
         }
 
         //This is the bridge between the two appdomains

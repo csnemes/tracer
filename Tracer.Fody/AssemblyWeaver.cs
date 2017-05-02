@@ -52,39 +52,41 @@ namespace Tracer.Fody
         /// </example>
         public static void Execute(string assemblyPath, TraceLoggingConfiguration configuration)
         {
-            //get module definition
-            ModuleDefinition moduleDef = null;
-
             var pdbFile = Path.ChangeExtension(assemblyPath, "pdb");
             var hasPdb = File.Exists(pdbFile);
 
             if (hasPdb)
             {
-                using (var symbolStream = File.OpenRead(pdbFile))
-                {
-                    moduleDef = ModuleDefinition.ReadModule(assemblyPath, new ReaderParameters
+                //using (var symbolStream = File.OpenRead(pdbFile))
+                //{
+                    using (var moduleDef = ModuleDefinition.ReadModule(assemblyPath, new ReaderParameters
+                    {
+                        AssemblyResolver = new DefaultAssemblyResolver(),
+                        ReadSymbols = true,
+                        ReadWrite = true
+                    }))
+                    {
+                        //execute weaving
+                        ModuleLevelWeaver.Execute(configuration, moduleDef);
+
+                        //write back the results
+                        moduleDef.Write(new WriterParameters
                         {
-                            AssemblyResolver = new DefaultAssemblyResolver(),
-                            ReadSymbols = true,
-                            SymbolReaderProvider = new PdbReaderProvider(),
-                            SymbolStream = symbolStream
+                            WriteSymbols = true,
                         });
-                }
+                    }
+                //}
             }
             else
             {
-                moduleDef = ModuleDefinition.ReadModule(assemblyPath);
+                using (var moduleDef = ModuleDefinition.ReadModule(assemblyPath, new ReaderParameters() { ReadWrite = true }))
+                {
+                    //execute weaving
+                    ModuleLevelWeaver.Execute(configuration, moduleDef);
+                    moduleDef.Write();
+                }
             }
 
-            //execute weaving
-            ModuleLevelWeaver.Execute(configuration, moduleDef);
-
-            //write back the results
-            moduleDef.Write(assemblyPath, new WriterParameters
-                    {
-                        WriteSymbols = hasPdb,
-                        SymbolWriterProvider = new PdbWriterProvider()
-                    });
         }
     }
 }
