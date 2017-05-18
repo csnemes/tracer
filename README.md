@@ -1,4 +1,4 @@
-Tracer 1.5.0
+Tracer 1.6.0
 ======
 
 Tracing and logging rewriter using Fody. It adds trace enter and trace leave log entries for the methods specified. Such calls include incoming and outgoing arguments as well as time spent in the method. It also rewrites static log entries to properly configured log calls. Tracer is the rewriter core on which one of the specific adapters like Tracer.Log4Net is built uppon. Creating custom adapters for your specific needs is very easy. 
@@ -6,11 +6,12 @@ See [Wiki](https://github.com/csnemes/tracer/wiki) for details.
 
 Existing adapters are:
 
-|Adapter     |NuGet package       |Version |
-|------------|--------------------|-------:|
-|Log4Net     |Tracer.Log4Net.Fody | 1.3.2  |
-|Serilog     |Tracer.Serilog.Fody | 1.1.0  |
-|NLog        |Tracer.4NLog.Fody   | 1.0.0  |
+|Adapter     |NuGet package              |Version |
+|------------|---------------------------|-------:|
+|Log4Net     |Tracer.Log4Net.Fody        | 1.3.2  |
+|Serilog     |Tracer.Serilog.Fody        | 1.1.0  |
+|NLog        |Tracer.4NLog.Fody          | 1.0.1  |
+|            |Tracer.4NLog.Signed.Fody   | 1.0.1  |
 
 Should you have any question/problem send an email to csaba.nemes@outlook.com or add an issue/request.
 
@@ -59,7 +60,9 @@ Version History for Tracer:
     - Static log rewrite now supports rewriting static generic methods (only instantiated calls)
 * 1.5.0
     - Added support for trace logging async methods
-      
+* 1.6.0
+    - Updated dependency to Fody 2.x
+    
 Version History for Tracer.Log4Net:
 ---
 * 1.0.0 
@@ -91,7 +94,8 @@ Version History for Tracer.Serilog:
     Framework version set to 4.5
 * 1.1.0
     Added the ability to destructure types in trace enter and leave. Use DestructureAttribute to mark a type as target for destructuring.
-    
+    Use the assembly level DestructureTypeAttribute to mark types outside of your codebase.
+
 Version History for Tracer.4NLog:
 ---
 * 1.0.0 
