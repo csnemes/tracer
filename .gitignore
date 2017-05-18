@@ -110,3 +110,5 @@ UpgradeLog*.XML
 
 #NuGet packages
 *.nupkg
+*.il
+*.res

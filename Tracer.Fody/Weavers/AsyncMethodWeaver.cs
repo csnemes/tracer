@@ -60,7 +60,7 @@ namespace Tracer.Fody.Weavers
                 instrs.Add(Instruction.Create(OpCodes.Ldloca, genVar));
             }
 
-            instrs.Add(Instruction.Create(OpCodes.Ldloc, _body.GetVariable(StartTickVarName)));
+            instrs.Add(Instruction.Create(OpCodes.Ldloc, StartTickVariable));
             instrs.Add(Instruction.Create(OpCodes.Stfld, _tickFieldRef));
             instr.InsertBefore(processor, instrs);
         }
@@ -96,7 +96,7 @@ namespace Tracer.Fody.Weavers
             if (setExceptionInstr != null)
             {
                 //do the exception exit logging
-                VariableDefinition exceptionValueDef = _moveNextBody.GetOrDeclareVariable("$exception",
+                VariableDefinition exceptionValueDef = _moveNextBody.DeclareVariable("$exception",
                     _typeReferenceProvider.Exception);
 
                 var exceptionDupInstructions = new List<Instruction>()
@@ -201,7 +201,7 @@ namespace Tracer.Fody.Weavers
         private List<Instruction> CreateReturnValueSavingInstructions(out VariableDefinition returnValueDef)
         {
             //Declare local variable for the return value
-            returnValueDef = _moveNextBody.GetOrDeclareVariable("$returnValue", _typeReferenceProvider.Object);
+            returnValueDef = _moveNextBody.DeclareVariable("$returnValue", _typeReferenceProvider.Object);
 
             var instructions = new List<Instruction>();
             instructions.Add(Instruction.Create(OpCodes.Dup));
@@ -235,8 +235,8 @@ namespace Tracer.Fody.Weavers
             if (hasReturnValue)
             {
                 //Get local variables for the arrays or declare them if they not exist
-                paramNamesDef = _moveNextBody.GetOrDeclareVariable("$paramNames", _typeReferenceProvider.StringArray);
-                paramValuesDef = _moveNextBody.GetOrDeclareVariable("$paramValues", _typeReferenceProvider.ObjectArray);
+                paramNamesDef = MoveNextParamNamesVariable;
+                paramValuesDef = MoveNextParamValuesVariable;
 
                 //init arrays
                 instructions.AddRange(InitArray(paramNamesDef, 1, _typeReferenceProvider.String));
@@ -270,8 +270,8 @@ namespace Tracer.Fody.Weavers
             VariableDefinition paramNamesDef = null;
             VariableDefinition paramValuesDef = null;
 
-            paramNamesDef = _moveNextBody.GetOrDeclareVariable("$paramNames", _typeReferenceProvider.StringArray);
-            paramValuesDef = _moveNextBody.GetOrDeclareVariable("$paramValues", _typeReferenceProvider.ObjectArray);
+            paramNamesDef = MoveNextParamNamesVariable;
+            paramValuesDef = MoveNextParamValuesVariable;
 
             instructions.AddRange(InitArray(paramNamesDef, 1, _typeReferenceProvider.String));
             instructions.AddRange(InitArray(paramValuesDef, 1, _typeReferenceProvider.Object));
@@ -294,6 +294,34 @@ namespace Tracer.Fody.Weavers
             instructions.Add(Instruction.Create(OpCodes.Callvirt, _methodReferenceProvider.GetTraceLeaveReference()));
 
             return instructions;
+        }
+
+        private VariableDefinition _moveNextParamNamesVariable;
+
+        protected VariableDefinition MoveNextParamNamesVariable
+        {
+            get
+            {
+                if (_moveNextParamNamesVariable == null)
+                {
+                    _moveNextParamNamesVariable = _moveNextBody.DeclareVariable("$paramNames", _typeReferenceProvider.StringArray);
+                }
+                return _moveNextParamNamesVariable;
+            }
+        }
+
+        private VariableDefinition _moveNextParamValuesVariable;
+
+        protected VariableDefinition MoveNextParamValuesVariable
+        {
+            get
+            {
+                if (_moveNextParamValuesVariable == null)
+                {
+                    _moveNextParamValuesVariable = _moveNextBody.DeclareVariable("$paramValues", _typeReferenceProvider.ObjectArray);
+                }
+                return _moveNextParamValuesVariable;
+            }
         }
 
         private bool IsCallSetResult(Instruction instr)

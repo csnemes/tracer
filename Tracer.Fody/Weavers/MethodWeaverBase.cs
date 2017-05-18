@@ -99,8 +99,8 @@ namespace Tracer.Fody.Weavers
             if (traceEnterNeedsParamArray)
             {
                 //Declare local variables for the arrays
-                paramNamesDef = _body.GetOrDeclareVariable("$paramNames", _typeReferenceProvider.StringArray);
-                paramValuesDef = _body.GetOrDeclareVariable("$paramValues", _typeReferenceProvider.ObjectArray);
+                paramNamesDef = ParamNamesVariable;
+                paramValuesDef = ParamValuesVariable;
 
                 instructions.AddRange(InitArray(paramNamesDef, traceEnterParamArraySize, _typeReferenceProvider.String));
                 instructions.AddRange(InitArray(paramValuesDef, traceEnterParamArraySize, _typeReferenceProvider.Object));
@@ -117,14 +117,56 @@ namespace Tracer.Fody.Weavers
             instructions.Add(Instruction.Create(OpCodes.Callvirt, _methodReferenceProvider.GetTraceEnterReference()));
 
             //timer start
-            var startTickVariable = _body.GetOrDeclareVariable(StartTickVarName, _typeReferenceProvider.Long);
             instructions.AddRange(new[]
             {
                 Instruction.Create(OpCodes.Call, _methodReferenceProvider.GetTimestampReference()),
-                Instruction.Create(OpCodes.Stloc, startTickVariable)
+                Instruction.Create(OpCodes.Stloc, StartTickVariable)
             });
 
             return instructions;
+        }
+
+        private VariableDefinition _paramNamesVariable;
+
+        protected VariableDefinition ParamNamesVariable
+        {
+            get
+            {
+                if (_paramNamesVariable == null)
+                {
+                    _paramNamesVariable = _body.DeclareVariable("$paramNames", _typeReferenceProvider.StringArray);
+                }
+                return _paramNamesVariable;
+            }
+        }
+
+        private VariableDefinition _paramValuesVariable;
+
+        protected VariableDefinition ParamValuesVariable
+        {
+            get
+            {
+                if (_paramValuesVariable == null)
+                {
+                    _paramValuesVariable = _body.DeclareVariable("$paramValues", _typeReferenceProvider.ObjectArray);
+                }
+                return _paramValuesVariable;
+            }
+        }
+
+
+        private VariableDefinition _startTickVariable;
+
+        protected VariableDefinition StartTickVariable
+        {
+            get
+            {
+                if (_startTickVariable == null)
+                {
+                    _startTickVariable = _body.DeclareVariable(StartTickVarName, _typeReferenceProvider.Long);
+                }
+                return _startTickVariable;
+            }
         }
 
 
