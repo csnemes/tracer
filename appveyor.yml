@@ -15,5 +15,5 @@ build:
   project: Tracer.sln
 after_build:
   - cmd: nuget pack .\Tracer.NLog\NuGet\Tracer.NLog.nuspec -version "%GitVersion_NuGetVersion%" -prop "target=%CONFIGURATION%"
-  - cmd: nuget push "Tracer.NLog.Fody.%GitVersion_NuGetVersion%.nupkg" -ApiKey u87fyi1n6gf89ul59gxnvylf -Source https://ci.appveyor.com/nuget/jesuissur-xnoby1t8il10
-  - cmd: appveyor PushArtifact "Tracer.NLog.Fody.%GitVersion_NuGetVersion%.nupkg"
+  - cmd: nuget push "Tracer.4NLog.Fody.%GitVersion_NuGetVersion%.nupkg" -ApiKey u87fyi1n6gf89ul59gxnvylf -Source https://ci.appveyor.com/nuget/jesuissur-xnoby1t8il10
+  - cmd: appveyor PushArtifact "Tracer.4NLog.Fody.%GitVersion_NuGetVersion%.nupkg"

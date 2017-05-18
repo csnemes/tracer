@@ -32,6 +32,12 @@
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>keyfile.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="NLog, Version=4.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c, processorArchitecture=MSIL">
       <HintPath>..\packages\NLog.4.4.1\lib\net40\NLog.dll</HintPath>
@@ -54,6 +60,7 @@
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
+    <None Include="keyfile.snk" />
     <None Include="NuGet\Tracer.NLog.nuspec" />
     <None Include="packages.config" />
   </ItemGroup>
