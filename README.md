@@ -84,8 +84,8 @@ Version History for Tracer.Log4Net:
 * 1.3.1
     - adding LogUseSafeParameterRendering key to appSettings with a true value will esacpe log4net's DefaultRenderer during trace parameter rendering.
 * 1.3.2
-    - documentation added to Log methods
-    
+    - documentation added to Log methods    
+
 Version History for Tracer.Serilog:
 ---
 * 1.0.0 
@@ -95,7 +95,7 @@ Version History for Tracer.Serilog:
 * 1.1.0
     Added the ability to destructure types in trace enter and leave. Use DestructureAttribute to mark a type as target for destructuring.
     Use the assembly level DestructureTypeAttribute to mark types outside of your codebase.
-    
+
 Version History for Tracer.4NLog:
 ---
 * 1.0.0 
