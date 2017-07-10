@@ -102,6 +102,8 @@ Version History for Tracer.4NLog:
     Initial release
 * 1.0.3
     Fixed issue with wrong callsite
+* 1.0.4
+    Fixed issue with logger name not containing namespace 
     
 Notes:
 ---
