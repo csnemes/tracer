@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using NLog;
 using NLog.Fluent;
@@ -20,7 +21,18 @@ namespace Tracer.NLog.Adapters
         public LoggerAdapter(Type type)
         {
             _typeName = PrettyFormat(type);
-            _logger = LogManager.GetLogger(type.Name);
+            _logger = FixLoggerLoggerType(LogManager.GetLogger(type.Name));
+        }
+
+        private static readonly FieldInfo LoggerTypeField = typeof(Logger).GetField("loggerType", BindingFlags.Instance | BindingFlags.NonPublic);
+
+        private static Logger FixLoggerLoggerType(Logger logger)
+        {
+            if (LoggerTypeField != null)
+            {
+                LoggerTypeField.SetValue(logger, typeof(LoggerAdapter));
+            }
+            return logger;
         }
 
         #region Methods required for trace enter and leave
@@ -142,7 +154,7 @@ namespace Tracer.NLog.Adapters
                     eventData.Properties.Add(property.Key, property.Value);
             }
 
-            _logger.Log(eventData);
+            _logger.Log(typeof(LoggerAdapter), eventData);
         }
 
         #endregion
