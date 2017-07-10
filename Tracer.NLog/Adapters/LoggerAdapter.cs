@@ -21,7 +21,7 @@ namespace Tracer.NLog.Adapters
         public LoggerAdapter(Type type)
         {
             _typeName = PrettyFormat(type);
-            _logger = FixLoggerLoggerType(LogManager.GetLogger(type.Name));
+            _logger = FixLoggerLoggerType(LogManager.GetLogger(type.FullName));
         }
 
         private static readonly FieldInfo LoggerTypeField = typeof(Logger).GetField("loggerType", BindingFlags.Instance | BindingFlags.NonPublic);
