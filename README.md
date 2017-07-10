@@ -10,8 +10,8 @@ Existing adapters are:
 |------------|---------------------------|-------:|
 |Log4Net     |Tracer.Log4Net.Fody        | 1.3.2  |
 |Serilog     |Tracer.Serilog.Fody        | 1.1.0  |
-|NLog        |Tracer.4NLog.Fody          | 1.0.1  |
-|            |Tracer.4NLog.Signed.Fody   | 1.0.1  |
+|NLog        |Tracer.4NLog.Fody          | 1.0.3  |
+|            |Tracer.4NLog.Signed.Fody   | 1.0.3  |
 
 Should you have any question/problem send an email to csaba.nemes@outlook.com or add an issue/request.
 
@@ -100,6 +100,8 @@ Version History for Tracer.4NLog:
 ---
 * 1.0.0 
     Initial release
+* 1.0.3
+    Fixed issue with wrong callsite
     
 Notes:
 ---
