@@ -1,4 +1,4 @@
-Tracer 1.6.0
+3Tracer 1.6.0
 ======
 
 Tracing and logging rewriter using Fody. It adds trace enter and trace leave log entries for the methods specified. Such calls include incoming and outgoing arguments as well as time spent in the method. It also rewrites static log entries to properly configured log calls. Tracer is the rewriter core on which one of the specific adapters like Tracer.Log4Net is built uppon. Creating custom adapters for your specific needs is very easy. 
@@ -8,7 +8,7 @@ Existing adapters are:
 
 |Adapter     |NuGet package              |Version |
 |------------|---------------------------|-------:|
-|Log4Net     |Tracer.Log4Net.Fody        | 1.3.2  |
+|Log4Net     |Tracer.Log4Net.Fody        | 1.3.3  |
 |Serilog     |Tracer.Serilog.Fody        | 1.1.0  |
 |NLog        |Tracer.4NLog.Fody          | 1.0.3  |
 |            |Tracer.4NLog.Signed.Fody   | 1.0.3  |
