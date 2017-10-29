@@ -112,7 +112,7 @@ namespace Tracer.Fody.Tests
         protected MockLogResult RunTest(string source, ITraceLoggingFilter filter, string staticEntryPoint, bool shouldTraceConstructors = false)
         {
             var splitEntry = staticEntryPoint.Split(new [] { "::" }, StringSplitOptions.RemoveEmptyEntries);
-            if (splitEntry.Length != 2) throw new ApplicationException("Static entry point must be in a form Namesp.Namesp2.Class::Method");
+            if (splitEntry.Length != 2) throw new Exception("Static entry point must be in a form Namesp.Namesp2.Class::Method");
             var entryClass = splitEntry[0];
             var entryMethod = splitEntry[1];
 

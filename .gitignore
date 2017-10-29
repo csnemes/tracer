@@ -112,3 +112,5 @@ UpgradeLog*.XML
 *.nupkg
 *.il
 *.res
+*.ide
+/lib

@@ -89,7 +89,7 @@ namespace Tracer.Fody.Helpers
             var attribute = element.Attribute(attributeName);
             if (isMandatory && (attribute == null || String.IsNullOrWhiteSpace(attribute.Value)))
             {
-                throw new ApplicationException(String.Format("Tracer: attribute {0} is missing or empty.", attributeName));
+                throw new Exception(String.Format("Tracer: attribute {0} is missing or empty.", attributeName));
             }
 
             return attribute != null ? attribute.Value : null;

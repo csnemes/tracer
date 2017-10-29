@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Tracer.Fody</id>
-    <version>1.6.0</version>
+    <version>2.0.0</version>
     <authors>csnemes</authors>
     <owners>csnemes</owners>
     <projectUrl>https://github.com/csnemes/tracer</projectUrl>
@@ -16,7 +16,7 @@
 	<developmentDependency>true</developmentDependency>
     <dependencies>
       <group>
-        <dependency id="Fody" version="[2.0.9,3.0)" />
+        <dependency id="Fody" version="[2.1.2,3.0)" />
       </group>
     </dependencies>
     <references />
@@ -53,6 +53,8 @@
     - Added support for trace logging async methods
 * 1.6.0
     - Updated dependency to Fody 2.x
+* 2.0.0
+    - Moved to netstandard 2.0
 	</releaseNotes>
   </metadata>
   <files>

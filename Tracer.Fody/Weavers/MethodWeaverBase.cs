@@ -326,12 +326,12 @@ namespace Tracer.Fody.Weavers
            
             //generic is defined in the called method
             var genericMethod = methodReference as GenericInstanceMethod;
-            if (genericMethod == null) throw new ApplicationException("Generic parameter for a non generic method."); //should not happen
+            if (genericMethod == null) throw new Exception("Generic parameter for a non generic method."); //should not happen
 
             int idx;
             if (!Int32.TryParse(genericParameter.Name.Replace('!', ' '), out idx))
             {
-                throw new ApplicationException(String.Format("Generic parameter {0} cannot be parsed for index.", genericParameter.Name));
+                throw new Exception(String.Format("Generic parameter {0} cannot be parsed for index.", genericParameter.Name));
             }
 
             return new VariableDefinition(genericMethod.GenericArguments[idx]);

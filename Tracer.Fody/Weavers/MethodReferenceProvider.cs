@@ -46,12 +46,12 @@ namespace Tracer.Fody.Weavers
 
         public MethodReference GetGetTypeFromHandleReference()
         {
-            return _moduleDefinition.ImportReference(typeof(Type).GetMethod("GetTypeFromHandle", BindingFlags.Public | BindingFlags.Static));
+            return _moduleDefinition.ImportReference(typeof(Type).GetRuntimeMethod("GetTypeFromHandle", new [] { typeof(RuntimeTypeHandle)}));
         }
 
         public MethodReference GetTimestampReference()
         {
-            return _moduleDefinition.ImportReference(typeof(Stopwatch).GetMethod("GetTimestamp", BindingFlags.Public | BindingFlags.Static));
+            return _moduleDefinition.ImportReference(typeof(Stopwatch).GetRuntimeMethod("GetTimestamp", new Type[0]));
         }
 
         public MethodReference GetInstanceLogMethod(MethodReferenceInfo methodReferenceInfo, IEnumerable<ParameterDefinition> parameters = null)

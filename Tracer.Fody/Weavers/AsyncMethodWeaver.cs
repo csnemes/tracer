@@ -41,7 +41,7 @@ namespace Tracer.Fody.Weavers
             if (genVar == null)
             {
                 //this should not happen
-                throw new ApplicationException($"Cannot find async statemachine for async method {this._methodDefinition.Name}.");
+                throw new Exception($"Cannot find async statemachine for async method {this._methodDefinition.Name}.");
             }
 
             var processor = _body.GetILProcessor();
@@ -145,7 +145,7 @@ namespace Tracer.Fody.Weavers
 
             if (methodReferenceInfo.IsPropertyAccessor() && methodReferenceInfo.IsSetter)
             {
-                throw new ApplicationException("Rewriting static property setters is not supported.");
+                throw new Exception("Rewriting static property setters is not supported.");
             }
 
             var parameters = methodReference.Parameters;

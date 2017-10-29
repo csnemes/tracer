@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" ?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Weavers>
   <!--<Tracer adapterAssembly="Tracer.OutputWindow"
         logManager="Tracer.OutputWindow.Adapters.LogManagerAdapter"
@@ -6,16 +6,8 @@
         traceConstructors="true">
     <TraceOn class="public" method="public" />
   </Tracer>-->
-
-  <Tracer adapterAssembly="Tracer.Log4Net"
-        logManager="Tracer.Log4Net.Adapters.LogManagerAdapter"
-        logger="Tracer.Log4Net.Adapters.LoggerAdapter"
-        staticLogger="Tracer.Log4Net.Log"
-        traceConstructors="true"
-        traceProperties="false">
+  <Tracer adapterAssembly="Tracer.Log4Net" logManager="Tracer.Log4Net.Adapters.LogManagerAdapter" logger="Tracer.Log4Net.Adapters.LoggerAdapter" staticLogger="Tracer.Log4Net.Log" traceConstructors="true" traceProperties="false">
     <TraceOn class="private" method="private" />
     <NoTrace namespace="NotTracedNamespace+*" />
   </Tracer>
-  
-  
 </Weavers>

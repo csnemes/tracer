@@ -193,7 +193,7 @@ namespace Tracer.Fody.Filters
             {
                 get
                 {
-                    if (!IsTraceOn) throw new ApplicationException("Not a traceOn result.");
+                    if (!IsTraceOn) throw new Exception("Not a traceOn result.");
                     return _targetVisibility;
                 }
             }
