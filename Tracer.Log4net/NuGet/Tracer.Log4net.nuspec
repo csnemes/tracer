@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Tracer.Log4Net.Fody</id>
-    <version>1.3.2</version>
+    <version>1.3.3</version>
     <authors>csnemes</authors>
     <owners>csnemes</owners>
     <projectUrl>https://github.com/csnemes/tracer</projectUrl>
@@ -15,7 +15,7 @@
     <dependencies>
       <group>
         <dependency id="Tracer.Fody" version="1.3.0" />
-		<dependency id="log4net" version="2.0.5" />
+		    <dependency id="log4net" version="2.0.8" />
       </group>
     </dependencies>
     <references />
@@ -40,6 +40,8 @@
     - adding LogUseSafeParameterRendering key to appSettings with a true value will esacpe log4net's DefaultRenderer during trace parameter rendering.
 * 1.3.2
     - documentation added to Log methods
+* 1.3.3
+	  - Updated to log4net package 2.0.8 
 	</releaseNotes>
   </metadata>
 </package>

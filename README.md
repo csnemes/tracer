@@ -85,7 +85,9 @@ Version History for Tracer.Log4Net:
     - adding LogUseSafeParameterRendering key to appSettings with a true value will esacpe log4net's DefaultRenderer during trace parameter rendering.
 * 1.3.2
     - documentation added to Log methods    
-
+* 1.3.3
+	  - Updated to log4net package 2.0.8
+    
 Version History for Tracer.Serilog:
 ---
 * 1.0.0 
