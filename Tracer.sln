@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApplication.Log4Net", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tracer.Log4Net.Tests", "Tracer.Log4Net.Tests\Tracer.Log4Net.Tests.csproj", "{00587743-F2C1-45CB-9BFD-49D1C9976042}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApplication.Log4Net.Core", "TestApplication.Log4Net.Core\TestApplication.Log4Net.Core.csproj", "{89BE58A6-B964-4039-BE83-9EC03D2DA82A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{00587743-F2C1-45CB-9BFD-49D1C9976042}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{00587743-F2C1-45CB-9BFD-49D1C9976042}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{00587743-F2C1-45CB-9BFD-49D1C9976042}.Release|Any CPU.Build.0 = Release|Any CPU
+		{89BE58A6-B964-4039-BE83-9EC03D2DA82A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{89BE58A6-B964-4039-BE83-9EC03D2DA82A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{89BE58A6-B964-4039-BE83-9EC03D2DA82A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{89BE58A6-B964-4039-BE83-9EC03D2DA82A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
