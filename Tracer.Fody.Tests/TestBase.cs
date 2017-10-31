@@ -70,7 +70,11 @@ namespace Tracer.Fody.Tests
                 parameters.ReferencedAssemblies.Add("System.Core.dll");
                 parameters.ReferencedAssemblies.Add("System.Data.dll");
                 if (additonalAssemblies != null)
+                {
                     parameters.ReferencedAssemblies.AddRange(additonalAssemblies);
+                    //copy additional assemblies to Environment.CurrentDirectory to prevent Resharper unit test runner from failing
+                    ResharperUnitTestRunnerFix(additonalAssemblies);
+                }
 
                 var results = provider.CompileAssemblyFromSource(parameters, source);
 
@@ -90,6 +94,31 @@ namespace Tracer.Fody.Tests
 
                 return destPath;
             }
+        }
+
+        private void ResharperUnitTestRunnerFix(string[] additonalAssemblies)
+        {
+            foreach (var additonalAssembly in additonalAssemblies)
+            {
+                var target = Path.Combine(Environment.CurrentDirectory, Path.GetFileName(additonalAssembly));
+                if (File.Exists(target))
+                {
+                    if (AreFilesTheSame(target, additonalAssembly)) continue;
+                }
+                File.Copy(additonalAssembly, target, true);
+            }
+        }
+
+        private bool AreFilesTheSame(string path1, string path2)
+        {
+            var bytes1 = File.ReadAllBytes(path1);
+            var bytes2 = File.ReadAllBytes(path2);
+            if (bytes1.Length != bytes2.Length) return false;
+            for (int i = 0; i < bytes1.Length; i++)
+            {
+                if (bytes1[i] != bytes2[i]) return false;
+            }
+            return true;
         }
 
         protected void Rewrite(string assemblyPath, ITraceLoggingFilter filter, bool traceConstructors = false)

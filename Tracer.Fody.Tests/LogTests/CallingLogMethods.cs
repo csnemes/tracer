@@ -309,7 +309,7 @@ namespace Tracer.Fody.Tests.LogTests
             ";
 
             Action test = () => this.RunTest(code, new PrivateOnlyTraceLoggingFilter(), "First.MyClass::Main");
-            test.ShouldThrow<ApplicationException>().And.Message.Contains("not supported");
+            test.ShouldThrow<Exception>().And.Message.Contains("not supported");
         }
 
         [Test]

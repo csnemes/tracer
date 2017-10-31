@@ -114,3 +114,6 @@ UpgradeLog*.XML
 *.res
 *.ide
 /lib
+
+#Studio
+/.vs

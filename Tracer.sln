@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26430.16
+VisualStudioVersion = 15.0.27004.2005
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tracer.Fody", "Tracer.Fody\Tracer.Fody.csproj", "{AB86D24C-9FAD-4151-A285-E90D66B5E05B}"
 EndProject
@@ -9,9 +9,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tracer.Fody.Tests", "Tracer
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApplication", "TestApplication\TestApplication.csproj", "{9C0C7A9A-049E-408B-AFDB-FD6ABF83759B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tracer.Log4Net", "Tracer.Log4Net\Tracer.Log4Net.csproj", "{5FC03C25-7594-431C-B248-F1A134DD5A77}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NewTestApplication", "NewTestApplication\NewTestApplication.csproj", "{7E07A8ED-6A11-4A7F-BDB5-582B241E05F1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tracer.Log4Net", "Tracer.Log4Net\Tracer.Log4Net.csproj", "{5FC03C25-7594-431C-B248-F1A134DD5A77}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -35,12 +33,11 @@ Global
 		{5FC03C25-7594-431C-B248-F1A134DD5A77}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5FC03C25-7594-431C-B248-F1A134DD5A77}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5FC03C25-7594-431C-B248-F1A134DD5A77}.Release|Any CPU.Build.0 = Release|Any CPU
-		{7E07A8ED-6A11-4A7F-BDB5-582B241E05F1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{7E07A8ED-6A11-4A7F-BDB5-582B241E05F1}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{7E07A8ED-6A11-4A7F-BDB5-582B241E05F1}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{7E07A8ED-6A11-4A7F-BDB5-582B241E05F1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {4CCC38BA-A210-4499-B31D-0A18C26D44DF}
 	EndGlobalSection
 EndGlobal
