@@ -1,8 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
@@ -11,14 +10,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\TestApplication.Log4Net.Netstd\TestApplication.Log4Net.Netstd.csproj" />
     <ProjectReference Include="..\Tracer.Log4Net\Tracer.Log4Net.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Update="Logging.config">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
   </ItemGroup>
 
 </Project>
