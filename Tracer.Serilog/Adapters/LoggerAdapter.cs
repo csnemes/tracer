@@ -5,6 +5,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -32,7 +33,7 @@ namespace Tracer.Serilog.Adapters
             _traceLeaveTemplate = parser.Parse("Returned from {MethodName} ({ReturnValue}). Time taken: {TimeTaken:0.00} ms.");
         }
 
-        public LoggerAdapter(Type type)
+        public LoggerAdapter(Type type, bool logUseSafeParameterRendering=false)
         {
             _logger = SL.Log.Logger.ForContext(type);
             _typeName = PrettyFormat(type);
@@ -40,11 +41,9 @@ namespace Tracer.Serilog.Adapters
             _assembliesParsedForDestructureTypeAttribute.GetOrAdd(type.Assembly, SeekForDestructureTypeAttribute);
 
             //var config = ConfigurationManager.AppSettings["LogUseSafeParameterRendering"];
-            //var builder = new ConfigurationBuilder();
-            var config = "true";
             
 
-            if ((config != null) && config.Equals("true", StringComparison.OrdinalIgnoreCase))
+            if (logUseSafeParameterRendering)
                 _renderParameterMethod = GetSafeRenderedFormat;
             else
                 _renderParameterMethod = GetRenderedFormat;
