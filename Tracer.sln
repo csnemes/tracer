@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.27004.2005
+VisualStudioVersion = 15.0.27004.2002
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tracer.Fody", "Tracer.Fody\Tracer.Fody.csproj", "{AB86D24C-9FAD-4151-A285-E90D66B5E05B}"
 EndProject
@@ -13,9 +13,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApplication.Log4Net", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tracer.Log4Net.Tests", "Tracer.Log4Net.Tests\Tracer.Log4Net.Tests.csproj", "{00587743-F2C1-45CB-9BFD-49D1C9976042}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApplication.Log4Net.Core", "TestApplication.Log4Net.Core\TestApplication.Log4Net.Core.csproj", "{89BE58A6-B964-4039-BE83-9EC03D2DA82A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestApplication.Log4Net.Core", "TestApplication.Log4Net.Core\TestApplication.Log4Net.Core.csproj", "{89BE58A6-B964-4039-BE83-9EC03D2DA82A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApplication.Log4Net.Netstd", "TestApplication.Log4Net.Netstd\TestApplication.Log4Net.Netstd.csproj", "{19AF511F-5FDD-4A8C-8E5C-E8AB51CECA50}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestApplication.Log4Net.Netstd", "TestApplication.Log4Net.Netstd\TestApplication.Log4Net.Netstd.csproj", "{19AF511F-5FDD-4A8C-8E5C-E8AB51CECA50}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tracer.Serilog", "Tracer.Serilog\Tracer.Serilog.csproj", "{F12EE57A-8D40-4060-95C2-25915159BDB5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -51,6 +53,10 @@ Global
 		{19AF511F-5FDD-4A8C-8E5C-E8AB51CECA50}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{19AF511F-5FDD-4A8C-8E5C-E8AB51CECA50}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{19AF511F-5FDD-4A8C-8E5C-E8AB51CECA50}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F12EE57A-8D40-4060-95C2-25915159BDB5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F12EE57A-8D40-4060-95C2-25915159BDB5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F12EE57A-8D40-4060-95C2-25915159BDB5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F12EE57A-8D40-4060-95C2-25915159BDB5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
