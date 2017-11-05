@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.27004.2002
+VisualStudioVersion = 15.0.27004.2005
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tracer.Fody", "Tracer.Fody\Tracer.Fody.csproj", "{AB86D24C-9FAD-4151-A285-E90D66B5E05B}"
 EndProject
@@ -17,9 +17,15 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestApplication.Log4Net.Cor
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestApplication.Log4Net.Netstd", "TestApplication.Log4Net.Netstd\TestApplication.Log4Net.Netstd.csproj", "{19AF511F-5FDD-4A8C-8E5C-E8AB51CECA50}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tracer.Serilog", "Tracer.Serilog\Tracer.Serilog.csproj", "{F12EE57A-8D40-4060-95C2-25915159BDB5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tracer.Serilog", "Tracer.Serilog\Tracer.Serilog.csproj", "{F12EE57A-8D40-4060-95C2-25915159BDB5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tracer.Serilog.std", "Tracer.Serilog.std\Tracer.Serilog.std.csproj", "{B1B1146C-EED0-43A6-BC01-12BCFF9FDDF9}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tracer.Serilog.Tests", "Tracer.Serilog.Tests\Tracer.Serilog.Tests.csproj", "{A92A7477-119C-499B-9773-B791982DC108}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApplication.Serilog", "TestApplication.Serilog\TestApplication.Serilog.csproj", "{AB00FADE-CAF6-4D70-A044-928F345D7FB3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApplication.Serilog.Core", "TestApplication.Serilog.Core\TestApplication.Serilog.Core.csproj", "{E6D0052F-A336-492A-BA51-22710904E502}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApplication.Serilog.Netstd", "TestApplication.Serilog.Netstd\TestApplication.Serilog.Netstd.csproj", "{620E3ACB-7E75-4D76-A6FF-0168FB47CB34}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -59,10 +65,22 @@ Global
 		{F12EE57A-8D40-4060-95C2-25915159BDB5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F12EE57A-8D40-4060-95C2-25915159BDB5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F12EE57A-8D40-4060-95C2-25915159BDB5}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B1B1146C-EED0-43A6-BC01-12BCFF9FDDF9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B1B1146C-EED0-43A6-BC01-12BCFF9FDDF9}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B1B1146C-EED0-43A6-BC01-12BCFF9FDDF9}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B1B1146C-EED0-43A6-BC01-12BCFF9FDDF9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A92A7477-119C-499B-9773-B791982DC108}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A92A7477-119C-499B-9773-B791982DC108}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A92A7477-119C-499B-9773-B791982DC108}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A92A7477-119C-499B-9773-B791982DC108}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AB00FADE-CAF6-4D70-A044-928F345D7FB3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AB00FADE-CAF6-4D70-A044-928F345D7FB3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AB00FADE-CAF6-4D70-A044-928F345D7FB3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AB00FADE-CAF6-4D70-A044-928F345D7FB3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E6D0052F-A336-492A-BA51-22710904E502}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E6D0052F-A336-492A-BA51-22710904E502}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E6D0052F-A336-492A-BA51-22710904E502}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E6D0052F-A336-492A-BA51-22710904E502}.Release|Any CPU.Build.0 = Release|Any CPU
+		{620E3ACB-7E75-4D76-A6FF-0168FB47CB34}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{620E3ACB-7E75-4D76-A6FF-0168FB47CB34}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{620E3ACB-7E75-4D76-A6FF-0168FB47CB34}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{620E3ACB-7E75-4D76-A6FF-0168FB47CB34}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

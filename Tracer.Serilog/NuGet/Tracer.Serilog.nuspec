@@ -2,8 +2,8 @@
 <package>
   <metadata>
     <id>Tracer.Serilog.Fody</id>
-    <version>1.1.0</version>
-    <authors>csnemes</authors>
+    <version>2.0.0</version>
+    <authors>csnemes,Duane McKinney</authors>
     <owners>csnemes</owners>
     <projectUrl>https://github.com/csnemes/tracer</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
@@ -14,19 +14,21 @@
     <tags>Fody, Logging, Tracing, Serilog, ILWeaving, Cecil</tags>
     <dependencies>
       <group>
-        <dependency id="Tracer.Fody" version="1.4.0" />
-		    <dependency id="Serilog" version="2.3.0" />
+        <dependency id="Tracer.Fody" version="[2.0.0,3.0)" />
+		    <dependency id="Serilog" version="2.5.0" />
       </group>
     </dependencies>
     <references />
     	<releaseNotes>
-* 1.0.0 
-    Initial release
-* 1.0.1
-    Framework version set to 4.5
-* 1.1.0
-    Added the ability to destructure types in trace enter and leave. Use DestructureAttribute to mark a type as target for destructuring.
-    Use the assembly level DestructureTypeAttribute to mark types outside of your codebase.
-	</releaseNotes>
+        * 1.0.0
+        Initial release
+        * 1.0.1
+        Framework version set to 4.5
+        * 1.1.0
+        Added the ability to destructure types in trace enter and leave. Use DestructureAttribute to mark a type as target for destructuring.
+        Use the assembly level DestructureTypeAttribute to mark types outside of your codebase.
+	      * 2.0.0
+	      Moved to netstandard 2.0
+      </releaseNotes>
   </metadata>
 </package>

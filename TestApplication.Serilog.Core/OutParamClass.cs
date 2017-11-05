@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace TestApplication
+namespace TestApplication.Serilog.Core
 {
     public class OutParamClass
     {

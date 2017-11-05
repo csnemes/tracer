@@ -33,20 +33,13 @@ namespace Tracer.Serilog.Adapters
             _traceLeaveTemplate = parser.Parse("Returned from {MethodName} ({ReturnValue}). Time taken: {TimeTaken:0.00} ms.");
         }
 
-        public LoggerAdapter(Type type, bool logUseSafeParameterRendering=false)
+        public LoggerAdapter(Type type)
         {
             _logger = SL.Log.Logger.ForContext(type);
             _typeName = PrettyFormat(type);
 
             _assembliesParsedForDestructureTypeAttribute.GetOrAdd(type.Assembly, SeekForDestructureTypeAttribute);
-
-            //var config = ConfigurationManager.AppSettings["LogUseSafeParameterRendering"];
-            
-
-            if (logUseSafeParameterRendering)
-                _renderParameterMethod = GetSafeRenderedFormat;
-            else
-                _renderParameterMethod = GetRenderedFormat;
+            _renderParameterMethod = GetRenderedFormat;
         }
 
         public void LogWrite(string methodInfo, LogEventLevel level, string messageTemplate)
@@ -438,18 +431,5 @@ namespace Tracer.Serilog.Adapters
                 return (string)message;
             return message.ToString();
         }
-
-        private string GetSafeRenderedFormat(object message, string stringRepresentationOfNull = "")
-        {
-            if (message == null)
-                return stringRepresentationOfNull;
-
-            var str = message as string;
-            if (str != null)
-                return str;
-
-            return message.ToString();
-        }
-
     }
 }
