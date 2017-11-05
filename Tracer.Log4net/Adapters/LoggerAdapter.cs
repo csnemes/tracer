@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -29,7 +30,17 @@ namespace Tracer.Log4Net.Adapters
             _typeName = PrettyFormat(type);
             _typeNamespace = type.Namespace;
             _logger = LogManager.GetLogger(type).Logger;
-            _renderParameterMethod = GetRenderedFormat;
+
+            var config = Environment.GetEnvironmentVariable("LogUseSafeParameterRendering");
+
+            if (config != null && config.Equals("true", StringComparison.OrdinalIgnoreCase))
+            {
+                _renderParameterMethod = GetSafeRenderedFormat;
+            }
+            else
+            {
+                _renderParameterMethod = GetRenderedFormat;
+            }
         }
 
         #region Methods required for trace enter and leave
