@@ -1,15 +1,21 @@
-Tracer 1.6.0
+Tracer 2.0.0
 ======
 
-Tracing and logging rewriter using Fody. It adds trace enter and trace leave log entries for the methods specified. Such calls include incoming and outgoing arguments as well as time spent in the method. It also rewrites static log entries to properly configured log calls. Tracer is the rewriter core on which one of the specific adapters like Tracer.Log4Net is built uppon. Creating custom adapters for your specific needs is very easy. 
+Tracing and logging rewriter using Fody. It adds trace enter and trace leave log entries for the methods specified. Such calls include incoming and outgoing arguments as well as time spent in the method. It also rewrites static log entries to properly configured log calls. Tracer is the rewriter core on which one of the specific adapters like Tracer.Log4Net is built uppon. Creating custom adapters for your specific needs is very easy.
+Version 2.0.0 supports netstandard 2.0.
 See [Wiki](https://github.com/csnemes/tracer/wiki) for details.
 
-Existing adapters are:
+Existing adapters are (supporting netstandard 2.0):
 
 |Adapter     |NuGet package              |Version |
 |------------|---------------------------|-------:|
-|Log4Net     |Tracer.Log4Net.Fody        | 1.3.2  |
-|Serilog     |Tracer.Serilog.Fody        | 1.1.0  |
+|Log4Net     |Tracer.Log4Net.Fody        | 2.0.0  |
+|Serilog     |Tracer.Serilog.Fody        | 2.0.0  |
+
+Not yet supporting netstandard 2.0:
+
+|Adapter     |NuGet package              |Version |
+|------------|---------------------------|-------:|
 |NLog        |Tracer.4NLog.Fody          | 1.0.3  |
 |            |Tracer.4NLog.Signed.Fody   | 1.0.3  |
 
@@ -17,7 +23,7 @@ Should you have any question/problem send an email to csaba.nemes@outlook.com or
 
 Compatibility:
 ---
-  - .NET Framework 4.5+ (.NET Framework 4.0+ before 1.5.0)
+  - netstandard 2.0 (.NET Framework 4.0+ before 1.5.0)
 
 To install:
 ---
@@ -26,7 +32,7 @@ To install:
 
 To build:
 ---
-Use Visual Studio 2015 or higher
+Use Visual Studio 2017
 
 Version History for Tracer:
 ---
@@ -62,6 +68,8 @@ Version History for Tracer:
     - Added support for trace logging async methods
 * 1.6.0
     - Updated dependency to Fody 2.x
+* 2.0.0
+    - Moved to netstandard 2.0    
     
 Version History for Tracer.Log4Net:
 ---
@@ -85,6 +93,10 @@ Version History for Tracer.Log4Net:
     - adding LogUseSafeParameterRendering key to appSettings with a true value will esacpe log4net's DefaultRenderer during trace parameter rendering.
 * 1.3.2
     - documentation added to Log methods    
+* 1.3.3
+    - Updated to log4net package 2.0.8    
+* 2.0.0
+    - Moved to netstandard 2.0    
 
 Version History for Tracer.Serilog:
 ---
@@ -95,6 +107,8 @@ Version History for Tracer.Serilog:
 * 1.1.0
     Added the ability to destructure types in trace enter and leave. Use DestructureAttribute to mark a type as target for destructuring.
     Use the assembly level DestructureTypeAttribute to mark types outside of your codebase.
+* 2.0.0
+    Moved to netstandard 2.0    
 
 Version History for Tracer.4NLog:
 ---

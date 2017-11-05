@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Tracer.4NLog.Signed.Fody</id>
-    <version>1.0.4</version>
+    <version>2.0.0</version>
     <authors>csnemes</authors>
     <owners>csnemes</owners>
     <projectUrl>https://github.com/csnemes/tracer</projectUrl>
@@ -14,12 +14,14 @@
     <tags>Fody, Logging, Tracing, NLog, ILWeaving, Cecil, 4NLog</tags>
     <dependencies>
       <group>
-        <dependency id="Tracer.Fody" version="1.4.0" />
-	    	<dependency id="NLog" version="4.4.1" />
+        <dependency id="Tracer.Fody" version="[2.0.0,3.0)" />
+	    	<dependency id="NLog" version="4.5.0-beta07" />
       </group>
     </dependencies>
     <references />
     	<releaseNotes>
-	</releaseNotes>
+	      * 2.0.0
+	      - Moved to netstandard 2.0
+      </releaseNotes>
   </metadata>
 </package>

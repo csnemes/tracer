@@ -27,6 +27,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApplication.Serilog.Cor
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApplication.Serilog.Netstd", "TestApplication.Serilog.Netstd\TestApplication.Serilog.Netstd.csproj", "{620E3ACB-7E75-4D76-A6FF-0168FB47CB34}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tracer.NLog", "Tracer.NLog\Tracer.NLog.csproj", "{22929B94-C0F5-43C8-B9DE-C756285A2634}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -81,6 +83,10 @@ Global
 		{620E3ACB-7E75-4D76-A6FF-0168FB47CB34}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{620E3ACB-7E75-4D76-A6FF-0168FB47CB34}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{620E3ACB-7E75-4D76-A6FF-0168FB47CB34}.Release|Any CPU.Build.0 = Release|Any CPU
+		{22929B94-C0F5-43C8-B9DE-C756285A2634}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{22929B94-C0F5-43C8-B9DE-C756285A2634}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{22929B94-C0F5-43C8-B9DE-C756285A2634}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{22929B94-C0F5-43C8-B9DE-C756285A2634}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
