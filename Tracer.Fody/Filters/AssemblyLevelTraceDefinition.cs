@@ -34,7 +34,7 @@ namespace Tracer.Fody.Filters
             }
             catch (Exception ex)
             {
-                throw new ApplicationException(String.Format("Failed to parse configuration line {0}. See inner exception for details.", element.ToString()), ex);
+                throw new Exception(String.Format("Failed to parse configuration line {0}. See inner exception for details.", element.ToString()), ex);
             }
         }
 

@@ -1,16 +1,14 @@
-﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Diagnostics;
-using System.Linq;
-using System.Reflection;
-using System.Security.Cryptography;
-using System.Text;
-using System.Threading.Tasks;
-using Serilog.Core;
+﻿using Serilog.Core;
 using Serilog.Events;
 using Serilog.Parsing;
+using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Text;
 using SL = Serilog;
 
 namespace Tracer.Serilog.Adapters
@@ -41,13 +39,7 @@ namespace Tracer.Serilog.Adapters
             _typeName = PrettyFormat(type);
 
             _assembliesParsedForDestructureTypeAttribute.GetOrAdd(type.Assembly, SeekForDestructureTypeAttribute);
-
-            var config = ConfigurationManager.AppSettings["LogUseSafeParameterRendering"];
-
-            if ((config != null) && config.Equals("true", StringComparison.OrdinalIgnoreCase))
-                _renderParameterMethod = GetSafeRenderedFormat;
-            else
-                _renderParameterMethod = GetRenderedFormat;
+            _renderParameterMethod = GetRenderedFormat;
         }
 
         public void LogWrite(string methodInfo, LogEventLevel level, string messageTemplate)
@@ -439,18 +431,5 @@ namespace Tracer.Serilog.Adapters
                 return (string)message;
             return message.ToString();
         }
-
-        private string GetSafeRenderedFormat(object message, string stringRepresentationOfNull = "")
-        {
-            if (message == null)
-                return stringRepresentationOfNull;
-
-            var str = message as string;
-            if (str != null)
-                return str;
-
-            return message.ToString();
-        }
-
     }
 }

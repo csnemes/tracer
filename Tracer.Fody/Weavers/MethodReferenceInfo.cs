@@ -59,12 +59,20 @@ namespace Tracer.Fody.Weavers
 
         public bool IsGeneric
         {
-            get { return _methodDefinition.HasGenericParameters; }
+            get
+            {
+                if (_methodDefinition != null) return _methodDefinition.HasGenericParameters;
+                return _methodReference.HasGenericParameters;
+            }
         }
 
         public Collection<GenericParameter> GenericParameters
         {
-            get { return _methodDefinition.GenericParameters; }
+            get
+            {
+                if (_methodDefinition != null) return _methodDefinition.GenericParameters;
+                return _methodReference.GenericParameters;
+            }
         }
 
         public Collection<TypeReference> GenericArguments

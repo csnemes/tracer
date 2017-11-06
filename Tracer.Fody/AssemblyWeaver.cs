@@ -1,9 +1,12 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using Mono.Cecil;
 using Mono.Cecil.Pdb;
 using Tracer.Fody.Weavers;
+
+[assembly:InternalsVisibleTo("Tracer.Fody.Tests")]
 
 namespace Tracer.Fody
 {
@@ -61,7 +64,6 @@ namespace Tracer.Fody
                 //{
                     using (var moduleDef = ModuleDefinition.ReadModule(assemblyPath, new ReaderParameters
                     {
-                        AssemblyResolver = new DefaultAssemblyResolver(),
                         ReadSymbols = true,
                         ReadWrite = true
                     }))

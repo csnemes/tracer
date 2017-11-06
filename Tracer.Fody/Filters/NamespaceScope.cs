@@ -46,18 +46,18 @@ namespace Tracer.Fody.Filters
             {
                 if (inp.EndsWith(".") || inp.EndsWith("*"))
                 {
-                    throw new ApplicationException("Namespace must end with a literal or with .* or +* symbols.");
+                    throw new Exception("Namespace must end with a literal or with .* or +* symbols.");
                 }
                 if (inp.Contains('*'))
                 {
-                    throw new ApplicationException("Namespace can only contain an asterisk at the end.");
+                    throw new Exception("Namespace can only contain an asterisk at the end.");
                 }
                 namespc = inp;
             }
 
             if (String.IsNullOrWhiteSpace(namespc))
             {
-                throw new ApplicationException("Namespace cannot be empty if specified.");    
+                throw new Exception("Namespace cannot be empty if specified.");    
             }
             
             return new NamespaceScope(namespc, matchMode);
@@ -107,7 +107,7 @@ namespace Tracer.Fody.Filters
                     return ns[_namespace.Length] == '.';
                 }
             }
-            throw new ApplicationException("Unknown match mode");
+            throw new Exception("Unknown match mode");
         }
     }
 }

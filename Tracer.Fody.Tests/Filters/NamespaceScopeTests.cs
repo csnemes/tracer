@@ -29,13 +29,13 @@ namespace Tracer.Fody.Tests.Filters
         public void ParseConfig_FailureTests()
         {
             Action runParse = () => NamespaceScope.Parse("my*name");
-            runParse.ShouldThrow<ApplicationException>();
+            runParse.ShouldThrow<Exception>();
             runParse = () => NamespaceScope.Parse("");
-            runParse.ShouldThrow<ApplicationException>().And.Message.Should().Contain("empty");
+            runParse.ShouldThrow<Exception>().And.Message.Should().Contain("empty");
             runParse = () => NamespaceScope.Parse("my.other.");
-            runParse.ShouldThrow<ApplicationException>();
+            runParse.ShouldThrow<Exception>();
             runParse = () => NamespaceScope.Parse("my.other*");
-            runParse.ShouldThrow<ApplicationException>();
+            runParse.ShouldThrow<Exception>();
         }
 
         [Test]

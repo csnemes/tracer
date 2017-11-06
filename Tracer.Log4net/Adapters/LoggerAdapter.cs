@@ -6,7 +6,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Security.Principal;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -31,7 +30,8 @@ namespace Tracer.Log4Net.Adapters
             _typeName = PrettyFormat(type);
             _typeNamespace = type.Namespace;
             _logger = LogManager.GetLogger(type).Logger;
-            var config = ConfigurationManager.AppSettings["LogUseSafeParameterRendering"];
+
+            var config = Environment.GetEnvironmentVariable("LogUseSafeParameterRendering");
 
             if (config != null && config.Equals("true", StringComparison.OrdinalIgnoreCase))
             {
@@ -422,7 +422,7 @@ namespace Tracer.Log4Net.Adapters
                 LocationInfo = new LocationInfo(_typeName, methodInfo, "", ""),
                 Level = level,
                 Message = GetRenderedFormat(message),
-                TimeStamp = DateTime.Now,
+                TimeStampUtc = DateTime.Now,
                 LoggerName = _logger.Name,
                 ThreadName = Thread.CurrentThread.Name,
                 Domain = SystemInfo.ApplicationFriendlyName,
@@ -500,10 +500,11 @@ namespace Tracer.Log4Net.Adapters
         private static string PrettyFormat(Type type)
         {
             var sb = new StringBuilder();
-            if (type.IsGenericType)
+            
+            if (type.GetTypeInfo().IsGenericType)
             {
                 sb.Append(type.Name.Remove(type.Name.IndexOf('`')));
-                AddGenericPrettyFormat(sb, type.GetGenericArguments());
+                AddGenericPrettyFormat(sb, type.GetGenericTypeDefinition().GenericTypeArguments);
             }
             else
             {

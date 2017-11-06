@@ -214,7 +214,7 @@ namespace Tracer.Fody.Weavers
 
             if (methodReferenceInfo.IsPropertyAccessor() && methodReferenceInfo.IsSetter)
             {
-                throw new ApplicationException("Rewriting static property setters is not supported.");
+                throw new Exception("Rewriting static property setters is not supported.");
             }
 
             var parameters = methodReference.Parameters;

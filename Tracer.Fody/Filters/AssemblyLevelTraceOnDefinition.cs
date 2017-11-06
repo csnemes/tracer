@@ -28,7 +28,7 @@ namespace Tracer.Fody.Filters
             var attribute = element.Attribute(attributeName);
             if (attribute == null)
             {
-                throw new ApplicationException(String.Format("Tracer: TraceOn config element missing attribute '{0}'.", attributeName));
+                throw new Exception(String.Format("Tracer: TraceOn config element missing attribute '{0}'.", attributeName));
             }
 
             switch (attribute.Value.ToLower())
@@ -39,7 +39,7 @@ namespace Tracer.Fody.Filters
                 case "private": return TraceTargetVisibility.All;
                 case "none": return TraceTargetVisibility.None;
                 default:
-                    throw new ApplicationException(String.Format("Tracer: TraceOn config element attribute '{0}' has an invalid value '{1}'.", attributeName, attribute.Value));
+                    throw new Exception(String.Format("Tracer: TraceOn config element attribute '{0}' has an invalid value '{1}'.", attributeName, attribute.Value));
             }
         }
 

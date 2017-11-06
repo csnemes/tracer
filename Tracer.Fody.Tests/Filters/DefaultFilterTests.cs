@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.Remoting.Messaging;
-using System.Text;
 using System.Xml.Linq;
 using FluentAssertions;
 using NUnit.Framework;
@@ -568,7 +566,7 @@ namespace Tracer.Fody.Tests.Filters
                 );
 
             Action runParse = () => DefaultFilter.ParseConfig(input.Descendants());
-            runParse.ShouldThrow<ApplicationException>();
+            runParse.ShouldThrow<Exception>();
         }
 
         [Test]
@@ -579,7 +577,7 @@ namespace Tracer.Fody.Tests.Filters
                 );
 
             Action runParse = () => DefaultFilter.ParseConfig(input.Descendants());
-            runParse.ShouldThrow<ApplicationException>();
+            runParse.ShouldThrow<Exception>();
         }
 
 
