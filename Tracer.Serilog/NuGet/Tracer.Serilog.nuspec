@@ -20,17 +20,17 @@
     </dependencies>
     <references />
     	<releaseNotes>
-        * 1.0.0
-        Initial release
-        * 1.0.1
-        Framework version set to 4.5
-        * 1.1.0
-        Added the ability to destructure types in trace enter and leave. Use DestructureAttribute to mark a type as target for destructuring.
-        Use the assembly level DestructureTypeAttribute to mark types outside of your codebase.
-        * 2.0.0
-        Moved to netstandard 2.0
-	      * 2.1.0
-	      Can use TracerFodySpecialKeyPrefix environment variable to define prefix (instead of $) in $return and $exception.
+* 1.0.0  
+Initial release
+* 1.0.1  
+Framework version set to 4.5
+* 1.1.0  
+Added the ability to destructure types in trace enter and leave. Use DestructureAttribute to mark a type as target for destructuring.
+Use the assembly level DestructureTypeAttribute to mark types outside of your codebase.
+* 2.0.0  
+Moved to netstandard 2.0
+* 2.1.0  
+Can use TracerFodySpecialKeyPrefix environment variable to define prefix (instead of $) in $return and $exception.
       </releaseNotes>
   </metadata>
 </package>
