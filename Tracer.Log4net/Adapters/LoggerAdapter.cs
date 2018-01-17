@@ -23,6 +23,7 @@ namespace Tracer.Log4Net.Adapters
         private readonly string _typeName;
         private readonly string _typeNamespace;
         private readonly Func<object, string, string> _renderParameterMethod;
+        private readonly string _specialPrefix;
 
         public LoggerAdapter(Type type)
         {
@@ -41,6 +42,9 @@ namespace Tracer.Log4Net.Adapters
             {
                 _renderParameterMethod = GetRenderedFormat;
             }
+
+            var configPrefix = Environment.GetEnvironmentVariable("TracerFodySpecialKeyPrefix");
+            _specialPrefix = string.IsNullOrWhiteSpace(configPrefix) ? "$" : configPrefix;
         }
 
         #region Methods required for trace enter and leave
@@ -86,7 +90,7 @@ namespace Tracer.Log4Net.Adapters
                     var parameters = new StringBuilder();  
                     for (int i = 0; i<paramNames.Length; i++)  
                     {  
-                        parameters.AppendFormat("{0}={1}", paramNames[i] ?? "$return", _renderParameterMethod(paramValues[i], NullString));  
+                        parameters.AppendFormat("{0}={1}", FixSpecialParameterName(paramNames[i] ?? "$return"), _renderParameterMethod(paramValues[i], NullString));  
                         if (i<paramNames.Length - 1) parameters.Append(", ");  
                     }  
                     returnValue = parameters.ToString();  
@@ -102,7 +106,17 @@ namespace Tracer.Log4Net.Adapters
                     String.Format("Returned from {1} ({2}). Time taken: {0:0.00} ms.",
                         timeTaken, methodInfo, returnValue), null, propDict);  
             }  
-        }  
+        }
+
+        private string FixSpecialParameterName(string paramName)
+        {
+            if (paramName[0] == '$')
+            {
+                return  _specialPrefix + paramName.Substring(1);
+            }
+
+            return paramName;
+        }
 
         #endregion
 

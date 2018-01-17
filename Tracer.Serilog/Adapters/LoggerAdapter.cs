@@ -25,6 +25,7 @@ namespace Tracer.Serilog.Adapters
         private static readonly ConcurrentDictionary<Assembly, byte> _assembliesParsedForDestructureTypeAttribute = new ConcurrentDictionary<Assembly, byte>(); //value doesnt really matter
         
         private readonly Func<object, string, string> _renderParameterMethod;
+        private readonly string _specialPrefix;
 
         static LoggerAdapter()
         {
@@ -40,6 +41,9 @@ namespace Tracer.Serilog.Adapters
 
             _assembliesParsedForDestructureTypeAttribute.GetOrAdd(type.Assembly, SeekForDestructureTypeAttribute);
             _renderParameterMethod = GetRenderedFormat;
+
+            var configPrefix = Environment.GetEnvironmentVariable("TracerFodySpecialKeyPrefix");
+            _specialPrefix = string.IsNullOrWhiteSpace(configPrefix) ? "$" : configPrefix;
         }
 
         public void LogWrite(string methodInfo, LogEventLevel level, string messageTemplate)
@@ -344,14 +348,14 @@ namespace Tracer.Serilog.Adapters
                         if (paramValues[i] != null && ShouldDestructure(paramValues[i].GetType()))
                         {
                             LogEventProperty prop;
-                            if (_logger.BindProperty(paramNames[i] ?? "$return", paramValues[i] ?? NullString, true, out prop))
+                            if (_logger.BindProperty(FixSpecialParameterName(paramNames[i] ?? "$return"), paramValues[i] ?? NullString, true, out prop))
                             {
                                 props.Add(prop);
                             }
                         }
                         else
                         {
-                            props.Add(new LogEventProperty(paramNames[i] ?? "$return", new ScalarValue(_renderParameterMethod(paramValues[i], NullString))));
+                            props.Add(new LogEventProperty(FixSpecialParameterName(paramNames[i] ?? "$return"), new ScalarValue(_renderParameterMethod(paramValues[i], NullString))));
                         }
                     }
                 }
@@ -374,6 +378,15 @@ namespace Tracer.Serilog.Adapters
 
                 _logger.Write(logEvent);
             }
+        }
+        private string FixSpecialParameterName(string paramName)
+        {
+            if (paramName[0] == '$')
+            {
+                return _specialPrefix + paramName.Substring(1);
+            }
+
+            return paramName;
         }
 
         private bool ShouldDestructure(Type type)

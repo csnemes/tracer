@@ -15,11 +15,14 @@ namespace Tracer.NLog.Adapters
 
         private const string TYPE_INFO = "TypeInfo";
         private const string METHOD_INFO = "MethodInfo";
+        private readonly string _specialPrefix;
 
         public LoggerAdapter(Type type)
         {
             _typeName = PrettyFormat(type);
             _logger = FixLoggerLoggerType(LogManager.GetLogger(type.FullName));
+            var configPrefix = Environment.GetEnvironmentVariable("TracerFodySpecialKeyPrefix");
+            _specialPrefix = string.IsNullOrWhiteSpace(configPrefix) ? "$" : configPrefix;
         }
 
         private static readonly FieldInfo LoggerTypeField = typeof(Logger).GetField("loggerType", BindingFlags.Instance | BindingFlags.NonPublic);
@@ -76,7 +79,7 @@ namespace Tracer.NLog.Adapters
                     var parameters = new StringBuilder();
                     for (int i = 0; i < paramNames.Length; i++)
                     {
-                        parameters.AppendFormat("{0}={1}", paramNames[i] ?? "$return", GetRenderedFormat(paramValues[i], NullString));
+                        parameters.AppendFormat("{0}={1}", FixSpecialParameterName(paramNames[i] ?? "$return"), GetRenderedFormat(paramValues[i], NullString));
                         if (i < paramNames.Length - 1) parameters.Append(", ");
                     }
                     returnValue = parameters.ToString();
@@ -92,6 +95,16 @@ namespace Tracer.NLog.Adapters
                     String.Format("Returned from {1} ({2}). Time taken: {0:0.00} ms.",
                         timeTaken, methodInfo, returnValue), null, propDict);
             }
+        }
+
+        private string FixSpecialParameterName(string paramName)
+        {
+            if (paramName[0] == '$')
+            {
+                return _specialPrefix + paramName.Substring(1);
+            }
+
+            return paramName;
         }
 
         private static void AddGenericPrettyFormat(StringBuilder sb, Type[] genericArgumentTypes)

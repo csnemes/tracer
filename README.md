@@ -9,8 +9,8 @@ Existing adapters are (supporting netstandard 2.0):
 
 |Adapter     |NuGet package              |Version |
 |------------|---------------------------|-------:|
-|Log4Net     |Tracer.Log4Net.Fody        | 2.0.0  |
-|Serilog     |Tracer.Serilog.Fody        | 2.0.0  |
+|Log4Net     |Tracer.Log4Net.Fody        | 2.0.0 or higher |
+|Serilog     |Tracer.Serilog.Fody        | 2.0.0 or higher |
 
 Not yet supporting netstandard 2.0:
 
@@ -97,6 +97,8 @@ Version History for Tracer.Log4Net:
     - Updated to log4net package 2.0.8    
 * 2.0.0
     - Moved to netstandard 2.0    
+* 2.1.0
+    Can use TracerFodySpecialKeyPrefix environment variable to define prefix (instead of $) in $return and $exception.
 
 Version History for Tracer.Serilog:
 ---
@@ -108,7 +110,10 @@ Version History for Tracer.Serilog:
     Added the ability to destructure types in trace enter and leave. Use DestructureAttribute to mark a type as target for destructuring.
     Use the assembly level DestructureTypeAttribute to mark types outside of your codebase.
 * 2.0.0
-    Moved to netstandard 2.0    
+    Moved to netstandard 2.0
+* 2.1.0
+    Can use TracerFodySpecialKeyPrefix environment variable to define prefix (instead of $) in $return and $exception.
+    
 
 Version History for Tracer.4NLog:
 ---

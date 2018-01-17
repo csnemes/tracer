@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Tracer.4NLog.Signed.Fody</id>
-    <version>2.0.0</version>
+    <version>2.1.0</version>
     <authors>csnemes</authors>
     <owners>csnemes</owners>
     <projectUrl>https://github.com/csnemes/tracer</projectUrl>
@@ -20,8 +20,10 @@
     </dependencies>
     <references />
     	<releaseNotes>
-	      * 2.0.0
-	      - Moved to netstandard 2.0
+        * 2.0.0
+        - Moved to netstandard 2.0
+	      * 2.1.0
+	      - Can use TracerFodySpecialKeyPrefix environment variable to define prefix (instead of $) in $return and $exception.
       </releaseNotes>
   </metadata>
 </package>

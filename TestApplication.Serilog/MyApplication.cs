@@ -70,6 +70,16 @@ namespace TestApplication.Serilog
             ReturningStructures2("input");
 
             NullInOut(null);
+
+            try {
+                ThrowException();
+            }
+            catch {}
+        }
+
+        public string ThrowException()
+        {
+            throw new NotImplementedException();
         }
 
         public string DoSomething(int inp, string name)
