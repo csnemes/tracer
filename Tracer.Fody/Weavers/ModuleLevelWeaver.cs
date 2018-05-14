@@ -12,7 +12,7 @@ using Tracer.Fody.Helpers;
 namespace Tracer.Fody.Weavers
 {
     /// <summary>
-    /// Class responsible for adding trace entry and exit calls to methods specified by the filter and replacing static log calls. 
+    /// Class responsible for adding trace entry and exit calls to methods specified by the filter and replacing static log calls.
     /// This is a module level weaver, separate instance should be created for each module.
     ///  </summary>
     internal class ModuleLevelWeaver : ILoggerAdapterMetadataScopeProvider
@@ -32,7 +32,7 @@ namespace Tracer.Fody.Weavers
         /// </summary>
         /// <param name="configuration">Configuration information</param>
         /// <param name="moduleDefinition">Target module</param>
-       
+
         public static void Execute(TraceLoggingConfiguration configuration, ModuleDefinition moduleDefinition)
         {
             try

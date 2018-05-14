@@ -15,7 +15,13 @@
   </PropertyGroup>
   
   <ItemGroup>
-    <PackageReference Include="FodyCecil" Version="2.2.0" />
+    <PackageReference Include="FodyHelpers" Version="3.0.0" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Reference Include="FodyHelpers">
+      <HintPath>..\lib\FodyHelpers.3.0.0\lib\net46\FodyHelpers.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">

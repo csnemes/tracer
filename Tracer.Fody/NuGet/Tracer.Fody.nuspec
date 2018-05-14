@@ -16,28 +16,28 @@
 	<developmentDependency>true</developmentDependency>
     <dependencies>
       <group>
-        <dependency id="Fody" version="[2.2.0,3.0)" />
+        <dependency id="Fody" version="[3.0.0,4.0)" />
       </group>
     </dependencies>
     <references />
 	<releaseNotes>
-* 1.0.0 
-    Initial release 
-* 1.1.0 
-    - Trace leave now logs when a method is exited with an exception 
-    - Bug fix on static log rewrites 
-    - Tracer now creates verifiable code 
-* 1.1.1 
-    - Fixed static log rewrite for constructors and closures/lambdas 
-* 1.2.0 
-    - In the configuration TraceOn target value extended with 'none' which means no tracing by default 
-    - Changed TraceLeave signature to receive start and end ticks instead of elapsed ticks 
-* 1.2.2 
-	- Updated to Fody 1.29.4 	
+* 1.0.0
+    Initial release
+* 1.1.0
+    - Trace leave now logs when a method is exited with an exception
+    - Bug fix on static log rewrites
+    - Tracer now creates verifiable code
+* 1.1.1
+    - Fixed static log rewrite for constructors and closures/lambdas
+* 1.2.0
+    - In the configuration TraceOn target value extended with 'none' which means no tracing by default
+    - Changed TraceLeave signature to receive start and end ticks instead of elapsed ticks
+* 1.2.2
+	- Updated to Fody 1.29.4
 * 1.2.3
 	- Added support for strong named custom adapter assemblies
 * 1.2.4
-	- Added option to trace log constructors with traceConstructors flag. 
+	- Added option to trace log constructors with traceConstructors flag.
 * 1.3.0
     - Static log rewrite now supports rewriting static property getters (e.g one can use Log.IsDebug to avoid costly calls)
     - Fix: Static constructors are excluded from tracing
