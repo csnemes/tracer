@@ -1,8 +1,8 @@
-Tracer 2.0.0
+Tracer 2.2.0
 ======
 
 Tracing and logging rewriter using Fody. It adds trace enter and trace leave log entries for the methods specified. Such calls include incoming and outgoing arguments as well as time spent in the method. It also rewrites static log entries to properly configured log calls. Tracer is the rewriter core on which one of the specific adapters like Tracer.Log4Net is built uppon. Creating custom adapters for your specific needs is very easy.
-Version 2.0.0 supports netstandard 2.0.
+Version 2.x supports netstandard 2.0.
 See [Wiki](https://github.com/csnemes/tracer/wiki) for details.
 
 Existing adapters are (supporting netstandard 2.0):
@@ -11,13 +11,8 @@ Existing adapters are (supporting netstandard 2.0):
 |------------|---------------------------|-------:|
 |Log4Net     |Tracer.Log4Net.Fody        | 2.0.0 or higher |
 |Serilog     |Tracer.Serilog.Fody        | 2.0.0 or higher |
-
-Not yet supporting netstandard 2.0:
-
-|Adapter     |NuGet package              |Version |
-|------------|---------------------------|-------:|
-|NLog        |Tracer.4NLog.Fody          | 1.0.3  |
-|            |Tracer.4NLog.Signed.Fody   | 1.0.3  |
+|NLog        |Tracer.4NLog.Fody          | 2.2.0  |
+|            |Tracer.4NLog.Signed.Fody   | 2.2.0  |
 
 Should you have any question/problem send an email to csaba.nemes@outlook.com or add an issue/request.
 
@@ -70,6 +65,8 @@ Version History for Tracer:
     - Updated dependency to Fody 2.x
 * 2.0.0
     - Moved to netstandard 2.0    
+* 2.2.0
+    - Updated to Fody 3.x
     
 Version History for Tracer.Log4Net:
 ---
@@ -99,6 +96,9 @@ Version History for Tracer.Log4Net:
     - Moved to netstandard 2.0    
 * 2.1.0
     Can use TracerFodySpecialKeyPrefix environment variable to define prefix (instead of $) in $return and $exception.
+* 2.2.0
+    - Updated to Fody 3.x
+    - TraceOn and NoTrace can be put on structs and constructors 
 
 Version History for Tracer.Serilog:
 ---
@@ -113,7 +113,9 @@ Version History for Tracer.Serilog:
     Moved to netstandard 2.0
 * 2.1.0
     Can use TracerFodySpecialKeyPrefix environment variable to define prefix (instead of $) in $return and $exception.
-    
+* 2.2.0
+    Updated to Fody 3.x
+    TraceOn and NoTrace can be put on structs and constructors       
 
 Version History for Tracer.4NLog:
 ---
@@ -123,6 +125,9 @@ Version History for Tracer.4NLog:
     Fixed issue with wrong callsite
 * 1.0.4
     Fixed issue with logger name not containing namespace 
+* 2.2.0
+    Updated to Fody 3.x
+    TraceOn and NoTrace can be put on structs and constructors      
     
 Notes:
 ---
