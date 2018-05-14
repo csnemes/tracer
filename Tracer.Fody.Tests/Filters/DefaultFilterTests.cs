@@ -566,7 +566,7 @@ namespace Tracer.Fody.Tests.Filters
                 );
 
             Action runParse = () => DefaultFilter.ParseConfig(input.Descendants());
-            runParse.ShouldThrow<Exception>();
+            runParse.Should().Throw<Exception>();
         }
 
         [Test]
@@ -577,7 +577,7 @@ namespace Tracer.Fody.Tests.Filters
                 );
 
             Action runParse = () => DefaultFilter.ParseConfig(input.Descendants());
-            runParse.ShouldThrow<Exception>();
+            runParse.Should().Throw<Exception>();
         }
 
 

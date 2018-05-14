@@ -14,7 +14,7 @@ namespace TestApplication
         {
             log4net.Config.XmlConfigurator.Configure(new FileInfo("Logging.config"));
             Console.WriteLine("Starting application...");
-            var myApp = new MyApplication();
+            var myApp = new MyApplication("inputparam");
             myApp.Run();
             Console.WriteLine("Press Enter to stop");
             Console.ReadLine();

@@ -5,10 +5,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="FluentAssertions" Version="4.19.4" />
-    <PackageReference Include="FodyHelpers" Version="3.0.0" />
-    <PackageReference Include="NUnit" Version="3.8.1" />
-    <PackageReference Include="System.IO.FileSystem" Version="4.0.1" />
+    <PackageReference Include="FluentAssertions" Version="5.3.0" />
+    <PackageReference Include="FodyHelpers" Version="3.0.3" />
+    <PackageReference Include="NUnit" Version="3.10.1" />
+    <PackageReference Include="System.IO.FileSystem" Version="4.3.0" />
   </ItemGroup>
 
   <ItemGroup>

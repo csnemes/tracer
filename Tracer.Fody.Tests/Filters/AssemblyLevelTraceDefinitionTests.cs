@@ -16,21 +16,21 @@ namespace Tracer.Fody.Tests.Filters
         public void Parse_TraceOn_Missing_ClassAttribute()
         {
             Action action = () => AssemblyLevelTraceOnDefinition.ParseFromConfig(XElement.Parse("<TraceOn />"));
-            action.ShouldThrow<Exception>().And.Message.Should().Contain("class");
+            action.Should().Throw<Exception>().And.Message.Should().Contain("class");
         }
 
         [Test]
         public void Parse_TraceOn_Missing_MethodAttribute()
         {
             Action action = () => AssemblyLevelTraceOnDefinition.ParseFromConfig(XElement.Parse("<TraceOn class=\"public\" />"));
-            action.ShouldThrow<Exception>().And.Message.Should().Contain("method");
+            action.Should().Throw<Exception>().And.Message.Should().Contain("method");
         }
 
         [Test]
         public void Parse_TraceOn_MethodAttribute_WrongValue()
         {
             Action action = () => AssemblyLevelTraceOnDefinition.ParseFromConfig(XElement.Parse("<TraceOn class=\"public\" method=\"wrng\" />"));
-            action.ShouldThrow<Exception>().And.Message.Should().Contain("method").And.Contain("wrng");
+            action.Should().Throw<Exception>().And.Message.Should().Contain("method").And.Contain("wrng");
         }
 
         [Test]

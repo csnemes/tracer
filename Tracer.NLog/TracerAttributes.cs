@@ -6,7 +6,7 @@ namespace TracerAttributes
     /// <summary>
     /// This attributes specifies that the marked element(s) should be traced.
     /// </summary>
-    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method | AttributeTargets.Property, AllowMultiple = true, Inherited = true)]
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method | AttributeTargets.Property | AttributeTargets.Constructor | AttributeTargets.Struct, AllowMultiple = true, Inherited = true)]
     public class TraceOn : Attribute
     {
         public TraceTarget Target { get; set; }
@@ -23,7 +23,7 @@ namespace TracerAttributes
     /// <summary>
     /// This attribute excludes the marked element from tracing.
     /// </summary>
-    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method | AttributeTargets.Property, AllowMultiple = true, Inherited = true)]
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method | AttributeTargets.Property | AttributeTargets.Constructor | AttributeTargets.Struct, AllowMultiple = true, Inherited = true)]
     public class NoTrace : Attribute
     {
     }

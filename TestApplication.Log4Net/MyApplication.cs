@@ -14,6 +14,11 @@ namespace TestApplication
 {
     public class MyApplication
     {
+        [TraceOn]
+        public MyApplication(string inp)
+        {
+        }
+
         private static string x = "abc";
 
         private string _testProperty;
