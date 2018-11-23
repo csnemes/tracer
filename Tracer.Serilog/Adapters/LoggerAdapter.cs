@@ -297,7 +297,7 @@ namespace Tracer.Serilog.Adapters
 
         public void TraceEnter(string methodName, string[] paramNames, object[] paramValues)
         {
-            if (_logger.IsEnabled(LogEventLevel.Debug))
+            if (_logger.IsEnabled(LogEventLevel.Verbose))
             {
                 var props = new List<LogEventProperty>();
 
@@ -326,7 +326,7 @@ namespace Tracer.Serilog.Adapters
                     new LogEventProperty("CallingParameters", new StructureValue(props))
                 };
 
-                var logEvent = new LogEvent(DateTimeOffset.Now, LogEventLevel.Debug, null, _traceEnterTemplate, properties);
+                var logEvent = new LogEvent(DateTimeOffset.Now, LogEventLevel.Verbose, null, _traceEnterTemplate, properties);
 
                 logEvent.AddPropertyIfAbsent(new LogEventProperty("TraceType", new ScalarValue("Enter")));
                 logEvent.AddPropertyIfAbsent(new LogEventProperty("ClassName", new ScalarValue(_typeName)));
@@ -337,7 +337,7 @@ namespace Tracer.Serilog.Adapters
 
         public void TraceLeave(string methodName, long startTicks, long endTicks, string[] paramNames, object[] paramValues)
         {
-            if (_logger.IsEnabled(LogEventLevel.Debug))
+            if (_logger.IsEnabled(LogEventLevel.Verbose))
             {
                 var props = new List<LogEventProperty>();
 
@@ -369,7 +369,7 @@ namespace Tracer.Serilog.Adapters
                     new LogEventProperty("TimeTaken", new ScalarValue(timeTaken)),
                 };
 
-                var logEvent = new LogEvent(DateTimeOffset.Now, LogEventLevel.Debug, null, _traceLeaveTemplate, properties);
+                var logEvent = new LogEvent(DateTimeOffset.Now, LogEventLevel.Verbose, null, _traceLeaveTemplate, properties);
 
                 logEvent.AddPropertyIfAbsent(new LogEventProperty("StartTicks", new ScalarValue(startTicks)));
                 logEvent.AddPropertyIfAbsent(new LogEventProperty("EndTicks", new ScalarValue(endTicks)));
