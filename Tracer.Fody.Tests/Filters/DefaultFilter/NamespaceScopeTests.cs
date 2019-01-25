@@ -1,13 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Xml.Linq;
 using FluentAssertions;
 using NUnit.Framework;
-using Tracer.Fody.Filters;
+using Tracer.Fody.Filters.DefaultFilter;
 
-namespace Tracer.Fody.Tests.Filters
+namespace Tracer.Fody.Tests.Filters.DefaultFilter
 {
     [TestFixture]
     public class NamespaceScopeTests

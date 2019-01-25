@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using FluentAssertions;
 using NUnit.Framework;
 using Tracer.Fody.Filters;
+using Tracer.Fody.Filters.DefaultFilter;
 using Tracer.Fody.Tests.MockLoggers;
 
 namespace Tracer.Fody.Tests.TraceTests

@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
-namespace Tracer.Fody.Filters
+namespace Tracer.Fody.Filters.DefaultFilter
 {
     /// <summary>
     /// Class representing the namespace scope of assembly level TraceOn and NoTrace definitions

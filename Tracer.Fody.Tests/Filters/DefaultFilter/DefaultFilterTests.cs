@@ -1,13 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
 using FluentAssertions;
 using NUnit.Framework;
 using Tracer.Fody.Filters;
+using Tracer.Fody.Filters.DefaultFilter;
 using Tracer.Fody.Weavers;
 
-namespace Tracer.Fody.Tests.Filters
+namespace Tracer.Fody.Tests.Filters.DefaultFilter
 {
     [TestFixture]
     public class DefaultFilterTests : TestBase
@@ -15,7 +15,7 @@ namespace Tracer.Fody.Tests.Filters
         [Test]
         public void Parse_MostBasicConfiguration()
         {
-            var result = DefaultFilter.ParseConfig(XElement.Parse(@"<root>
+            var result = Fody.Filters.DefaultFilter.DefaultFilter.ParseConfig(XElement.Parse(@"<root>
                 <TraceOn class=""public"" method =""public"" />
             </root>").Descendants()).ToList();
 
@@ -26,7 +26,7 @@ namespace Tracer.Fody.Tests.Filters
         [Test]
         public void Parse_MultiElement_Configuration()
         {
-            var result = DefaultFilter.ParseConfig(XElement.Parse(@"<root>
+            var result = Fody.Filters.DefaultFilter.DefaultFilter.ParseConfig(XElement.Parse(@"<root>
                 <TraceOn class=""public"" method =""public"" />
                 <TraceOn namespace=""rootnamespace"" class=""public"" method =""public"" />
                 <NoTrace namespace=""rootnamespace.other"" />
@@ -41,7 +41,7 @@ namespace Tracer.Fody.Tests.Filters
         [Test]
         public void Creation_MultiElementConfig()
         {
-            var filter = new DefaultFilter(XElement.Parse(@"<root>
+            var filter = new Fody.Filters.DefaultFilter.DefaultFilter(XElement.Parse(@"<root>
                 <TraceOn class=""public"" method =""public"" />
                 <TraceOn namespace=""rootnamespace"" class=""public"" method =""public"" />
                 <NoTrace namespace=""rootnamespace.other"" />
@@ -537,7 +537,7 @@ namespace Tracer.Fody.Tests.Filters
                 new XElement("TraceOn", new XAttribute("class", "public"), new XAttribute("method", "public"))
                 );
 
-            var parseResult = DefaultFilter.ParseConfig(input.Descendants()).ToList();
+            var parseResult = Fody.Filters.DefaultFilter.DefaultFilter.ParseConfig(input.Descendants()).ToList();
             parseResult.Count.Should().Be(1);
             parseResult[0].Should().BeOfType<AssemblyLevelTraceOnDefinition>();
             ((AssemblyLevelTraceOnDefinition)parseResult[0]).TargetClass.Should().Be(TraceTargetVisibility.Public);
@@ -551,7 +551,7 @@ namespace Tracer.Fody.Tests.Filters
                 new XElement("TraceOn", new XAttribute("class", "internal"), new XAttribute("method", "private"))
                 );
 
-            var parseResult = DefaultFilter.ParseConfig(input.Descendants()).ToList();
+            var parseResult = Fody.Filters.DefaultFilter.DefaultFilter.ParseConfig(input.Descendants()).ToList();
             parseResult.Count.Should().Be(1);
             parseResult[0].Should().BeOfType<AssemblyLevelTraceOnDefinition>();
             ((AssemblyLevelTraceOnDefinition)parseResult[0]).TargetClass.Should().Be(TraceTargetVisibility.InternalOrMoreVisible);
@@ -565,7 +565,7 @@ namespace Tracer.Fody.Tests.Filters
                 new XElement("TraceOn", new XAttribute("method", "private"))
                 );
 
-            Action runParse = () => DefaultFilter.ParseConfig(input.Descendants());
+            Action runParse = () => Fody.Filters.DefaultFilter.DefaultFilter.ParseConfig(input.Descendants());
             runParse.Should().Throw<Exception>();
         }
 
@@ -576,7 +576,7 @@ namespace Tracer.Fody.Tests.Filters
                 new XElement("TraceOn", new XAttribute("class", "wrongvalue"), new XAttribute("method", "private"))
                 );
 
-            Action runParse = () => DefaultFilter.ParseConfig(input.Descendants());
+            Action runParse = () => Fody.Filters.DefaultFilter.DefaultFilter.ParseConfig(input.Descendants());
             runParse.Should().Throw<Exception>();
         }
 
@@ -585,7 +585,7 @@ namespace Tracer.Fody.Tests.Filters
             TraceTargetVisibility methodTarget)
         {
             var config = new[] {new AssemblyLevelTraceOnDefinition(NamespaceScope.All, classTarget, methodTarget)};
-            return new DefaultFilter(config);
+            return new Fody.Filters.DefaultFilter.DefaultFilter(config);
         }
     }
 }

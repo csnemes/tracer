@@ -6,6 +6,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using Tracer.Fody.Filters;
+using Tracer.Fody.Filters.DefaultFilter;
+using Tracer.Fody.Filters.PatternFilter;
 using Tracer.Fody.Weavers;
 
 namespace Tracer.Fody.Helpers
@@ -23,6 +25,7 @@ namespace Tracer.Fody.Helpers
         private string _logManager;
         private string _logger;
         private string _staticLogger;
+        private string _filter;
         private bool _traceConstructorsFlag;
         private bool _tracePropertiesFlag = true;
         private IEnumerable<XElement> _filterConfigElements;
@@ -40,10 +43,18 @@ namespace Tracer.Fody.Helpers
             {
                 var result = TraceLoggingConfiguration.New
                     .WithAdapterAssembly(_adapterAssembly)
-                    .WithFilter(new DefaultFilter(_filterConfigElements))
                     .WithLogger(_logger)
                     .WithLogManager(_logManager)
                     .WithStaticLogger(_staticLogger);
+
+                if (String.Equals(_filter, "pattern", StringComparison.OrdinalIgnoreCase))
+                {
+                    result.WithFilter(new PatternFilter(_filterConfigElements));
+                }
+                else
+                {
+                    result.WithFilter(new DefaultFilter(_filterConfigElements));
+                }
 
                 if (_traceConstructorsFlag) { result.WithConstructorTraceOn(); }
                     else { result.WithConstructorTraceOff(); }
@@ -76,6 +87,7 @@ namespace Tracer.Fody.Helpers
                 _staticLogger = GetAttributeValue(element, "staticLogger", false);
                 _traceConstructorsFlag = Boolean.Parse(GetAttributeValueOrDefault(element, "traceConstructors", Boolean.FalseString));
                 _tracePropertiesFlag = Boolean.Parse(GetAttributeValueOrDefault(element, "traceProperties", Boolean.TrueString));
+                _filter = GetAttributeValue(element, "filter", false);
                 _filterConfigElements = element.Descendants();
             }
             catch (Exception ex)

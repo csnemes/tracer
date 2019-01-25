@@ -1,15 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml.Linq;
 using Mono.Cecil;
 using Tracer.Fody.Helpers;
 using Tracer.Fody.Weavers;
 
-namespace Tracer.Fody.Filters
+namespace Tracer.Fody.Filters.DefaultFilter
 {
     /// <summary>
     /// The default filter used for weaving. It processes information from the FodyWeavers.xml belonging to Tracer to 

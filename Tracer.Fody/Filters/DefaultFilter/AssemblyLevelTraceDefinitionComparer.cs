@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Generic;
 
-namespace Tracer.Fody.Filters
+namespace Tracer.Fody.Filters.DefaultFilter
 {
     /// <summary>
     /// Comparer to compare two <see cref="AssemblyLevelTraceDefinition"/> instances.

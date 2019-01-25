@@ -2,7 +2,7 @@
 using System.Xml.Linq;
 using Mono.Cecil;
 
-namespace Tracer.Fody.Filters
+namespace Tracer.Fody.Filters.DefaultFilter
 {
     /// <summary>
     /// Specifies that the namespace should be traced for the given class and method visibility level.
