@@ -275,8 +275,10 @@ namespace Tracer.Fody.Weavers
             var index = startingIndex;
             foreach (var parameter in parameters)
             {
+                var parameterName = parameter.Name;
+                if (string.IsNullOrWhiteSpace(parameterName)) parameterName = "<unknown>";
                 //set name at index
-                instructions.AddRange(StoreValueReadByInstructionsInArray(paramNamesDef, index, Instruction.Create(OpCodes.Ldstr, parameter.Name)));
+                instructions.AddRange(StoreValueReadByInstructionsInArray(paramNamesDef, index, Instruction.Create(OpCodes.Ldstr, parameterName)));
                 instructions.AddRange(StoreParameterInObjectArray(paramValuesDef, index, parameter));
                 index++;
             }

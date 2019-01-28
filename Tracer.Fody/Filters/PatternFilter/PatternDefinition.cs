@@ -41,8 +41,19 @@ namespace Tracer.Fody.Filters.PatternFilter
 
 
             var memberPart = pattern.Substring(memberSeparatorIdx + 1);
-            var classPart = pattern.Substring(classSeparatorIdx, memberSeparatorIdx - classSeparatorIdx);
+            var classPart = pattern.Substring(classSeparatorIdx + 1, memberSeparatorIdx - classSeparatorIdx - 1);
             var nameSpacePart = pattern.Substring(0, classSeparatorIdx);
+
+            //fixing weird dottings
+            if (nameSpacePart.Length > 2)
+            {
+                if (nameSpacePart[0] == '.' && nameSpacePart[1] != '.') nameSpacePart = "." + nameSpacePart;
+                if (nameSpacePart[nameSpacePart.Length-1] == '.' && nameSpacePart[nameSpacePart.Length-2] != '.') nameSpacePart = nameSpacePart + ".";
+            }
+            else
+            {
+                if (nameSpacePart[0] == '.') nameSpacePart = "." + nameSpacePart;
+            }
 
             return new PatternDefinition(traceEnabled, new NamespaceMatcher(nameSpacePart), ClassMatcher.Create(classPart), MemberMatcher.Create(memberPart));
         }

@@ -12,6 +12,8 @@ namespace Tracer.Fody.Filters.PatternFilter
         private readonly bool _matchPublic;
         private readonly bool _matchNonPublic;
 
+        private static readonly string[] Keywords = { "public", "nonpublic", "internal" };
+
         private ClassMatcher(string regexPattern, bool matchPublic, bool matchNonPublic)
         {
             _regex = new Regex(regexPattern,
@@ -30,6 +32,12 @@ namespace Tracer.Fody.Filters.PatternFilter
         {
             var className = typeDefinition.Name;
 
+            if (typeDefinition.HasGenericParameters)
+            {
+                var backtickIndex = className.IndexOf('`');
+                className = className.Substring(0, backtickIndex);
+            }
+
             return _regex.IsMatch(className) && CheckVisibility();
 
             bool CheckVisibility()
@@ -39,8 +47,10 @@ namespace Tracer.Fody.Filters.PatternFilter
             }
         }
 
-        public static ClassMatcher Create(string filterExpression)
+        public static ClassMatcher Create(string input)
         {
+            var filterExpression = input;
+
             if (string.IsNullOrWhiteSpace(filterExpression))
                 throw new ArgumentException("Filter expression cannot be empty.", nameof(filterExpression));
 
@@ -68,7 +78,12 @@ namespace Tracer.Fody.Filters.PatternFilter
                 throw new ArgumentException("Filter expression's class name part cannot be empty.",
                     nameof(filterExpression));
 
+            var badKeyword = conditions.SkipWhile(it => Keywords.Contains(it)).FirstOrDefault();
+            if (badKeyword != null)
+                throw new ArgumentException($"Keyword {badKeyword} is not recognized in {input}");
+
             var regexPattern = filterExpression.Replace("?", "[a-z0-9_]").Replace("*", "[a-z0-9_]*");
+            regexPattern = "^" + regexPattern + "$";
 
             return new ClassMatcher(regexPattern,
                 conditions.Contains("public"),

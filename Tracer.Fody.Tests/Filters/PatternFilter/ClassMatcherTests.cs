@@ -18,6 +18,13 @@ namespace Tracer.Fody.Tests.Filters.PatternFilter
         }
 
         [Test]
+        public void InvalidKeywordFails()
+        {
+            Action action = () => ClassMatcher.Create("[private]MyClass");
+            action.Should().Throw<ArgumentException>();
+        }
+
+        [Test]
         public void FullDefinitionWithoutPrefixMatch()
         {
             var matcher = ClassMatcher.Create("MyClass");
@@ -85,13 +92,38 @@ namespace Tracer.Fody.Tests.Filters.PatternFilter
             matcher.IsMatch(GetTypeDefinition(typeof(MyInternalClass))).Should().BeTrue();
         }
 
- private TypeDefinition GetTypeDefinition(Type runtimeType)
+        [Test]
+        public void PartialDefinitionGenericClass()
+        {
+            var matcher = ClassMatcher.Create("My*");
+            matcher.IsMatch(GetTypeDefinition(typeof(MyGeneric<>))).Should().BeTrue();
+        }
+
+        [Test]
+        public void PartialDefinitionGenericInstanceClass()
+        {
+            var matcher = ClassMatcher.Create("My*");
+            matcher.IsMatch(GetGenericTypeDefinition(typeof(MyGeneric<>), typeof(string))).Should().BeTrue();
+        }
+
+        private TypeDefinition GetTypeDefinition(Type runtimeType)
         {
             var asmDef = AssemblyDefinition.ReadAssembly(runtimeType.Module.FullyQualifiedName);
             var types = asmDef.MainModule.GetAllTypes();
             return types.FirstOrDefault(it => it.FullName == runtimeType.FullName);
         }
+
+        private TypeDefinition GetGenericTypeDefinition(Type genericType, Type paramType)
+        {
+            var asmDef = AssemblyDefinition.ReadAssembly(genericType.Module.FullyQualifiedName);
+            var types = asmDef.MainModule.GetAllTypes();
+            var type = types.FirstOrDefault(it => it.FullName == genericType.FullName);
+            var genType = type.MakeGenericInstanceType(asmDef.MainModule.ImportReference(paramType)).Resolve();
+            return genType;
+        }
     }
+
+    public class MyGeneric<T> { }
 
     public class MyClass { }
 

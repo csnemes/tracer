@@ -12,6 +12,8 @@ namespace TestApplication.Serilog
     {
         public void Run()
         {
+            InlineTest(42);
+
             Log.Verbose("message");
             Log.Verbose("Logging integer {intVal} and string {stringVal}", 42, "hello");
             Log.Verbose("StructLog {@destr}", new { StringVal = "hello", IntVal = 42 });
@@ -75,6 +77,18 @@ namespace TestApplication.Serilog
                 ThrowException();
             }
             catch {}
+        }
+
+        public string InlineTest(int input1)
+        {
+            var locStr = "Hello2";
+            var x = Inline(42, "Hello");
+            return x.Reverse().ToString();
+
+            string Inline(int inp, string inp2)
+            {
+                return inp2 + locStr + input1;
+            }
         }
 
         public string ThrowException()

@@ -19,6 +19,8 @@ namespace Tracer.Fody.Filters.PatternFilter
         private readonly bool _matchPropertySet;
         private readonly bool _matchPropertyGet;
 
+        private static readonly string[] Keywords = { "public", "private", "internal", "protected", "instance", "static", "method", "get", "set" };
+
         private MemberMatcher(string regexPattern, bool matchPublic, bool matchPrivate, bool matchInternal, bool matchProtected,
             bool matchInstance, bool matchStatic, bool matchMethod, bool matchPropertySet, bool matchPropertyGet)
         {
@@ -56,7 +58,15 @@ namespace Tracer.Fody.Filters.PatternFilter
 
         public bool IsMatch(MethodDefinition methodDefinition)
         {
-            var methodName = methodDefinition.Name;
+            var methodName = (methodDefinition.IsSetter || methodDefinition.IsGetter) ? methodDefinition.Name.Substring(4) :
+                methodDefinition.Name;
+
+            if (methodDefinition.HasGenericParameters)
+            {
+                var backtickIndex = methodName.IndexOf('`');
+                if (backtickIndex > 0) methodName = methodName.Substring(0, backtickIndex);
+            }
+
             return _regex.IsMatch(methodName) && CheckVisibility() && CheckStaticOrInstance() && CheckMemberType();
 
             bool CheckStaticOrInstance()
@@ -82,8 +92,10 @@ namespace Tracer.Fody.Filters.PatternFilter
             }
         }
 
-        public static MemberMatcher Create(string filterExpression)
+        public static MemberMatcher Create(string input)
         {
+            var filterExpression = input;
+
             if (string.IsNullOrWhiteSpace(filterExpression))
                 throw new ArgumentException("Filter expression cannot be empty.", nameof(filterExpression));
 
@@ -111,7 +123,13 @@ namespace Tracer.Fody.Filters.PatternFilter
                 throw new ArgumentException("Filter expression's method name part cannot be empty.",
                     nameof(filterExpression));
 
+            var badKeyword = conditions.SkipWhile(it => Keywords.Contains(it)).FirstOrDefault();
+            if (badKeyword != null)
+                throw new ArgumentException($"Keyword {badKeyword} is not recognized in {input}");
+
             var regexPattern = filterExpression.Replace("?", "[a-z0-9_]").Replace("*", "[a-z0-9_]*");
+
+            regexPattern = "^" + regexPattern + "$";
 
             return new MemberMatcher(regexPattern,
                 conditions.Contains("public"),

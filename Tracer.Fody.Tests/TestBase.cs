@@ -62,7 +62,7 @@ namespace Tracer.Fody.Tests
         {
             var destPath = GetDestinationFilePath(assemblyName);
 
-            using (var provider = new CSharpCodeProvider())
+            using (var provider = GetPathHackedProvider())
             {
                 var parameters = new CompilerParameters { OutputAssembly = destPath, IncludeDebugInformation = true };
 
@@ -94,6 +94,19 @@ namespace Tracer.Fody.Tests
 
                 return destPath;
             }
+        }
+
+        static CSharpCodeProvider GetPathHackedProvider()
+        {
+            var provider = new Microsoft.CodeDom.Providers.DotNetCompilerPlatform.CSharpCodeProvider();
+            var settings = provider
+                .GetType()
+                .GetField("_compilerSettings", BindingFlags.Instance | BindingFlags.NonPublic)
+                .GetValue(provider);
+            var path = settings.GetType().GetField("_compilerFullPath", BindingFlags.Instance | BindingFlags.NonPublic);
+            path.SetValue(settings, ((string)path.GetValue(settings)).Replace(@"bin\roslyn\", @"roslyn\"));
+
+            return provider;
         }
 
         private void ResharperUnitTestRunnerFix(string[] additonalAssemblies)

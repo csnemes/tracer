@@ -5,7 +5,9 @@
       logger="Tracer.Serilog.Adapters.LoggerAdapter"
       staticLogger="Tracer.Serilog.Log"
       traceConstructors="true"
-      traceProperties="false">
-    <TraceOn class="private" method="private" />
+      traceProperties="false"
+      filter="pattern" >
+    <TraceOn pattern="TestApplication.*..My*.[public]*Method" />
+    <TraceOn pattern="TestApplication.*..[internal]My*.*Method" />
   </Tracer>
 </Weavers>

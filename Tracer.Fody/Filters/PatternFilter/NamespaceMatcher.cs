@@ -19,6 +19,9 @@ namespace Tracer.Fody.Filters.PatternFilter
         private Regex CreateRegexFromPattern(string pattern)
         {
             var regexPattern = pattern.Replace("?", "[a-z0-9_]").Replace("*", "[a-z0-9_]*").Replace("..", "[a-z0-9_.]*");
+
+            regexPattern = "^" + regexPattern + "$";
+
             var result = new Regex(regexPattern, RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.CultureInvariant);
             return result;
         }
