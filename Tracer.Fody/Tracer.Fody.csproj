@@ -1,32 +1,53 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   
-  <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <OutputType>Library</OutputType>
-  </PropertyGroup>
-  
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
-    <AssemblyVersion>2.0.0.0</AssemblyVersion>
-    <FileVersion>2.0.0.0</FileVersion>
-    <ApplicationIcon />
+    <TargetFrameworks>net46;netstandard2.0</TargetFrameworks>
+    <AssemblyVersion>3.0.0.0</AssemblyVersion>
+    <FileVersion>3.0.0.0</FileVersion>
     <OutputTypeEx>library</OutputTypeEx>
     <StartupObject />
-    <Version>2.0.0</Version>
   </PropertyGroup>
   
   <ItemGroup>
-    <PackageReference Include="FodyHelpers" Version="3.0.3" />
+    <None Remove="Tracer.Fody.xcf" />
   </ItemGroup>
   
   <ItemGroup>
-    <Reference Include="FodyHelpers">
-      <HintPath>..\lib\FodyHelpers.3.0.0\lib\net46\FodyHelpers.dll</HintPath>
-    </Reference>
+    <Content Include="Tracer.Fody.xcf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  
+  <ItemGroup>
+    <PackageReference Include="FodyHelpers" Version="3.3.5" />
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="copy $(TargetPath) $(SolutionDir)\tools" />
-    <Exec Command="copy $(TargetPath) $(ProjectDir)\NuGet" />
+    
+    <PropertyGroup>
+      <WeaverFolder Condition="$(TargetFramework) != 'netstandard2.0'">netclassicweaver</WeaverFolder>
+      <WeaverFolder Condition="$(TargetFramework) == 'netstandard2.0'">netstandardweaver</WeaverFolder>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <OutputFiles Include="$(OutDir)**\Tracer.Fody.dll"></OutputFiles>
+      <OutputFiles Include="$(OutDir)**\Tracer.Fody.pdb"></OutputFiles>
+      <OutputFiles Include="$(OutDir)**\Tracer.Fody.xcf"></OutputFiles>
+    </ItemGroup>
+
+    <Copy SourceFiles="@(OutputFiles)" DestinationFolder="$(SolutionDir)\TestApplication.Log4Net\tools\$(WeaverFolder)" OverwriteReadOnlyFiles="true"></Copy>
+    <Copy SourceFiles="@(OutputFiles)" DestinationFolder="$(SolutionDir)\TestApplication.Log4Net.Core\tools\$(WeaverFolder)" OverwriteReadOnlyFiles="true"></Copy>
+    <Copy SourceFiles="@(OutputFiles)" DestinationFolder="$(SolutionDir)\TestApplication.Log4Net.Netstd\tools\$(WeaverFolder)" OverwriteReadOnlyFiles="true"></Copy>
+    <Copy SourceFiles="@(OutputFiles)" DestinationFolder="$(SolutionDir)\TestApplication.Serilog\tools\$(WeaverFolder)" OverwriteReadOnlyFiles="true"></Copy>
+    <Copy SourceFiles="@(OutputFiles)" DestinationFolder="$(SolutionDir)\TestApplication.Serilog.Core\tools\$(WeaverFolder)" OverwriteReadOnlyFiles="true"></Copy>
+    <Copy SourceFiles="@(OutputFiles)" DestinationFolder="$(SolutionDir)\TestApplication.Serilog.Netstd\tools\$(WeaverFolder)" OverwriteReadOnlyFiles="true"></Copy>
+    <Copy SourceFiles="@(OutputFiles)" DestinationFolder="$(SolutionDir)\TestApplication.NLog.Netstd\tools\$(WeaverFolder)" OverwriteReadOnlyFiles="true"></Copy>
+    <Copy SourceFiles="@(OutputFiles)" DestinationFolder="$(SolutionDir)\TestApplication.PatternFilter\tools\$(WeaverFolder)" OverwriteReadOnlyFiles="true"></Copy>
+
+    <Copy SourceFiles="@(OutputFiles)" DestinationFolder="$(SolutionDir)\Tracer.Log4Net\NuGet\$(WeaverFolder)" OverwriteReadOnlyFiles="true"></Copy>
+    <Copy SourceFiles="@(OutputFiles)" DestinationFolder="$(SolutionDir)\Tracer.Serilog\NuGet\$(WeaverFolder)" OverwriteReadOnlyFiles="true"></Copy>
+    <Copy SourceFiles="@(OutputFiles)" DestinationFolder="$(SolutionDir)\Tracer.NLog\NuGet\$(WeaverFolder)" OverwriteReadOnlyFiles="true"></Copy>
+
   </Target>
   
 </Project>

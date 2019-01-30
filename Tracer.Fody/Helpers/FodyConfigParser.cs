@@ -30,10 +30,10 @@ namespace Tracer.Fody.Helpers
         private bool _tracePropertiesFlag = true;
         private IEnumerable<XElement> _filterConfigElements;
 
-        public static FodyConfigParser Parse(XElement element)
+        public static FodyConfigParser Parse(XElement element, XElement defaultElement)
         {
             var result = new FodyConfigParser();
-            result.DoParse(element);
+            result.DoParse(element, defaultElement);
             return result;
         }
 
@@ -76,15 +76,15 @@ namespace Tracer.Fody.Helpers
             get { return _error; }
         }
 
-        private void DoParse(XElement element)
+        private void DoParse(XElement element, XElement defaultElement)
         {
 
             try
             {
-                _adapterAssembly = GetAttributeValue(element, "adapterAssembly", true);
-                _logManager = GetAttributeValue(element, "logManager", true);
-                _logger = GetAttributeValue(element, "logger", true);
-                _staticLogger = GetAttributeValue(element, "staticLogger", false);
+                _adapterAssembly = GetAttributeValue(element, "adapterAssembly", false) ?? GetAttributeValue(defaultElement, "adapterAssembly", true);
+                _logManager = GetAttributeValue(element, "logManager", false) ?? GetAttributeValue(defaultElement, "logManager", true); ;
+                _logger = GetAttributeValue(element, "logger", false) ?? GetAttributeValue(defaultElement, "logger", true); ;
+                _staticLogger = GetAttributeValue(element, "staticLogger", false) ?? GetAttributeValue(defaultElement, "staticLogger", true); ;
                 _traceConstructorsFlag = Boolean.Parse(GetAttributeValueOrDefault(element, "traceConstructors", Boolean.FalseString));
                 _tracePropertiesFlag = Boolean.Parse(GetAttributeValueOrDefault(element, "traceProperties", Boolean.TrueString));
                 _filter = GetAttributeValue(element, "filter", false);

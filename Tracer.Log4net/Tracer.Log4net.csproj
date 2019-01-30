@@ -1,17 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <OutputType>Library</OutputType>
-  </PropertyGroup>
-
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFrameworks>net46;netstandard2.0</TargetFrameworks>
     <ApplicationIcon />
     <OutputTypeEx>library</OutputTypeEx>
     <StartupObject />
-    <AssemblyVersion>2.1.0.0</AssemblyVersion>
-    <FileVersion>2.1.0.0</FileVersion>
-    <Version>2.1.0</Version>
+    <AssemblyVersion>3.0.0.0</AssemblyVersion>
+    <FileVersion>3.0.0.0</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -19,7 +14,13 @@
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="copy $(TargetPath) $(ProjectDir)\NuGet\lib\netstandard2.0" />
+
+    <ItemGroup>
+      <OutputFiles Include="$(OutDir)**\Tracer.Log4Net.dll"></OutputFiles>
+      <OutputFiles Include="$(OutDir)**\Tracer.Log4Net.pdb"></OutputFiles>
+    </ItemGroup>
+
+    <Copy SourceFiles="@(OutputFiles)" DestinationFolder="$(ProjectDir)\NuGet\lib\$(TargetFramework)" OverwriteReadOnlyFiles="true"></Copy>
   </Target>
 
 </Project>

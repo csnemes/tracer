@@ -1,0 +1,36 @@
+﻿<?xml version="1.0"?>
+<package>
+  <metadata>
+    <id>Tracer.4NLog.Fody</id>
+    <version>3.0.0-beta</version>
+    <authors>csnemes</authors>
+    <owners>csnemes</owners>
+    <projectUrl>https://github.com/csnemes/tracer</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>NLog adapter for Tracer.Fody (which is an ILWeaver adding trace enter and leave log entries to methods). This adapter offers trace and static logging calls and changes them
+    to calls to NLog.</description>
+    <summary>NLog adapter for Tracer.Fody. Adds trace log entries and rewrite static log calls using NLog.</summary>
+    <copyright>Copyright 2019</copyright>
+    <tags>Fody, Logging, Tracing, NLog, ILWeaving, Cecil, 4NLog</tags>
+    <dependencies>
+      <group>
+        <dependency id="Fody" version="[3.3.2,4)" include="All" />
+	    	<dependency id="NLog" version="[4.5.0,5.0.0)" />
+      </group>
+    </dependencies>
+    <references />
+    	<releaseNotes>
+        * 2.0.0
+        - Moved to netstandard 2.0
+        * 2.1.0
+        - Can use TracerFodySpecialKeyPrefix environment variable to define prefix (instead of $) in $return and $exception.
+	    * 2.2.0
+	    - Updated to Fody 3.x
+	    - TraceOn and NoTrace can be put on structs and constructors
+		* 3.0.0
+		- Fixed issue with missing local function extra parameter name
+		- Switched to new Fody package format, upgraded to Fody 3.3.x
+		- Added pattern based filter for specifying which methods to trace
+      </releaseNotes>
+  </metadata>
+</package>

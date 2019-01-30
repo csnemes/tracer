@@ -1,11 +1,6 @@
-<?xml version="1.0" encoding="utf-8" ?>
-<Weavers>
-  <Tracer adapterAssembly="Tracer.Serilog"
-      logManager="Tracer.Serilog.Adapters.LogManagerAdapter"
-      logger="Tracer.Serilog.Adapters.LoggerAdapter"
-      staticLogger="Tracer.Serilog.Log"
-      traceConstructors="true"
-      traceProperties="false">
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Weavers xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="FodyWeavers.xsd">
+  <Tracer adapterAssembly="Tracer.Serilog" logManager="Tracer.Serilog.Adapters.LogManagerAdapter" logger="Tracer.Serilog.Adapters.LoggerAdapter" staticLogger="Tracer.Serilog.Log" traceConstructors="true" traceProperties="false">
     <TraceOn class="private" method="private" />
   </Tracer>
 </Weavers>

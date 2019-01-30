@@ -1,10 +1,5 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <Weavers>
-  <Tracer adapterAssembly="Tracer.Serilog"
-      logManager="Tracer.Serilog.Adapters.LogManagerAdapter"
-      logger="Tracer.Serilog.Adapters.LoggerAdapter"
-      staticLogger="Tracer.Serilog.Log"
-      traceConstructors="true"
-      traceProperties="false">
+  <Tracer traceConstructors="true" traceProperties="false">
   </Tracer>
 </Weavers>

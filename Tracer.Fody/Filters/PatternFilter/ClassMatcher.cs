@@ -1,26 +1,29 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.SqlTypes;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Mono.Cecil;
 
 namespace Tracer.Fody.Filters.PatternFilter
 {
-    public class ClassMatcher
+    public class ClassMatcher : IComparable<ClassMatcher>
     {
         private readonly Regex _regex;
         private readonly bool _matchPublic;
         private readonly bool _matchNonPublic;
+        private readonly string _filterExpression;
 
         private static readonly string[] Keywords = { "public", "nonpublic", "internal" };
 
-        private ClassMatcher(string regexPattern, bool matchPublic, bool matchNonPublic)
+        private ClassMatcher(string regexPattern, bool matchPublic, bool matchNonPublic, string filterExpression)
         {
             _regex = new Regex(regexPattern,
                 RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.CultureInvariant);
 
             _matchPublic = matchPublic;
             _matchNonPublic = matchNonPublic;
+            _filterExpression = filterExpression;
 
             if (!matchNonPublic && !matchPublic)
             {
@@ -87,7 +90,26 @@ namespace Tracer.Fody.Filters.PatternFilter
 
             return new ClassMatcher(regexPattern,
                 conditions.Contains("public"),
-                conditions.Contains("nonpublic") || conditions.Contains("internal"));
+                conditions.Contains("nonpublic") || conditions.Contains("internal"), filterExpression);
+        }
+
+        public int CompareTo(ClassMatcher other)
+        {
+            var otherQmark = other._filterExpression.Count(it => it == '?');
+            var otherStar = other._filterExpression.Count(it => it == '*');
+
+            var thisQmark = this._filterExpression.Count(it => it == '?');
+            var thisStar = this._filterExpression.Count(it => it == '*');
+
+            if (otherStar > 0 && thisStar == 0) return -1; //this precedes other
+            if (thisStar > 0 && otherStar == 0) return 1; //other precedes this
+            if (thisStar == 0 && otherStar == 0)
+            {
+                return thisQmark - otherQmark;
+            }
+
+            return (this._filterExpression.Length - thisStar - thisQmark) -
+                   (other._filterExpression.Length - otherStar - otherQmark);
         }
     }
 }

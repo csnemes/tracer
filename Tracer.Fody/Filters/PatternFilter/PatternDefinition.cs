@@ -21,6 +21,8 @@ namespace Tracer.Fody.Filters.PatternFilter
 
         public bool TraceEnabled => _traceEnabled;
 
+        public int Order => 0;
+
         internal static PatternDefinition ParseFromConfig(XElement element, bool traceEnabled)
         {
             var pattern = element.Attribute("pattern")?.Value;

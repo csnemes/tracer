@@ -31,12 +31,25 @@ namespace Tracer.Fody.Filters.PatternFilter
 
         internal static List<PatternDefinition> ParseConfig(IEnumerable<XElement> configElements)
         {
-            return configElements
-                .Where(elem => elem.Name.LocalName.Equals("TraceOn", StringComparison.OrdinalIgnoreCase))
+            var patternDefinitions = configElements
+                .Where(elem => elem.Name.LocalName.Equals("On", StringComparison.OrdinalIgnoreCase))
                 .Select(it => PatternDefinition.ParseFromConfig(it, true))
                 .Concat(configElements
-                    .Where(elem => elem.Name.LocalName.Equals("TraceOff", StringComparison.OrdinalIgnoreCase))
+                    .Where(elem => elem.Name.LocalName.Equals("Off", StringComparison.OrdinalIgnoreCase))
                     .Select(it => PatternDefinition.ParseFromConfig(it, false))).ToList();
+
+            patternDefinitions.Sort(new PatternDefinitionComparer());
+
+            return patternDefinitions;
+        }
+
+        internal class PatternDefinitionComparer : IComparer<PatternDefinition>
+        {
+            public int Compare(PatternDefinition x, PatternDefinition y)
+            {
+                
+                return x.Order - y.Order;
+            }
         }
     }
 }

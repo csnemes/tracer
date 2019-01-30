@@ -1,14 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.IO;
 using System.Xml.Linq;
 using Fody;
 using Mono.Cecil;
-using Mono.Cecil.Cil;
-using Tracer.Fody.Filters;
 using Tracer.Fody.Helpers;
 using Tracer.Fody.Weavers;
 
@@ -28,7 +23,7 @@ namespace Tracer.Fody
         {
             WeavingLog.SetLogger(this);
 
-            var parser = FodyConfigParser.Parse(Config);
+            var parser = FodyConfigParser.Parse(Config, GetDefaultConfig());
 
             if (parser.IsErroneous)
             {
@@ -37,6 +32,22 @@ namespace Tracer.Fody
             else
             {
                 ModuleLevelWeaver.Execute(parser.Result, ModuleDefinition);
+            }
+        }
+
+        private XElement GetDefaultConfig()
+        {
+            try
+            {
+                var defaultConfigFile = Path.Combine(AddinDirectoryPath, "default.config");
+                var xDoc = XDocument.Load(defaultConfigFile);
+                LogDebug($"Found default config file at {defaultConfigFile}.");
+                return xDoc.Root;
+            }
+            catch (Exception ex)
+            {
+                LogDebug($"Exception {ex} while trying to load default config.");
+                return XElement.Parse("<Tracer />");
             }
         }
 

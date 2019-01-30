@@ -18,11 +18,12 @@ namespace Tracer.Fody.Filters.PatternFilter
         private readonly bool _matchMethod;
         private readonly bool _matchPropertySet;
         private readonly bool _matchPropertyGet;
+        private readonly int _order;
 
         private static readonly string[] Keywords = { "public", "private", "internal", "protected", "instance", "static", "method", "get", "set" };
 
         private MemberMatcher(string regexPattern, bool matchPublic, bool matchPrivate, bool matchInternal, bool matchProtected,
-            bool matchInstance, bool matchStatic, bool matchMethod, bool matchPropertySet, bool matchPropertyGet)
+            bool matchInstance, bool matchStatic, bool matchMethod, bool matchPropertySet, bool matchPropertyGet, int order)
         {
             _regex = new Regex(regexPattern,
                 RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.CultureInvariant);
@@ -48,6 +49,7 @@ namespace Tracer.Fody.Filters.PatternFilter
             _matchMethod = matchMethod;
             _matchPropertySet = matchPropertySet;
             _matchPropertyGet = matchPropertyGet;
+            _order = order;
 
             if (!matchMethod && !matchPropertySet && !matchPropertyGet)
             {
@@ -55,6 +57,8 @@ namespace Tracer.Fody.Filters.PatternFilter
             }
 
         }
+
+        public int Order => _order;
 
         public bool IsMatch(MethodDefinition methodDefinition)
         {
@@ -131,6 +135,8 @@ namespace Tracer.Fody.Filters.PatternFilter
 
             regexPattern = "^" + regexPattern + "$";
 
+            var order = filterExpression.Length - filterExpression.Count(it => it == '?') - 100 * Math.Max(filterExpression.Count(it => it == '*'), 1);
+
             return new MemberMatcher(regexPattern,
                 conditions.Contains("public"),
                 conditions.Contains("private"),
@@ -140,7 +146,8 @@ namespace Tracer.Fody.Filters.PatternFilter
                 conditions.Contains("static"),
                 conditions.Contains("method"),
                 conditions.Contains("get"),
-                conditions.Contains("set"));
+                conditions.Contains("set"),
+                order);
         }
 
     }
