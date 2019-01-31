@@ -13,11 +13,48 @@ namespace Tracer.Fody.Tests.Filters.PatternFilter
 {
     public class MemberMatcherTests
     {
+        static MemberMatcherTests() { }
+
+        public MemberMatcherTests()
+        {}
+
+        protected MemberMatcherTests(int inp)
+        {}
+
         [Test]
         public void EmptyMemberNameFails()
         {
             Action action = () => MemberMatcher.Create("[]");
             action.Should().Throw<ArgumentException>();
+        }
+
+        [Test]
+        public void ConstructorMatching()
+        {
+            var matcher = MemberMatcher.Create("[constructor]*");
+            matcher.IsMatch(GetMethodDefinition(nameof(MyPropPrivate))).Should().BeFalse();
+            matcher.IsMatch(GetConstructorDefinition(true)).Should().BeTrue();
+            matcher.IsMatch(GetConstructorDefinition(false)).Should().BeTrue();
+            matcher.IsMatch(GetStaticConstructorDefinition()).Should().BeTrue();
+        }
+
+        [Test]
+        public void StaticOnlyConstructorMatching()
+        {
+            var matcher = MemberMatcher.Create("[static|constructor]*");
+            matcher.IsMatch(GetConstructorDefinition(true)).Should().BeFalse();
+            matcher.IsMatch(GetMethodDefinition(nameof(MyPropPrivate))).Should().BeFalse();
+            matcher.IsMatch(GetStaticConstructorDefinition()).Should().BeTrue();
+        }
+
+        [Test]
+        public void ConstructorMatchingWithVisibility()
+        {
+            var matcher = MemberMatcher.Create("[protected|constructor]*");
+            matcher.IsMatch(GetMethodDefinition(nameof(MyPropPrivate))).Should().BeFalse();
+            matcher.IsMatch(GetConstructorDefinition(true)).Should().BeFalse();
+            matcher.IsMatch(GetConstructorDefinition(false)).Should().BeTrue();
+            matcher.IsMatch(GetStaticConstructorDefinition()).Should().BeTrue();
         }
 
         [Test]
@@ -187,6 +224,21 @@ namespace Tracer.Fody.Tests.Filters.PatternFilter
             list[1].Should().Be(matcher2);
         }
 
+
+        MethodDefinition GetConstructorDefinition(bool publicVisibility)
+        {
+            var asmDef = AssemblyDefinition.ReadAssembly(typeof(MemberMatcherTests).Module.FullyQualifiedName);
+            var type = asmDef.MainModule.GetType(typeof(MemberMatcherTests).FullName);
+            var methods = type.GetConstructors();
+            return methods.First(it => !it.IsStatic && ((publicVisibility && it.IsPublic) || (!publicVisibility && !it.IsPublic)) );
+        }
+
+        MethodDefinition GetStaticConstructorDefinition()
+        {
+            var asmDef = AssemblyDefinition.ReadAssembly(typeof(MemberMatcherTests).Module.FullyQualifiedName);
+            var type = asmDef.MainModule.GetType(typeof(MemberMatcherTests).FullName);
+            return type.GetStaticConstructor();
+        }
 
         MethodDefinition GetMethodDefinition(string methodName)
         {

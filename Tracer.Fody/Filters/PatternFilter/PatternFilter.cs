@@ -26,6 +26,8 @@ namespace Tracer.Fody.Filters.PatternFilter
                 if (patternDefinition.IsMatching(definition)) return patternDefinition.TraceEnabled;
             }
 
+            //defaults to public methods only
+            //TODO
             return false;
         }
 

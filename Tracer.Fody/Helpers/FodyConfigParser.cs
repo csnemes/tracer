@@ -50,17 +50,18 @@ namespace Tracer.Fody.Helpers
                 if (String.Equals(_filter, "pattern", StringComparison.OrdinalIgnoreCase))
                 {
                     result.WithFilter(new PatternFilter(_filterConfigElements));
+                    //with patterns both constructor and prop flag is turned on as the pattern can be used to decide on logging
+                    result.WithConstructorTraceOn().WithPropertiesTraceOn();
                 }
                 else
                 {
                     result.WithFilter(new DefaultFilter(_filterConfigElements));
-                }
-
-                if (_traceConstructorsFlag) { result.WithConstructorTraceOn(); }
+                    if (_traceConstructorsFlag) { result.WithConstructorTraceOn(); }
                     else { result.WithConstructorTraceOff(); }
 
-                if (_tracePropertiesFlag) { result.WithPropertiesTraceOn(); }
-                else { result.WithPropertiesTraceOff(); }
+                    if (_tracePropertiesFlag) { result.WithPropertiesTraceOn(); }
+                    else { result.WithPropertiesTraceOff(); }
+                }
 
                 return result;
             }

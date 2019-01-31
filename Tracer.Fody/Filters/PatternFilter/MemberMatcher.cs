@@ -16,14 +16,15 @@ namespace Tracer.Fody.Filters.PatternFilter
         private readonly bool _matchInstance;
         private readonly bool _matchStatic;
         private readonly bool _matchMethod;
+        private readonly bool _matchConstructor;
         private readonly bool _matchPropertySet;
         private readonly bool _matchPropertyGet;
         private readonly string _filterExpression;
 
-        private static readonly string[] Keywords = { "public", "private", "internal", "protected", "instance", "static", "method", "get", "set" };
+        private static readonly string[] Keywords = { "public", "private", "internal", "protected", "instance", "static", "method", "get", "set", "constructor" };
 
         private MemberMatcher(string regexPattern, bool matchPublic, bool matchPrivate, bool matchInternal, bool matchProtected,
-            bool matchInstance, bool matchStatic, bool matchMethod, bool matchPropertySet, bool matchPropertyGet, string filterExpression)
+            bool matchInstance, bool matchStatic, bool matchMethod, bool matchPropertySet, bool matchPropertyGet, bool matchConstructor, string filterExpression)
         {
             _regex = new Regex(regexPattern,
                 RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.CultureInvariant);
@@ -49,17 +50,31 @@ namespace Tracer.Fody.Filters.PatternFilter
             _matchMethod = matchMethod;
             _matchPropertySet = matchPropertySet;
             _matchPropertyGet = matchPropertyGet;
-            _filterExpression = filterExpression;
+            _matchConstructor = matchConstructor;
 
-            if (!matchMethod && !matchPropertySet && !matchPropertyGet)
+            if (!matchMethod && !matchPropertySet && !matchPropertyGet &&!matchConstructor)
             {
-                _matchMethod = _matchPropertySet = _matchPropertyGet = true;
+                _matchMethod = _matchPropertySet = _matchPropertyGet = _matchConstructor = true;
             }
 
+            _filterExpression = filterExpression;
         }
 
         public bool IsMatch(MethodDefinition methodDefinition)
         {
+            if (methodDefinition.IsConstructor)
+            {
+                //name doesn't matter
+                if (methodDefinition.IsStatic)
+                {
+                    return _matchConstructor && _matchStatic;
+                }
+                else
+                {
+                    return _matchConstructor && _matchInstance && CheckVisibility();
+                }
+            }
+
             var methodName = (methodDefinition.IsSetter || methodDefinition.IsGetter) ? methodDefinition.Name.Substring(4) :
                 methodDefinition.Name;
 
@@ -143,6 +158,7 @@ namespace Tracer.Fody.Filters.PatternFilter
                 conditions.Contains("method"),
                 conditions.Contains("get"),
                 conditions.Contains("set"),
+                conditions.Contains("constructor"),
                 filterExpression);
         }
 
