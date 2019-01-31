@@ -4,7 +4,7 @@ using Mono.Cecil;
 
 namespace Tracer.Fody.Filters.PatternFilter
 {
-    public class PatternDefinition
+    public class PatternDefinition : IComparable<PatternDefinition>
     {
         private readonly bool _traceEnabled;
         private readonly NamespaceMatcher _namespaceMatcher;
@@ -20,8 +20,6 @@ namespace Tracer.Fody.Filters.PatternFilter
         }
 
         public bool TraceEnabled => _traceEnabled;
-
-        public int Order => 0;
 
         internal static PatternDefinition ParseFromConfig(XElement element, bool traceEnabled)
         {
@@ -65,6 +63,17 @@ namespace Tracer.Fody.Filters.PatternFilter
             var ns = methodDefinition.DeclaringType.Namespace;
             return _namespaceMatcher.IsMatch(ns) && _classMatcher.IsMatch(methodDefinition.DeclaringType) &&
                 _memberMatcher.IsMatch(methodDefinition);
+        }
+
+        public int CompareTo(PatternDefinition other)
+        {
+            var nsMatch = this._namespaceMatcher?.CompareTo(other?._namespaceMatcher) ?? 0;
+            if (nsMatch != 0) return nsMatch;
+
+            var classMatch = this._classMatcher?.CompareTo(other?._classMatcher) ?? 0;
+            if (classMatch != 0) return classMatch;
+
+            return this?._memberMatcher?.CompareTo(other?._memberMatcher) ?? 0;
         }
     }
 }

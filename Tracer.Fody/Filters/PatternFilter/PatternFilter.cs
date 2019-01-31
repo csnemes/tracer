@@ -38,18 +38,10 @@ namespace Tracer.Fody.Filters.PatternFilter
                     .Where(elem => elem.Name.LocalName.Equals("Off", StringComparison.OrdinalIgnoreCase))
                     .Select(it => PatternDefinition.ParseFromConfig(it, false))).ToList();
 
-            patternDefinitions.Sort(new PatternDefinitionComparer());
+            patternDefinitions.Sort();
 
             return patternDefinitions;
         }
 
-        internal class PatternDefinitionComparer : IComparer<PatternDefinition>
-        {
-            public int Compare(PatternDefinition x, PatternDefinition y)
-            {
-                
-                return x.Order - y.Order;
-            }
-        }
     }
 }

@@ -108,8 +108,7 @@ namespace Tracer.Fody.Filters.PatternFilter
                 return thisQmark - otherQmark;
             }
 
-            return (this._filterExpression.Length - thisStar - thisQmark) -
-                   (other._filterExpression.Length - otherStar - otherQmark);
+            return (other._filterExpression.Length - otherStar - otherQmark) - (this._filterExpression.Length - thisStar - thisQmark);
         }
     }
 }

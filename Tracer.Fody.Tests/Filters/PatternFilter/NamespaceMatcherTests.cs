@@ -1,5 +1,6 @@
 ﻿using FluentAssertions;
 using NUnit.Framework;
+using System.Collections.Generic;
 using Tracer.Fody.Filters.PatternFilter;
 
 namespace Tracer.Fody.Tests.Filters.PatternFilter
@@ -71,6 +72,41 @@ namespace Tracer.Fody.Tests.Filters.PatternFilter
             matcher.IsMatch("MyNamespace.Some.Other").Should().BeFalse();
             matcher.IsMatch("MyNamespace.Inner").Should().BeFalse();
             matcher.IsMatch("MyNamespace.Inner.Other").Should().BeFalse();
+        }
+
+        [Test]
+        public void SortTest_IncreasingNumberOfElements()
+        {
+            var matcher1 = new NamespaceMatcher("MyNamespace");
+            var matcher2 = new NamespaceMatcher("MyNamespace.Other");
+            var matcher3 = new NamespaceMatcher("MyNamespace.Other.Inner");
+            var list = new List<NamespaceMatcher> { matcher2, matcher1, matcher3 };
+            list.Sort();
+            list[0].Should().Be(matcher3);
+            list[1].Should().Be(matcher2);
+            list[2].Should().Be(matcher1);
+        }
+
+        [Test]
+        public void SortTest_StarIsLessSpecific()
+        {
+            var matcher1 = new NamespaceMatcher("MyNamespace.Other.Inner");
+            var matcher2 = new NamespaceMatcher("MyNamespace.Other.*");
+            var list = new List<NamespaceMatcher> { matcher2, matcher1 };
+            list.Sort();
+            list[0].Should().Be(matcher1);
+            list[1].Should().Be(matcher2);
+        }
+
+        [Test]
+        public void SortTest_DoubleDotIsLessSpecific()
+        {
+            var matcher1 = new NamespaceMatcher("MyNamespace.Other.Inner");
+            var matcher2 = new NamespaceMatcher("MyNamespace..Inner");
+            var list = new List<NamespaceMatcher> { matcher2, matcher1 };
+            list.Sort();
+            list[0].Should().Be(matcher1);
+            list[1].Should().Be(matcher2);
         }
     }
 }

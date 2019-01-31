@@ -132,6 +132,62 @@ namespace Tracer.Fody.Tests.Filters.PatternFilter
             matcher.IsMatch(GetMethodDefinition(nameof(MyPropPrivateStatic))).Should().BeFalse();
         }
 
+        [Test]
+        public void SortTest_LongerNameFirst()
+        {
+            var matcher1 = MemberMatcher.Create("MyClass");
+            var matcher2 = MemberMatcher.Create("MyCl");
+            var list = new List<MemberMatcher> { matcher2, matcher1 };
+            list.Sort();
+            list[0].Should().Be(matcher1);
+            list[1].Should().Be(matcher2);
+        }
+
+        [Test]
+        public void SortTest_ScopeDefsDoesntMatter()
+        {
+            var matcher1 = MemberMatcher.Create("MyClass");
+            var matcher2 = MemberMatcher.Create("[public]MyCl");
+            var list = new List<MemberMatcher> { matcher2, matcher1 };
+            list.Sort();
+            list[0].Should().Be(matcher1);
+            list[1].Should().Be(matcher2);
+        }
+
+        [Test]
+        public void SortTest_LessQuestionMarksFirst()
+        {
+            var matcher1 = MemberMatcher.Create("MyClas?");
+            var matcher2 = MemberMatcher.Create("MyCla??");
+            var list = new List<MemberMatcher> { matcher2, matcher1 };
+            list.Sort();
+            list[0].Should().Be(matcher1);
+            list[1].Should().Be(matcher2);
+        }
+
+        [Test]
+        public void SortTest_LongerNameFirstIfBothContainsStar()
+        {
+            var matcher1 = MemberMatcher.Create("My*Class");
+            var matcher2 = MemberMatcher.Create("*MyCl");
+            var list = new List<MemberMatcher> { matcher2, matcher1 };
+            list.Sort();
+            list[0].Should().Be(matcher1);
+            list[1].Should().Be(matcher2);
+        }
+
+        [Test]
+        public void SortTest_NameWithoutStarFirst()
+        {
+            var matcher1 = MemberMatcher.Create("MyClass");
+            var matcher2 = MemberMatcher.Create("MyClassIsLongerButContains*");
+            var list = new List<MemberMatcher> { matcher2, matcher1 };
+            list.Sort();
+            list[0].Should().Be(matcher1);
+            list[1].Should().Be(matcher2);
+        }
+
+
         MethodDefinition GetMethodDefinition(string methodName)
         {
             var asmDef = AssemblyDefinition.ReadAssembly(typeof(MemberMatcherTests).Module.FullyQualifiedName);

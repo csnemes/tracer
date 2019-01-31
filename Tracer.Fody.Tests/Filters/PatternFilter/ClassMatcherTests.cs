@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using FluentAssertions;
 using Mono.Cecil;
@@ -104,6 +105,61 @@ namespace Tracer.Fody.Tests.Filters.PatternFilter
         {
             var matcher = ClassMatcher.Create("My*");
             matcher.IsMatch(GetGenericTypeDefinition(typeof(MyGeneric<>), typeof(string))).Should().BeTrue();
+        }
+
+        [Test]
+        public void SortTest_LongerNameFirst()
+        {
+            var matcher1 = ClassMatcher.Create("MyClass");
+            var matcher2 = ClassMatcher.Create("MyCl");
+            var list = new List<ClassMatcher> { matcher2, matcher1 };
+            list.Sort();
+            list[0].Should().Be(matcher1);
+            list[1].Should().Be(matcher2);
+        }
+
+        [Test]
+        public void SortTest_ScopeDefsDoesntMatter()
+        {
+            var matcher1 = ClassMatcher.Create("MyClass");
+            var matcher2 = ClassMatcher.Create("[public]MyCl");
+            var list = new List<ClassMatcher> { matcher2, matcher1 };
+            list.Sort();
+            list[0].Should().Be(matcher1);
+            list[1].Should().Be(matcher2);
+        }
+
+        [Test]
+        public void SortTest_LessQuestionMarksFirst()
+        {
+            var matcher1 = ClassMatcher.Create("MyClas?");
+            var matcher2 = ClassMatcher.Create("MyCla??");
+            var list = new List<ClassMatcher> { matcher2, matcher1 };
+            list.Sort();
+            list[0].Should().Be(matcher1);
+            list[1].Should().Be(matcher2);
+        }
+
+        [Test]
+        public void SortTest_LongerNameFirstIfBothContainsStar()
+        {
+            var matcher1 = ClassMatcher.Create("My*Class");
+            var matcher2 = ClassMatcher.Create("*MyCl");
+            var list = new List<ClassMatcher> { matcher2, matcher1 };
+            list.Sort();
+            list[0].Should().Be(matcher1);
+            list[1].Should().Be(matcher2);
+        }
+
+        [Test]
+        public void SortTest_NameWithoutStarFirst()
+        {
+            var matcher1 = ClassMatcher.Create("MyClass");
+            var matcher2 = ClassMatcher.Create("MyClassIsLongerButContains*");
+            var list = new List<ClassMatcher> { matcher2, matcher1 };
+            list.Sort();
+            list[0].Should().Be(matcher1);
+            list[1].Should().Be(matcher2);
         }
 
         private TypeDefinition GetTypeDefinition(Type runtimeType)

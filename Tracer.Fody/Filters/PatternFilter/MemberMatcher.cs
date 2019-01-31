@@ -6,7 +6,7 @@ using Mono.Cecil;
 
 namespace Tracer.Fody.Filters.PatternFilter
 {
-    public class MemberMatcher
+    public class MemberMatcher : IComparable<MemberMatcher>
     {
         private readonly Regex _regex;
         private readonly bool _matchPublic;
@@ -18,12 +18,12 @@ namespace Tracer.Fody.Filters.PatternFilter
         private readonly bool _matchMethod;
         private readonly bool _matchPropertySet;
         private readonly bool _matchPropertyGet;
-        private readonly int _order;
+        private readonly string _filterExpression;
 
         private static readonly string[] Keywords = { "public", "private", "internal", "protected", "instance", "static", "method", "get", "set" };
 
         private MemberMatcher(string regexPattern, bool matchPublic, bool matchPrivate, bool matchInternal, bool matchProtected,
-            bool matchInstance, bool matchStatic, bool matchMethod, bool matchPropertySet, bool matchPropertyGet, int order)
+            bool matchInstance, bool matchStatic, bool matchMethod, bool matchPropertySet, bool matchPropertyGet, string filterExpression)
         {
             _regex = new Regex(regexPattern,
                 RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.CultureInvariant);
@@ -49,7 +49,7 @@ namespace Tracer.Fody.Filters.PatternFilter
             _matchMethod = matchMethod;
             _matchPropertySet = matchPropertySet;
             _matchPropertyGet = matchPropertyGet;
-            _order = order;
+            _filterExpression = filterExpression;
 
             if (!matchMethod && !matchPropertySet && !matchPropertyGet)
             {
@@ -57,8 +57,6 @@ namespace Tracer.Fody.Filters.PatternFilter
             }
 
         }
-
-        public int Order => _order;
 
         public bool IsMatch(MethodDefinition methodDefinition)
         {
@@ -135,8 +133,6 @@ namespace Tracer.Fody.Filters.PatternFilter
 
             regexPattern = "^" + regexPattern + "$";
 
-            var order = filterExpression.Length - filterExpression.Count(it => it == '?') - 100 * Math.Max(filterExpression.Count(it => it == '*'), 1);
-
             return new MemberMatcher(regexPattern,
                 conditions.Contains("public"),
                 conditions.Contains("private"),
@@ -147,8 +143,25 @@ namespace Tracer.Fody.Filters.PatternFilter
                 conditions.Contains("method"),
                 conditions.Contains("get"),
                 conditions.Contains("set"),
-                order);
+                filterExpression);
         }
 
+        public int CompareTo(MemberMatcher other)
+        {
+            var otherQmark = other._filterExpression.Count(it => it == '?');
+            var otherStar = other._filterExpression.Count(it => it == '*');
+
+            var thisQmark = this._filterExpression.Count(it => it == '?');
+            var thisStar = this._filterExpression.Count(it => it == '*');
+
+            if (otherStar > 0 && thisStar == 0) return -1; //this precedes other
+            if (thisStar > 0 && otherStar == 0) return 1; //other precedes this
+            if (thisStar == 0 && otherStar == 0)
+            {
+                return thisQmark - otherQmark;
+            }
+
+            return (other._filterExpression.Length - otherStar - otherQmark) - (this._filterExpression.Length - thisStar - thisQmark);
+        }
     }
 }
