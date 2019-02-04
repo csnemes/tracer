@@ -31,6 +31,7 @@
 		- Fixed issue with missing local function extra parameter name
 		- Switched to new Fody package format, upgraded to Fody 3.3.x
 		- Added pattern based filter for specifying which methods to trace
+		- Fixed generic async rewrite issues causing PEVerify errors
       </releaseNotes>
   </metadata>
 </package>

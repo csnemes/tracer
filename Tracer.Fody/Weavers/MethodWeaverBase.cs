@@ -18,6 +18,7 @@ namespace Tracer.Fody.Weavers
         protected readonly MethodDefinition _methodDefinition;
         protected readonly MethodBody _body;
         protected readonly bool _isEmptyBody;
+        protected readonly Instruction _firstRealInstruction;
 
         protected const string ExceptionMarker = "$exception";
         protected const string StartTickVarName = "$startTick";
@@ -29,8 +30,32 @@ namespace Tracer.Fody.Weavers
             _methodReferenceProvider = methodReferenceProvider;
             _methodDefinition = methodDefinition;
             _body = methodDefinition.Body;
-            _isEmptyBody = (_body.Instructions.Count == 0);
             _loggerProvider = loggerProvider;
+            _isEmptyBody = (_body.Instructions.Count == 0);
+            _firstRealInstruction = _body.Instructions.FirstOrDefault();
+
+            if (_body.Method.IsConstructor && !_body.Method.IsStatic)
+            {
+                var constructorCall = _body.Instructions.FirstOrDefault(IsConstructorCall);
+                if (constructorCall != null)
+                {
+                    var cctrCallIndex = _body.Instructions.IndexOf(constructorCall);
+                    if (cctrCallIndex == _body.Instructions.Count - 1)
+                    {
+                        _isEmptyBody = true;
+                    }
+                    else
+                    {
+                        _firstRealInstruction = _body.Instructions[cctrCallIndex + 1];
+                    }
+                }
+            }
+        }
+
+        private bool IsConstructorCall(Instruction ins)
+        {
+            return ins.OpCode == OpCodes.Call && ins.Operand is MethodReference methodReference &&
+                   methodReference.Name == ".ctor";
         }
 
         private string PrettyMethodName

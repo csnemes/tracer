@@ -26,7 +26,7 @@ MyNamespace.Core.Other.Package2 and MyNamespace.Core.Other.Some.Package3.
 The class_part format is [public|internal]class_name_filter where the [] part is optional. If not specified all visibilities are logged.
 Class_name_filter can contain * and ?. Eg. [public]*Repository logs all public classes ending with Repository 
 
-The member_part format is [public|private|protected|internal|get|set|method|instance|static]member_name_filter where the [] part is optional. 
+The member_part format is [public|private|protected|internal|get|set|method|constructor|instance|static]member_name_filter where the [] part is optional. 
 If visibility, instance or member type is not specified then all are logged. Member_name_filter can contain * and ?.
 
 When considering filters more specified filters (containing less * and ? approx.) trumps less specified filters.

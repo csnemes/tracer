@@ -363,6 +363,52 @@ namespace Tracer.Fody.Tests.TraceTests
         }
 
         [Test]
+        public void Test_GenericClassAsyncRetval()
+        {
+            string code = @"
+                using System;
+                using System.Diagnostics;
+                using System.Threading.Tasks;
+                using Tracer.Fody.Tests.MockLoggers;
+
+                namespace First
+                {
+                    public class MyClass
+                    {
+                        public static void Main()
+                        {
+                            var myClass = new OtherClass<string>();
+                            var x1 = myClass.CallMePub(""Hello"", ""Hello2"", 42).Result;
+                        }
+                    }
+
+                    public class OtherClass<T>
+                    {
+                        public async Task<T> CallMePub(T param, string param2, int paraInt)
+                        {
+                            return CallMe(param, param2, paraInt).Result;
+                        }
+
+                        private async Task<T> CallMe(T param, string param2, int paraInt)
+                        {
+                            var result = await Double(paraInt);
+                            return param;
+                        }
+
+                        public async Task<int> Double(int p)
+                        {
+                            return await Task.Run(()=>  p * 2);
+                        }
+                    }
+                }";
+
+            var result = this.RunTest(code, new PrivateOnlyTraceLoggingFilter(), "First.MyClass::Main");
+            result.Count.Should().Be(2);
+            result.ElementAt(0).ShouldBeTraceEnterInto("First.OtherClass<String>::CallMe", "param", "Hello", "param2", "Hello2", "paraInt", "42");
+            result.ElementAt(1).ShouldBeTraceLeaveFrom("First.OtherClass<String>::CallMe", "Hello");
+        }
+
+        [Test]
         public void Test_AsyncLoggingCallOrderWithException()
         {
             string code = @"
@@ -408,6 +454,78 @@ namespace Tracer.Fody.Tests.TraceTests
             result.ElementAt(1).ShouldBeTraceEnterInto("First.MyClass::Double", "p", "42");
             result.ElementAt(4).ShouldBeTraceLeaveWithExceptionFrom("First.MyClass::Double", "Err");
             result.ElementAt(5).ShouldBeTraceLeaveWithExceptionFrom("First.MyClass::CallMe", "Err");
+        }
+
+        [Test]
+        public void Test_GenericAsyncRetvalMultiGeneric()
+        {
+            string code = @"
+                using System;
+                using System.Diagnostics;
+                using System.Threading.Tasks;
+                using Tracer.Fody.Tests.MockLoggers;
+
+                namespace First
+                {
+                    public class MyClass
+                    {
+                        public static void Main()
+                        {
+                            var myClass = new MyClass();
+                            var x1 = myClass.CallMe<string, string>(""Hello"", ""Hello2"", 42).Result;
+                            var x2 = myClass.CallMe<int, string>(12, ""Ahoy2"", 43).Result;
+                        }
+
+                        private async Task<K> CallMe<T, K>(T param, K param2, int paraInt)
+                        {
+                            return param2;
+                        }
+                    }
+                }
+            ";
+
+            var result = this.RunTest(code, new PrivateOnlyTraceLoggingFilter(), "First.MyClass::Main");
+            result.Count.Should().Be(4);
+            result.ElementAt(0).ShouldBeTraceEnterInto("First.MyClass::CallMe", "param", "Hello", "param2", "Hello2", "paraInt", "42");
+            result.ElementAt(1).ShouldBeTraceLeaveFrom("First.MyClass::CallMe", "Hello2");
+            result.ElementAt(2).ShouldBeTraceEnterInto("First.MyClass::CallMe", "param", "12", "param2", "Ahoy2", "paraInt", "43");
+            result.ElementAt(3).ShouldBeTraceLeaveFrom("First.MyClass::CallMe", "Ahoy2");
+        }
+
+        [Test]
+        public void Test_GenericAsyncRetvalMultiGenericTuple()
+        {
+            string code = @"
+                using System;
+                using System.Diagnostics;
+                using System.Threading.Tasks;
+                using Tracer.Fody.Tests.MockLoggers;
+
+                namespace First
+                {
+                    public class MyClass
+                    {
+                        public static void Main()
+                        {
+                            var myClass = new MyClass();
+                            var x1 = myClass.CallMe<string, string, int>(""Hello"", ""Hello2"", 42).Result;
+                            var x2 = myClass.CallMe<int, string, int>(12, ""Ahoy2"", 43).Result;
+                        }
+
+                        private async Task<(K, U)> CallMe<T, K, U>(T param, K param2, U paraInt)
+                        {
+                            return (param2, paraInt);
+                        }
+                    }
+                }
+            ";
+
+            var result = this.RunTest(code, new PrivateOnlyTraceLoggingFilter(), "First.MyClass::Main");
+            result.Count.Should().Be(4);
+            result.ElementAt(0).ShouldBeTraceEnterInto("First.MyClass::CallMe", "param", "Hello", "param2", "Hello2", "paraInt", "42");
+            result.ElementAt(1).ShouldBeTraceLeaveFrom("First.MyClass::CallMe", "(Hello2, 42)");
+            result.ElementAt(2).ShouldBeTraceEnterInto("First.MyClass::CallMe", "param", "12", "param2", "Ahoy2", "paraInt", "43");
+            result.ElementAt(3).ShouldBeTraceLeaveFrom("First.MyClass::CallMe", "(Ahoy2, 43)");
         }
     }
 }

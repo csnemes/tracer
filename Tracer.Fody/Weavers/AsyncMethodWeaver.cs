@@ -13,7 +13,7 @@ namespace Tracer.Fody.Weavers
 {
     internal class AsyncMethodWeaver : MethodWeaverBase
     {
-        private readonly TypeDefinition _generatedType;
+        private TypeDefinition _generatedType;
         private FieldReference _tickFieldRef;
         private MethodBody _moveNextBody;
         private MethodDefinition _moveNextDefinition;
@@ -61,7 +61,7 @@ namespace Tracer.Fody.Weavers
             }
 
             instrs.Add(Instruction.Create(OpCodes.Ldloc, StartTickVariable));
-            instrs.Add(Instruction.Create(OpCodes.Stfld, _tickFieldRef));
+            instrs.Add(Instruction.Create(OpCodes.Stfld, _tickFieldRef.FixFieldReferenceToUseSameGenericArgumentsAsVariable(genVar)));
             instr.InsertBefore(processor, instrs);
         }
 
@@ -208,14 +208,15 @@ namespace Tracer.Fody.Weavers
             if (ReturnType.IsGenericParameter)
             {
                 //use the generic parameter of the generated state machine
-                var varType = _generatedType.GenericParameters[0];
+                var varType = _generatedType.GenericParameters.Single(it => it.Name == ReturnType.Name);
                 instructions.Add(Instruction.Create(OpCodes.Box, varType));
             }
             else
             {
                 if (IsBoxingNeeded(ReturnType))
                 {
-                    instructions.Add(Instruction.Create(OpCodes.Box, ReturnType));
+                    var vs = _moveNextBody.Variables.First(v => v.VariableType.Name == ReturnType.Name);
+                    instructions.Add(Instruction.Create(OpCodes.Box, vs.VariableType));
                 }
             }
             instructions.Add(Instruction.Create(OpCodes.Stloc, returnValueDef)); //store return value in local variable

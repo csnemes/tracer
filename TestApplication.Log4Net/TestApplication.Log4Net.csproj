@@ -57,6 +57,7 @@
     <Compile Include="PerfComp.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SimuClass.cs" />
     <Compile Include="StructParamCLass.cs" />
   </ItemGroup>
   <ItemGroup>

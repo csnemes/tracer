@@ -35,11 +35,12 @@
         - Updated to Fody 3.x
         - TraceOn and NoTrace can be put on structs and constructors
         * 2.2.1
-        - Trace enter and leave now use Verbose level instead of Debug
-	      * 3.0.0
-	      - Fixed issue with missing local function extra parameter name
-	      - Switched to new Fody package format, upgraded to Fody 3.3.x
-	      - Added pattern based filter for specifying which methods to trace
+		- Trace enter and leave now use Verbose level instead of Debug
+        * 3.0.0
+	    - Fixed issue with missing local function extra parameter name
+	    - Switched to new Fody package format, upgraded to Fody 3.3.x
+	    - Added pattern based filter for specifying which methods to trace
+  		- Fixed generic async rewrite issues causing PEVerify errors
       </releaseNotes>
   </metadata>
 </package>

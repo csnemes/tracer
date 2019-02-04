@@ -15,8 +15,6 @@ namespace Tracer.Fody.Weavers
     /// </summary>
     internal class MethodWeaver : MethodWeaverBase
     {
-        private Instruction _firstInstructionAfterTraceEnter;
-
 
         internal MethodWeaver(TypeReferenceProvider typeReferenceProvider, MethodReferenceProvider methodReferenceProvider,
             ILoggerProvider loggerProvider, MethodDefinition methodDefinition) : base(typeReferenceProvider, methodReferenceProvider,
@@ -25,7 +23,6 @@ namespace Tracer.Fody.Weavers
 
         protected override void WeaveTraceEnter()
         {
-            _firstInstructionAfterTraceEnter = _body.Instructions.FirstOrDefault();
             var instructions = CreateTraceEnterCallInstructions();
             _body.InsertAtTheBeginning(instructions);
         }
@@ -44,7 +41,7 @@ namespace Tracer.Fody.Weavers
                * we use CLR's fault block capbility to do so
             */
             VariableDefinition returnValueDef = null;
-            
+
             if (HasReturnValue)
             {
                 //Declare local variable for the return value
@@ -52,21 +49,26 @@ namespace Tracer.Fody.Weavers
             }
 
             var allReturns = _body.Instructions.Where(instr => instr.OpCode == OpCodes.Ret).ToList();
-            var handlerStart = CreateExceptionHandlerAtTheEnd();
 
-            var loggingReturnStart = CreateLoggingReturnAtTheEnd(returnValueDef);
+            Instruction loggingReturnStart;
 
             //add exception handler 
             if (!_isEmptyBody)
             {
+                var handlerStart = CreateExceptionHandlerAtTheEnd();
+                loggingReturnStart = CreateLoggingReturnAtTheEnd(returnValueDef);
                 _body.ExceptionHandlers.Add(new ExceptionHandler(ExceptionHandlerType.Catch)
                 {
-                    TryStart = _firstInstructionAfterTraceEnter,
+                    TryStart = _firstRealInstruction,
                     TryEnd = handlerStart,
                     HandlerStart = handlerStart,
                     HandlerEnd = loggingReturnStart,
                     CatchType = _typeReferenceProvider.Exception
                 });
+            }
+            else
+            {
+                loggingReturnStart = CreateLoggingReturnAtTheEnd(returnValueDef);
             }
             
             foreach (var @return in allReturns)

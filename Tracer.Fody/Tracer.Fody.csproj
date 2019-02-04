@@ -48,6 +48,8 @@
     <Copy SourceFiles="@(OutputFiles)" DestinationFolder="$(SolutionDir)\Tracer.Serilog\NuGet\$(WeaverFolder)" OverwriteReadOnlyFiles="true"></Copy>
     <Copy SourceFiles="@(OutputFiles)" DestinationFolder="$(SolutionDir)\Tracer.NLog\NuGet\$(WeaverFolder)" OverwriteReadOnlyFiles="true"></Copy>
 
+    <Copy SourceFiles="@(OutputFiles)" DestinationFolder="$(ProjectDir)\NuGet\$(WeaverFolder)" OverwriteReadOnlyFiles="true"></Copy>
+
   </Target>
   
 </Project>
