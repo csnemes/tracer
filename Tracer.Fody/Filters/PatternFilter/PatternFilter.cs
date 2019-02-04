@@ -26,9 +26,10 @@ namespace Tracer.Fody.Filters.PatternFilter
                 if (patternDefinition.IsMatching(definition)) return patternDefinition.TraceEnabled;
             }
 
-            //defaults to public methods only
-            //TODO
-            return false;
+            //defaults to public methods of public classes only
+            return (definition.IsPublic && definition.DeclaringType.IsPublic && !definition.IsConstructor &&
+                    !definition.IsSetter
+                    && !definition.IsGetter);
         }
 
         internal static List<PatternDefinition> ParseConfig(IEnumerable<XElement> configElements)
