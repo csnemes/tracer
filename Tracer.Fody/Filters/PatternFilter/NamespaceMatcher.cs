@@ -3,7 +3,7 @@ using System.Text.RegularExpressions;
 
 namespace Tracer.Fody.Filters.PatternFilter
 {
-    public class NamespaceMatcher : IComparable<NamespaceMatcher>
+    public class NamespaceMatcher : IComparable<NamespaceMatcher>, IMatcher<string>
     {
         private readonly Regex _regex;
         private readonly string _pattern;

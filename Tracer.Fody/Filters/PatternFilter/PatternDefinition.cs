@@ -10,6 +10,8 @@ namespace Tracer.Fody.Filters.PatternFilter
         private readonly NamespaceMatcher _namespaceMatcher;
         private readonly ClassMatcher _classMatcher;
         private readonly MemberMatcher _memberMatcher;
+        private readonly IMatcher<string> _cachedNamespaceMatcher;
+        private readonly IMatcher<TypeDefinition> _cachedClassMatcher;
 
         private PatternDefinition(bool traceEnabled, NamespaceMatcher namespaceMatcher, ClassMatcher classMatcher, MemberMatcher memberMatcher)
         {
@@ -17,6 +19,8 @@ namespace Tracer.Fody.Filters.PatternFilter
             _namespaceMatcher = namespaceMatcher;
             _classMatcher = classMatcher;
             _memberMatcher = memberMatcher;
+            _cachedNamespaceMatcher = new CachingDecorator<string>(namespaceMatcher);
+            _cachedClassMatcher = new CachingDecorator<TypeDefinition>(classMatcher);
         }
 
         public bool TraceEnabled => _traceEnabled;
@@ -63,7 +67,7 @@ namespace Tracer.Fody.Filters.PatternFilter
         public bool IsMatching(MethodDefinition methodDefinition)
         {
             var ns = methodDefinition.DeclaringType.Namespace;
-            return _namespaceMatcher.IsMatch(ns) && _classMatcher.IsMatch(methodDefinition.DeclaringType) &&
+            return _cachedNamespaceMatcher.IsMatch(ns) && _cachedClassMatcher.IsMatch(methodDefinition.DeclaringType) &&
                 _memberMatcher.IsMatch(methodDefinition);
         }
 

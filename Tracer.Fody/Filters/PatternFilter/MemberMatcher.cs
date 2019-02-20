@@ -6,7 +6,7 @@ using Mono.Cecil;
 
 namespace Tracer.Fody.Filters.PatternFilter
 {
-    public class MemberMatcher : IComparable<MemberMatcher>
+    public class MemberMatcher : IComparable<MemberMatcher>, IMatcher<MethodDefinition>
     {
         private readonly Regex _regex;
         private readonly bool _matchPublic;
