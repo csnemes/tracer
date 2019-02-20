@@ -34,6 +34,14 @@ namespace Tracer.Fody.Tests.Filters.PatternFilter
         }
 
         [Test]
+        public void AnyClassWithoutPrefixMatch()
+        {
+            var matcher = ClassMatcher.Create("*");
+            matcher.IsMatch(GetTypeDefinition(typeof(MyClass))).Should().BeTrue();
+            matcher.IsMatch(GetTypeDefinition(typeof(YourClass))).Should().BeTrue();
+        }
+
+        [Test]
         public void FullDefinitionWithoutPrefixMatch_MatchCaseInsensitive()
         {
             var matcher = ClassMatcher.Create("myclass");

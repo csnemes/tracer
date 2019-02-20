@@ -38,7 +38,7 @@ namespace Tracer.Fody.Filters.PatternFilter
             if (typeDefinition.HasGenericParameters)
             {
                 var backtickIndex = className.IndexOf('`');
-                className = className.Substring(0, backtickIndex);
+                className = backtickIndex <= 0 ? className : className.Substring(0, backtickIndex);
             }
 
             return _regex.IsMatch(className) && CheckVisibility();
@@ -55,7 +55,7 @@ namespace Tracer.Fody.Filters.PatternFilter
             var filterExpression = input;
 
             if (string.IsNullOrWhiteSpace(filterExpression))
-                throw new ArgumentException("Filter expression cannot be empty.", nameof(filterExpression));
+                throw new ArgumentException("Filter expression's class part cannot be empty.", nameof(filterExpression));
 
             var conditions = new List<string>();
 
@@ -63,7 +63,7 @@ namespace Tracer.Fody.Filters.PatternFilter
             {
                 var closingPosition = filterExpression.IndexOf(']');
                 if (closingPosition == -1)
-                    throw new ArgumentException("Missing closing square bracket in filter expression.",
+                    throw new ArgumentException("Missing closing square bracket in filter expression's class part.",
                         nameof(filterExpression));
 
                 var conditionsExpression = filterExpression.Substring(1, closingPosition - 1);
@@ -74,7 +74,7 @@ namespace Tracer.Fody.Filters.PatternFilter
             }
 
             if (filterExpression.Contains("]"))
-                throw new ArgumentException("Invalid closing square bracket in filter expression.",
+                throw new ArgumentException("Invalid closing square bracket in filter expression's class name part.",
                     nameof(filterExpression));
 
             if (string.IsNullOrWhiteSpace(filterExpression))

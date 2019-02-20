@@ -114,7 +114,7 @@ namespace Tracer.Fody.Filters.PatternFilter
             var filterExpression = input;
 
             if (string.IsNullOrWhiteSpace(filterExpression))
-                throw new ArgumentException("Filter expression cannot be empty.", nameof(filterExpression));
+                throw new ArgumentException("Filter expression's method name part cannot be empty.", nameof(filterExpression));
 
             var conditions = new List<string>();
 
@@ -122,7 +122,7 @@ namespace Tracer.Fody.Filters.PatternFilter
             {
                 var closingPosition = filterExpression.IndexOf(']');
                 if (closingPosition == -1)
-                    throw new ArgumentException("Missing closing square bracket in filter expression.",
+                    throw new ArgumentException("Missing closing square bracket in filter expression's method name part.",
                         nameof(filterExpression));
 
                 var conditionsExpression = filterExpression.Substring(1, closingPosition - 1);
@@ -133,7 +133,7 @@ namespace Tracer.Fody.Filters.PatternFilter
             }
 
             if (filterExpression.Contains("]"))
-                throw new ArgumentException("Invalid closing square bracket in filter expression.",
+                throw new ArgumentException("Invalid closing square bracket in filter expression's method name part.",
                     nameof(filterExpression));
 
             if (string.IsNullOrWhiteSpace(filterExpression))

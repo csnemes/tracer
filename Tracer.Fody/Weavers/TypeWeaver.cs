@@ -37,9 +37,8 @@ namespace Tracer.Fody.Weavers
             _typeDefinition = typeDefinition;
             _staticLoggerField = new Lazy<FieldReference>(() => CreateLoggerStaticField(_typeReferenceProvider, _methodReferenceProvider, _typeDefinition));
             _methodWeaverFactory = new MethodWeaverFactory(typeReferenceProvider, methodReferenceProvider, this);
-            _hasCompilerGeneratedAttribute = new Lazy<bool>(() =>
-                _typeDefinition.HasCustomAttributes && _typeDefinition.CustomAttributes
-                    .Any(attr => attr.AttributeType.FullName.Equals(typeof(CompilerGeneratedAttribute).FullName, StringComparison.Ordinal)));
+            _hasCompilerGeneratedAttribute =
+                new Lazy<bool>(() => CalculateHasCompilerGeneratedAttribute(typeDefinition));
             _shouldTraceConstructors = shouldTraceConstructors;
             _shouldTraceProperties = shouldTraceProperties;
         }
@@ -63,6 +62,18 @@ namespace Tracer.Fody.Weavers
                
                 _methodWeaverFactory.Create(method).Execute(shouldAddTrace);
             }
+        }
+
+        private bool CalculateHasCompilerGeneratedAttribute(TypeDefinition typeDefinition)
+        {
+            var hasCompGenAttribute = typeDefinition.HasCustomAttributes && typeDefinition.CustomAttributes
+                       .Any(attr => attr.AttributeType.FullName.Equals(typeof(CompilerGeneratedAttribute).FullName,
+                           StringComparison.Ordinal));
+
+            if (!hasCompGenAttribute && typeDefinition.IsNested)
+                return CalculateHasCompilerGeneratedAttribute(typeDefinition.DeclaringType); 
+
+            return hasCompGenAttribute;
         }
 
         private bool HasCompilerGeneratedAttribute
