@@ -30,6 +30,8 @@ namespace Tracer.Fody.Filters.PatternFilter
 
         internal static PatternDefinition BuildUpDefinition(string pattern, bool traceEnabled)
         {
+            if (pattern == "*" || pattern == "*.*" || pattern == ".." ) pattern = "..*.*";
+
             var memberSeparatorIdx = pattern.LastIndexOf('.');
             if (memberSeparatorIdx <= 0)
                 throw new Exception($"Invalid pattern format {pattern}");
