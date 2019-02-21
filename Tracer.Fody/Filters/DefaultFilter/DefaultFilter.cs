@@ -37,7 +37,7 @@ namespace Tracer.Fody.Filters.DefaultFilter
                 .Select(AssemblyLevelNoTraceDefinition.ParseFromConfig)).ToList();
         }
 
-        public bool ShouldAddTrace(MethodDefinition definition)
+        public FilterResult ShouldAddTrace(MethodDefinition definition)
         {
             //Trace attribute defined closer to the method overrides more generic definitions
             //So the check order is method -> class -> outer class -> assembly level specs
@@ -47,7 +47,7 @@ namespace Tracer.Fody.Filters.DefaultFilter
                    ShouldTraceBasedOnAssemblyLevelInfo(definition);
         }
         
-        private bool ShouldTraceBasedOnAssemblyLevelInfo(MethodDefinition definition)
+        private FilterResult ShouldTraceBasedOnAssemblyLevelInfo(MethodDefinition definition)
         {
             //get matching assembly level rule (note that defs are ordered from more specific to least specific. On same level noTrace trumps traceOn)
             var rule = _assemblyLevelTraceDefinitions.FirstOrDefault(
@@ -55,10 +55,10 @@ namespace Tracer.Fody.Filters.DefaultFilter
 
             if (rule != null)
             {
-                return rule.ShouldTrace();
+                return new FilterResult(rule.ShouldTrace());
             }
 
-            return false;
+            return new FilterResult(false);
         }
 
     }

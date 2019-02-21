@@ -1,6 +1,7 @@
 ﻿using Mono.Cecil;
 using NUnit.Framework;
 using Tracer.Fody;
+using Tracer.Fody.Filters;
 using Tracer.Fody.Weavers;
 
 
@@ -24,9 +25,9 @@ namespace Tracer.Log4Net.Tests
 
         private class PublicMethodsFilter : ITraceLoggingFilter
         {
-            public bool ShouldAddTrace(MethodDefinition definition)
+            public FilterResult ShouldAddTrace(MethodDefinition definition)
             {
-                return true;
+                return new FilterResult(true);
             }
         }
     }

@@ -20,7 +20,7 @@ namespace Tracer.Fody.Filters.PatternFilter
             _patternDefinitions = patternDefinitions;
         }
 
-        public bool ShouldAddTrace(MethodDefinition definition)
+        public FilterResult ShouldAddTrace(MethodDefinition definition)
         {
             //attributes are stronger than patterns
             var shouldTrace = _traceAttributeHelper.ShouldTraceBasedOnMethodLevelInfo(definition) ??
@@ -30,13 +30,15 @@ namespace Tracer.Fody.Filters.PatternFilter
 
             foreach (var patternDefinition in _patternDefinitions)
             {
-                if (patternDefinition.IsMatching(definition)) return patternDefinition.TraceEnabled;
+                if (patternDefinition.IsMatching(definition)) return new FilterResult(patternDefinition.TraceEnabled, patternDefinition.Parameters);
             }
 
             //defaults to public methods of public classes only
-            return (definition.IsPublic && definition.DeclaringType.IsPublic && !definition.IsConstructor &&
+            var result = (definition.IsPublic && definition.DeclaringType.IsPublic && !definition.IsConstructor &&
                     !definition.IsSetter
                     && !definition.IsGetter);
+
+            return new FilterResult(result);
         }
 
         internal static List<PatternDefinition> ParseConfig(IEnumerable<XElement> configElements)

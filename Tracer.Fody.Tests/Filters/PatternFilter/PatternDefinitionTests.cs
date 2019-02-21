@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 using FluentAssertions;
 using Mono.Cecil;
 using Mono.Cecil.Rocks;
@@ -71,6 +72,27 @@ namespace Tracer.Fody.Tests.Filters.PatternFilter
             def.IsMatching(GetMethodDefinition(typeof(MyNamespace.Inner.AndMore.MyClass), "MyMethod")).Should().BeTrue();
             def.IsMatching(GetMethodDefinition(typeof(MyNamespace.MyClass), "MyMethod")).Should().BeTrue();
             def.IsMatching(GetMethodDefinition(typeof(MyNamespace.OtherClass), "MyMethod")).Should().BeFalse();
+        }
+
+        [Test]
+        public void ParsingParameters()
+        {
+            var def = PatternDefinition.ParseFromConfig(new XElement("On", new XAttribute("pattern", "..*.*"), new XAttribute("logParam", true),
+                 new XAttribute("otherParam", "Test")), true);
+
+            def.Parameters.Count.Should().Be(2);
+            def.Parameters.Keys.Should().Contain("logParam");
+            def.Parameters.Keys.Should().Contain("otherParam");
+            def.Parameters["logParam"].Should().Be("true");
+            def.Parameters["otherParam"].Should().Be("Test");
+        }
+
+        [Test]
+        public void ParsingParametersNoParameters()
+        {
+            var def = PatternDefinition.ParseFromConfig(new XElement("On", new XAttribute("pattern", "..*.*")), true);
+
+            def.Parameters.Count.Should().Be(0);
         }
 
         [Test]

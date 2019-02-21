@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Xml.Linq;
 using Mono.Cecil;
 
@@ -7,13 +9,14 @@ namespace Tracer.Fody.Filters.PatternFilter
     public class PatternDefinition : IComparable<PatternDefinition>
     {
         private readonly bool _traceEnabled;
+        private readonly Dictionary<string, string> _parameters;
         private readonly NamespaceMatcher _namespaceMatcher;
         private readonly ClassMatcher _classMatcher;
         private readonly MemberMatcher _memberMatcher;
         private readonly IMatcher<string> _cachedNamespaceMatcher;
         private readonly IMatcher<TypeDefinition> _cachedClassMatcher;
 
-        private PatternDefinition(bool traceEnabled, NamespaceMatcher namespaceMatcher, ClassMatcher classMatcher, MemberMatcher memberMatcher)
+        private PatternDefinition(bool traceEnabled, NamespaceMatcher namespaceMatcher, ClassMatcher classMatcher, MemberMatcher memberMatcher, Dictionary<string, string> parameters)
         {
             _traceEnabled = traceEnabled;
             _namespaceMatcher = namespaceMatcher;
@@ -21,18 +24,25 @@ namespace Tracer.Fody.Filters.PatternFilter
             _memberMatcher = memberMatcher;
             _cachedNamespaceMatcher = new CachingDecorator<string>(namespaceMatcher);
             _cachedClassMatcher = new CachingDecorator<TypeDefinition>(classMatcher);
+            _parameters = parameters ?? new Dictionary<string, string>();
         }
 
         public bool TraceEnabled => _traceEnabled;
+
+        public Dictionary<string, string> Parameters => _parameters;
 
         internal static PatternDefinition ParseFromConfig(XElement element, bool traceEnabled)
         {
             var pattern = element.Attribute("pattern")?.Value;
             if (pattern == null) throw new Exception($"Pattern is missing from configuration line: {element.Value}.");
-            return BuildUpDefinition(pattern, traceEnabled);
+
+            var parameters = element.Attributes().Where(it => it.Name.LocalName != "pattern")
+                .ToDictionary(it => it.Name.LocalName, it => it.Value);
+
+            return BuildUpDefinition(pattern, traceEnabled, parameters);
         }
 
-        internal static PatternDefinition BuildUpDefinition(string pattern, bool traceEnabled)
+        internal static PatternDefinition BuildUpDefinition(string pattern, bool traceEnabled, Dictionary<string, string> parameters = null)
         {
             if (pattern == "*" || pattern == "*.*" || pattern == ".." ) pattern = "..*.*";
 
@@ -61,7 +71,7 @@ namespace Tracer.Fody.Filters.PatternFilter
                 if (nameSpacePart[0] == '.') nameSpacePart = "." + nameSpacePart;
             }
 
-            return new PatternDefinition(traceEnabled, new NamespaceMatcher(nameSpacePart), ClassMatcher.Create(classPart), MemberMatcher.Create(memberPart));
+            return new PatternDefinition(traceEnabled, new NamespaceMatcher(nameSpacePart), ClassMatcher.Create(classPart), MemberMatcher.Create(memberPart), parameters);
         }
 
         public bool IsMatching(MethodDefinition methodDefinition)

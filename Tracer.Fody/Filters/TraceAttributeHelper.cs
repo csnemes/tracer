@@ -11,14 +11,14 @@ namespace Tracer.Fody.Filters
         private readonly Dictionary<string, TraceAttributeInfo> _traceAttributeCache = new Dictionary<string, TraceAttributeInfo>();
 
 
-        public bool? ShouldTraceBasedOnMethodLevelInfo(MethodDefinition definition)
+        public FilterResult? ShouldTraceBasedOnMethodLevelInfo(MethodDefinition definition)
         {
             if (!definition.IsPropertyAccessor())
             {
                 if (definition.CustomAttributes.Any(attr => attr.AttributeType.FullName.Equals("TracerAttributes.TraceOn", StringComparison.Ordinal)))
-                    return true;
+                    return new FilterResult(true, GetTraceOnAttributeParameters(definition));
                 if (definition.CustomAttributes.Any(attr => attr.AttributeType.FullName.Equals("TracerAttributes.NoTrace", StringComparison.Ordinal)))
-                    return false;
+                    return new FilterResult(false);
             }
             else
             { //its a property accessor check the prop for the attribute
@@ -27,27 +27,49 @@ namespace Tracer.Fody.Filters
                 if (correspondingProp != null)
                 {
                     if (correspondingProp.CustomAttributes.Any(attr => attr.AttributeType.FullName.Equals("TracerAttributes.TraceOn", StringComparison.Ordinal)))
-                        return true;
+                        return new FilterResult(true, GetTraceOnAttributeParameters(definition));
                     if (correspondingProp.CustomAttributes.Any(attr => attr.AttributeType.FullName.Equals("TracerAttributes.NoTrace", StringComparison.Ordinal)))
-                        return false;
+                        return new FilterResult(false);
                 }
             }
 
             return null;
         }
 
-        public bool? ShouldTraceBasedOnClassLevelInfo(MethodDefinition definition)
+        private Dictionary<string, string> GetTraceOnAttributeParameters(MethodDefinition definition)
+        {
+            var attribute = definition.CustomAttributes.FirstOrDefault(attr =>
+                attr.AttributeType.FullName.Equals("TracerAttributes.TraceOn", StringComparison.Ordinal));
+            return GetTraceOnAttributeParameters(attribute);
+        }
+
+        private Dictionary<string, string> GetTraceOnAttributeParameters(CustomAttribute attribute)
+        {
+            var result = new Dictionary<string, string>();
+            if (attribute != null && attribute.HasProperties)
+            {
+                foreach (var property in attribute.Properties)
+                {
+                    result.Add(property.Name, property.Argument.Value?.ToString());
+                }
+            }
+
+            return result;
+        }
+
+        public FilterResult? ShouldTraceBasedOnClassLevelInfo(MethodDefinition definition)
         {
             var attributeInfo = GetTraceAttributeInfoForType(definition.DeclaringType);
 
             if (attributeInfo != null)
             {
-                if (attributeInfo.IsNoTrace) { return false; }
+                if (attributeInfo.IsNoTrace) { return new FilterResult(false); }
 
                 var targetVisibility = attributeInfo.TargetVisibility;
                 var methodVisibility = VisibilityHelper.GetMethodVisibilityLevel(definition);
-                return ((int)targetVisibility >= (int)methodVisibility);
+                var shouldTrace = (int)targetVisibility >= (int)methodVisibility;
 
+                return new FilterResult(shouldTrace, attributeInfo.Parameters);
             }
 
             return null;
@@ -79,7 +101,7 @@ namespace Tracer.Fody.Filters
 
             if (traceOnAttribute != null)
             {
-                return TraceAttributeInfo.TraceOn(GetTargetVisibilityFromAttribute(traceOnAttribute));
+                return TraceAttributeInfo.TraceOn(GetTargetVisibilityFromAttribute(traceOnAttribute), GetTraceOnAttributeParameters(traceOnAttribute));
             }
 
             //no attrib present on type see if we have an outer class
@@ -108,11 +130,13 @@ namespace Tracer.Fody.Filters
         {
             private readonly TraceTargetVisibility _targetVisibility;
             private readonly bool _noTrace;
+            private readonly Dictionary<string, string> _parameters;
 
-            private TraceAttributeInfo(TraceTargetVisibility targetVisibility, bool noTrace)
+            private TraceAttributeInfo(TraceTargetVisibility targetVisibility, bool noTrace, Dictionary<string, string> parameters = null)
             {
                 _targetVisibility = targetVisibility;
                 _noTrace = noTrace;
+                _parameters = parameters;
             }
 
             public static TraceAttributeInfo NoTrace()
@@ -120,20 +144,16 @@ namespace Tracer.Fody.Filters
                 return new TraceAttributeInfo(TraceTargetVisibility.All, true);
             }
 
-            public static TraceAttributeInfo TraceOn(TraceTargetVisibility visibility)
+            public static TraceAttributeInfo TraceOn(TraceTargetVisibility visibility, Dictionary<string, string> parameters)
             {
-                return new TraceAttributeInfo(visibility, false);
+                return new TraceAttributeInfo(visibility, false, parameters);
             }
 
-            public bool IsNoTrace
-            {
-                get { return _noTrace; }
-            }
+            public bool IsNoTrace => _noTrace;
 
-            public bool IsTraceOn
-            {
-                get { return !_noTrace; }
-            }
+            public bool IsTraceOn => !_noTrace;
+
+            public Dictionary<string, string> Parameters => _parameters ?? new Dictionary<string, string>();
 
             public TraceTargetVisibility TargetVisibility
             {
