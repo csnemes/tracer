@@ -10,6 +10,7 @@ namespace Tracer.Fody.Filters.PatternFilter
     public class PatternFilter : ITraceLoggingFilter
     {
         private readonly List<PatternDefinition> _patternDefinitions;
+        private readonly TraceAttributeHelper _traceAttributeHelper = new TraceAttributeHelper();
 
         public PatternFilter(IEnumerable<XElement> configElements) : this(ParseConfig(configElements))
         { }
@@ -21,6 +22,12 @@ namespace Tracer.Fody.Filters.PatternFilter
 
         public bool ShouldAddTrace(MethodDefinition definition)
         {
+            //attributes are stronger than patterns
+            var shouldTrace = _traceAttributeHelper.ShouldTraceBasedOnMethodLevelInfo(definition) ??
+                _traceAttributeHelper.ShouldTraceBasedOnClassLevelInfo(definition);
+
+            if (shouldTrace.HasValue) return shouldTrace.Value;
+
             foreach (var patternDefinition in _patternDefinitions)
             {
                 if (patternDefinition.IsMatching(definition)) return patternDefinition.TraceEnabled;
