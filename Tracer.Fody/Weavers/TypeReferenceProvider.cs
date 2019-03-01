@@ -15,6 +15,8 @@ namespace Tracer.Fody.Weavers
     internal class TypeReferenceProvider
     {
         private readonly Lazy<TypeReference> _stringArray;
+        private readonly Lazy<TypeReference> _stringTuple;
+        private readonly Lazy<TypeReference> _stringTupleArray;
         private readonly Lazy<TypeReference> _objectArray;
         private readonly Lazy<TypeReference> _type;
         private readonly Lazy<TypeReference> _stopwatch;
@@ -31,6 +33,8 @@ namespace Tracer.Fody.Weavers
             _moduleDefinition = moduleDefinition;
             _loggerAdapterMetadataScopeProvider = loggerAdapterMetadataScopeProvider;
             _stringArray = new Lazy<TypeReference>(() => moduleDefinition.ImportReference((typeof(string[]))));
+            _stringTupleArray = new Lazy<TypeReference>(() => moduleDefinition.ImportReference((typeof(Tuple<string, string>[]))));
+            _stringTuple = new Lazy<TypeReference>(() => moduleDefinition.ImportReference((typeof(Tuple<string, string>))));
             _objectArray = new Lazy<TypeReference>(() => moduleDefinition.ImportReference(typeof(object[])));
             _type = new Lazy<TypeReference>(() => moduleDefinition.ImportReference(typeof(Type)));
             _stopwatch = new Lazy<TypeReference>(() => moduleDefinition.ImportReference(typeof(Stopwatch)));
@@ -44,6 +48,10 @@ namespace Tracer.Fody.Weavers
         {
             get { return _stringArray.Value; }
         }
+
+        public TypeReference StringTupleArray => _stringTupleArray.Value;
+
+        public TypeReference StringTuple => _stringTuple.Value;
 
         public TypeReference ObjectArray
         {

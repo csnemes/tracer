@@ -17,14 +17,14 @@ namespace Tracer.Fody.Tests.MockLoggers
             return new MockLogResult(Calls, true);
         }
 
-        public static void TraceEnterCalled(string loggerName, string containingMethod, string[] paramNames, string[] paramValues)
+        public static void TraceEnterCalled(string loggerName, string containingMethod, string[] paramNames, string[] paramValues, Tuple<string, string>[] configParameters)
         {
-            Calls.Add(MockCallInfo.CreateEnter(loggerName, containingMethod, paramNames, paramValues));
+            Calls.Add(MockCallInfo.CreateEnter(loggerName, containingMethod, paramNames, paramValues, configParameters));
         }
 
-        public static void TraceLeaveCalled(string loggerName, string containingMethod, long numberOfTicks, string[] paramNames, string[] paramValues)
+        public static void TraceLeaveCalled(string loggerName, string containingMethod, long numberOfTicks, string[] paramNames, string[] paramValues, Tuple<string, string>[] configParameters)
         {
-            Calls.Add(MockCallInfo.CreateLeave(loggerName, containingMethod, numberOfTicks, paramNames, paramValues));
+            Calls.Add(MockCallInfo.CreateLeave(loggerName, containingMethod, numberOfTicks, paramNames, paramValues, configParameters));
         }
 
         public static void LogCalled(string loggerName, string containingMethod, string logMethodCalled,

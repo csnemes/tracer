@@ -69,6 +69,5 @@ namespace Tracer.Fody.Tests.TraceTests
         }
 
 
-
     }
 }

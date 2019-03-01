@@ -20,6 +20,12 @@ namespace Tracer.Fody.Weavers
         {
             _moduleDefinition = moduleDefinition;
             _typeReferenceProvider = typeReferenceProvider;
+            _getTypeFromHandleReference =
+                new Lazy<MethodReference>(() => _moduleDefinition.ImportReference(typeof(Type).GetRuntimeMethod("GetTypeFromHandle", new[] { typeof(RuntimeTypeHandle) })));
+            _getTimestampReference =
+                new Lazy<MethodReference>(() => _moduleDefinition.ImportReference(typeof(Stopwatch).GetRuntimeMethod("GetTimestamp", new Type[0])));
+            _getTupleCreateReference =
+                new Lazy<MethodReference>(InternalGetTupleCreateReference);
         }
 
         public MethodReference GetTraceEnterReference()
@@ -27,6 +33,7 @@ namespace Tracer.Fody.Weavers
             var logTraceEnterMethod = new MethodReference("TraceEnter", _moduleDefinition.TypeSystem.Void, _typeReferenceProvider.LogAdapterReference);
             logTraceEnterMethod.HasThis = true; //instance method
             logTraceEnterMethod.Parameters.Add(new ParameterDefinition(_moduleDefinition.TypeSystem.String));
+            logTraceEnterMethod.Parameters.Add(new ParameterDefinition(_typeReferenceProvider.StringTupleArray));
             logTraceEnterMethod.Parameters.Add(new ParameterDefinition(_typeReferenceProvider.StringArray));
             logTraceEnterMethod.Parameters.Add(new ParameterDefinition(_typeReferenceProvider.ObjectArray));
             return logTraceEnterMethod;
@@ -37,6 +44,7 @@ namespace Tracer.Fody.Weavers
             var logTraceLeaveMethod = new MethodReference("TraceLeave", _moduleDefinition.TypeSystem.Void, _typeReferenceProvider.LogAdapterReference);
             logTraceLeaveMethod.HasThis = true; //instance method
             logTraceLeaveMethod.Parameters.Add(new ParameterDefinition(_moduleDefinition.TypeSystem.String));
+            logTraceLeaveMethod.Parameters.Add(new ParameterDefinition(_typeReferenceProvider.StringTupleArray));
             logTraceLeaveMethod.Parameters.Add(new ParameterDefinition(_moduleDefinition.TypeSystem.Int64));
             logTraceLeaveMethod.Parameters.Add(new ParameterDefinition(_moduleDefinition.TypeSystem.Int64));
             logTraceLeaveMethod.Parameters.Add(new ParameterDefinition(_typeReferenceProvider.StringArray));
@@ -44,14 +52,23 @@ namespace Tracer.Fody.Weavers
             return logTraceLeaveMethod;
         }
 
-        public MethodReference GetGetTypeFromHandleReference()
-        {
-            return _moduleDefinition.ImportReference(typeof(Type).GetRuntimeMethod("GetTypeFromHandle", new [] { typeof(RuntimeTypeHandle)}));
-        }
+        private readonly Lazy<MethodReference> _getTypeFromHandleReference;
+        private readonly Lazy<MethodReference> _getTimestampReference;
+        private readonly Lazy<MethodReference> _getTupleCreateReference;
 
-        public MethodReference GetTimestampReference()
+        public MethodReference GetGetTypeFromHandleReference() => _getTypeFromHandleReference.Value;
+
+        public MethodReference GetTimestampReference() => _getTimestampReference.Value;
+
+        public MethodReference GetTupleCreateReference() => _getTupleCreateReference.Value;
+
+        private MethodReference InternalGetTupleCreateReference()
         {
-            return _moduleDefinition.ImportReference(typeof(Stopwatch).GetRuntimeMethod("GetTimestamp", new Type[0]));
+            var methods = typeof(Tuple).GetRuntimeMethods();
+            var method = methods.First(it =>
+                it.Name.Equals("Create") && it.ContainsGenericParameters && it.GetParameters().Length == 2);
+            var typedMethod = method.MakeGenericMethod(typeof(string), typeof(string));
+            return _moduleDefinition.ImportReference(typedMethod);
         }
 
         public MethodReference GetInstanceLogMethod(MethodReferenceInfo methodReferenceInfo, IEnumerable<ParameterDefinition> parameters = null)

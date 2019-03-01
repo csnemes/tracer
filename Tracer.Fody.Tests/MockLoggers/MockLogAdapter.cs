@@ -16,30 +16,30 @@ namespace Tracer.Fody.Tests.MockLoggers
             _type = type;
         }
 
-        public void TraceEnter(string methodInfo, string[] paramNames, object[] paramValues)
+        public void TraceEnter(string methodInfo, Tuple<string, string>[] configParameters, string[] paramNames, object[] paramValues)
         {
             if (paramNames != null)
             {
                 var stringValues = paramValues.Select(val => val != null ? val.ToString() : null).ToArray();
-                MockLogManagerAdapter.TraceEnterCalled(TypePrettyName, methodInfo, paramNames, stringValues);
+                MockLogManagerAdapter.TraceEnterCalled(TypePrettyName, methodInfo, paramNames, stringValues, configParameters);
             }
             else
             {
-                MockLogManagerAdapter.TraceEnterCalled(TypePrettyName, methodInfo, null, null);
+                MockLogManagerAdapter.TraceEnterCalled(TypePrettyName, methodInfo, null, null, configParameters);
             }
         }
 
-        public void TraceLeave(string methodInfo, long startTicks, long endTicks, string[] paramNames, object[] paramValues)
+        public void TraceLeave(string methodInfo, Tuple<string, string>[] configParameters, long startTicks, long endTicks, string[] paramNames, object[] paramValues)
         {
             var numberOfTicks = endTicks - startTicks;
             if (paramNames != null)
             {
                 var stringValues = paramValues.Select(val => val != null ? val.ToString() : null).ToArray();
-                MockLogManagerAdapter.TraceLeaveCalled(TypePrettyName, methodInfo, numberOfTicks, paramNames, stringValues);
+                MockLogManagerAdapter.TraceLeaveCalled(TypePrettyName, methodInfo, numberOfTicks, paramNames, stringValues, configParameters);
             }
             else
             {
-                MockLogManagerAdapter.TraceLeaveCalled(TypePrettyName, methodInfo, numberOfTicks, null, null);
+                MockLogManagerAdapter.TraceLeaveCalled(TypePrettyName, methodInfo, numberOfTicks, null, null, configParameters);
             }
         }
 

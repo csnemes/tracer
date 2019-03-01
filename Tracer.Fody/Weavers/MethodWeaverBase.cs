@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using Mono.Cecil.Rocks;
@@ -82,14 +81,15 @@ namespace Tracer.Fody.Weavers
         /// Runs the method weaver which adds trace logs if required and rewrites static log calls
         /// </summary>
         /// <param name="addTrace">if true trace logs are added</param>
-        public void Execute(bool addTrace)
+        /// <param name="parameters">additional parameters to pass to the logger</param>
+        public void Execute(bool addTrace, Dictionary<string, string> parameters)
         {
             _body.SimplifyMacros();
 
             if (addTrace)
             {
-                WeaveTraceEnter();
-                WeaveTraceLeave();
+                WeaveTraceEnter(parameters);
+                WeaveTraceLeave(parameters);
             }
 
             SearchForAndReplaceStaticLogCalls();
@@ -98,13 +98,26 @@ namespace Tracer.Fody.Weavers
             _body.OptimizeMacros();
         }
 
-        protected abstract void WeaveTraceEnter();
+        protected abstract void WeaveTraceEnter(Dictionary<string, string> configParameters);
 
-        protected abstract void WeaveTraceLeave();
+        protected abstract void WeaveTraceLeave(Dictionary<string, string> configParameters);
 
         protected abstract void SearchForAndReplaceStaticLogCalls();
-        
-        protected List<Instruction> CreateTraceEnterCallInstructions()
+
+        private VariableDefinition _configParamDef;
+
+        protected VariableDefinition ConfigParamDef
+        {
+            get
+            {
+                if (_configParamDef == null)
+                    _configParamDef = _body.DeclareVariable("$configParameters", _typeReferenceProvider.StringTupleArray);
+
+                return _configParamDef;
+            }
+        }
+
+        protected List<Instruction> CreateTraceEnterCallInstructions(Dictionary<string, string> configParameters)
         {
             /* TRACE ENTRY: 
  * What we'd like to achieve is this:
@@ -134,9 +147,15 @@ namespace Tracer.Fody.Weavers
                     _body.Method.Parameters.Where(p => !p.IsOut), paramNamesDef, paramValuesDef, 0));
             }
 
+            if (configParameters?.Any() == true)
+            {
+                instructions.AddRange(LoadConfigParameters(ConfigParamDef, configParameters));
+            }
+
             //build up logger call
             instructions.Add(Instruction.Create(OpCodes.Ldsfld, _loggerProvider.StaticLogger));
             instructions.AddRange(LoadMethodNameOnStack());
+            instructions.Add(configParameters?.Any() == true ? Instruction.Create(OpCodes.Ldloc, ConfigParamDef) : Instruction.Create(OpCodes.Ldnull)); 
             instructions.Add(traceEnterNeedsParamArray ? Instruction.Create(OpCodes.Ldloc, paramNamesDef) : Instruction.Create(OpCodes.Ldnull));
             instructions.Add(traceEnterNeedsParamArray ? Instruction.Create(OpCodes.Ldloc, paramValuesDef) : Instruction.Create(OpCodes.Ldnull));
             instructions.Add(Instruction.Create(OpCodes.Callvirt, _methodReferenceProvider.GetTraceEnterReference()));
@@ -150,6 +169,7 @@ namespace Tracer.Fody.Weavers
 
             return instructions;
         }
+
 
         private VariableDefinition _paramNamesVariable;
 
@@ -194,6 +214,25 @@ namespace Tracer.Fody.Weavers
             }
         }
 
+        protected IEnumerable<Instruction> LoadConfigParameters(VariableDefinition configParamDef, Dictionary<string, string> configParameters)
+        {
+            var size = configParameters.Count;
+            yield return Instruction.Create(OpCodes.Ldc_I4, size);  //setArraySize
+            yield return Instruction.Create(OpCodes.Newarr, _typeReferenceProvider.StringTuple); //create name array
+            yield return Instruction.Create(OpCodes.Stloc, configParamDef); //store it in local variable
+
+            int position = 0;
+            foreach (var configParameter in configParameters)
+            {
+                yield return Instruction.Create(OpCodes.Ldloc, configParamDef); 
+                yield return Instruction.Create(OpCodes.Ldc_I4, position);
+                yield return Instruction.Create(OpCodes.Ldstr, configParameter.Key);
+                yield return Instruction.Create(OpCodes.Ldstr, configParameter.Value);
+                yield return Instruction.Create(OpCodes.Call, _methodReferenceProvider.GetTupleCreateReference());
+                yield return Instruction.Create(OpCodes.Stelem_Ref);
+                position++;
+            }
+        }
 
         protected IEnumerable<Instruction> InitArray(VariableDefinition arrayVar, int size, TypeReference type)
         {

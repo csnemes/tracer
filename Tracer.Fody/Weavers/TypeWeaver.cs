@@ -9,6 +9,7 @@ using Mono.Cecil;
 using Mono.Cecil.Cil;
 using Mono.Cecil.Rocks;
 using Mono.Collections.Generic;
+using Tracer.Fody.Filters;
 using Tracer.Fody.Helpers;
 
 namespace Tracer.Fody.Weavers
@@ -57,10 +58,13 @@ namespace Tracer.Fody.Weavers
 
                 bool shouldAddTrace = !HasCompilerGeneratedAttribute 
                     && ((method.IsConstructor && _shouldTraceConstructors && !method.IsStatic) || !method.IsConstructor)
-                    && _filter.ShouldAddTrace(method).ShouldTrace
                     && ((method.IsPropertyAccessor() && _shouldTraceProperties) || !method.IsPropertyAccessor());
-               
-                _methodWeaverFactory.Create(method).Execute(shouldAddTrace);
+
+                FilterResult filterResult = new FilterResult(false);
+                if (shouldAddTrace)
+                    filterResult = _filter.ShouldAddTrace(method);
+
+                _methodWeaverFactory.Create(method).Execute(filterResult.ShouldTrace, filterResult.Parameters);
             }
         }
 

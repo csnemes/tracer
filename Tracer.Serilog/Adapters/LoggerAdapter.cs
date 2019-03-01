@@ -295,7 +295,7 @@ namespace Tracer.Serilog.Adapters
             _logger.Write(logEvent);
         }
 
-        public void TraceEnter(string methodName, string[] paramNames, object[] paramValues)
+        public void TraceEnter(string methodName, Tuple<string, string>[] methodParameters, string[] paramNames, object[] paramValues)
         {
             if (_logger.IsEnabled(LogEventLevel.Verbose))
             {
@@ -335,7 +335,7 @@ namespace Tracer.Serilog.Adapters
             }
         }
 
-        public void TraceLeave(string methodName, long startTicks, long endTicks, string[] paramNames, object[] paramValues)
+        public void TraceLeave(string methodName, Tuple<string, string>[] methodParameters, long startTicks, long endTicks, string[] paramNames, object[] paramValues)
         {
             if (_logger.IsEnabled(LogEventLevel.Verbose))
             {

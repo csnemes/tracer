@@ -38,7 +38,7 @@ namespace Tracer.NLog.Adapters
 
         #region Methods required for trace enter and leave
 
-        public void TraceEnter(string methodInfo, string[] paramNames, object[] paramValues)
+        public void TraceEnter(string methodInfo, Tuple<string, string>[] methodParameters, string[] paramNames, object[] paramValues)
         {
             if (_logger.IsTraceEnabled)
             {
@@ -66,7 +66,7 @@ namespace Tracer.NLog.Adapters
             }
         }
 
-        public void TraceLeave(string methodInfo, long startTicks, long endTicks, string[] paramNames, object[] paramValues)
+        public void TraceLeave(string methodInfo, Tuple<string, string>[] methodParameters, long startTicks, long endTicks, string[] paramNames, object[] paramValues)
         {
             if (_logger.IsTraceEnabled)
             {
