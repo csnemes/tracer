@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Tracer.Fody</id>
-    <version>3.0.0-beta2</version>
+    <version>3.0.0</version>
     <authors>csnemes</authors>
     <owners>csnemes</owners>
     <projectUrl>https://github.com/csnemes/tracer</projectUrl>
@@ -62,6 +62,7 @@
 	- Switched to new Fody package format, upgraded to Fody 3.3.x
 	- Added pattern based filter for specifying which methods to trace	
 	- Fixed generic async rewrite issues causing PEVerify errors
+	- Added the possibility to pass in extra configuration parameters to trace enter and leave methods (breaks signature)
 	</releaseNotes>
   </metadata>
 </package>
