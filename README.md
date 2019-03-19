@@ -1,18 +1,18 @@
-Tracer 2.2.0
+Tracer 3.0.0
 ======
 
 Tracing and logging rewriter using Fody. It adds trace enter and trace leave log entries for the methods specified. Such calls include incoming and outgoing arguments as well as time spent in the method. It also rewrites static log entries to properly configured log calls. Tracer is the rewriter core on which one of the specific adapters like Tracer.Log4Net is built uppon. Creating custom adapters for your specific needs is very easy.
-Version 2.x supports netstandard 2.0.
+Version 2.x or higher supports netstandard 2.0.
 See [Wiki](https://github.com/csnemes/tracer/wiki) for details.
 
 Existing adapters are (supporting netstandard 2.0):
 
 |Adapter     |NuGet package              |Version |
 |------------|---------------------------|-------:|
-|Log4Net     |Tracer.Log4Net.Fody        | 2.0.0 or higher |
-|Serilog     |Tracer.Serilog.Fody        | 2.0.0 or higher |
-|NLog        |Tracer.4NLog.Fody          | 2.2.0  |
-|            |Tracer.4NLog.Signed.Fody   | 2.2.0  |
+|Log4Net     |Tracer.Log4Net.Fody        | 3.0.0  |
+|Serilog     |Tracer.Serilog.Fody        | 3.0.0  |
+|NLog        |Tracer.4NLog.Fody          | 3.0.0  |
+
 
 Should you have any question/problem send an email to csaba.nemes@outlook.com or add an issue/request.
 
@@ -67,7 +67,13 @@ Version History for Tracer:
     - Moved to netstandard 2.0    
 * 2.2.0
     - Updated to Fody 3.x
-    
+* 3.0.0
+    - Fixed issue with missing local function extra parameter name
+    - Switched to new Fody package format, upgraded to Fody 3.3.x
+    - Added pattern based filter for specifying which methods to trace	
+    - Fixed generic async rewrite issues causing PEVerify errors
+    - Added the possibility to pass in extra configuration parameters to trace enter and leave methods (breaks trace enter and leave signature)
+
 Version History for Tracer.Log4Net:
 ---
 * 1.0.0 
@@ -99,6 +105,8 @@ Version History for Tracer.Log4Net:
 * 2.2.0
     - Updated to Fody 3.x
     - TraceOn and NoTrace can be put on structs and constructors 
+* 3.0.0
+    - See Tracer.Fody Version History
 
 Version History for Tracer.Serilog:
 ---
@@ -116,6 +124,8 @@ Version History for Tracer.Serilog:
 * 2.2.0
     Updated to Fody 3.x
     TraceOn and NoTrace can be put on structs and constructors       
+* 3.0.0
+    - See Tracer.Fody Version History
 
 Version History for Tracer.4NLog:
 ---
@@ -128,6 +138,8 @@ Version History for Tracer.4NLog:
 * 2.2.0
     Updated to Fody 3.x
     TraceOn and NoTrace can be put on structs and constructors      
+* 3.0.0
+    - See Tracer.Fody Version History
     
 Notes:
 ---
