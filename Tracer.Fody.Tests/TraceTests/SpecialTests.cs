@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using FluentAssertions;
 using NUnit.Framework;
 using Tracer.Fody.Filters;
+using Tracer.Fody.Filters.DefaultFilter;
 using Tracer.Fody.Tests.MockLoggers;
 
 namespace Tracer.Fody.Tests.TraceTests
@@ -261,6 +262,42 @@ namespace Tracer.Fody.Tests.TraceTests
                 TraceTargetVisibility.Public);
             var result = this.RunTest(code, new DefaultFilter(new[] { def }), "First.MyClass::Main");
             result.Count.Should().Be(6);
+        }
+
+        [Test]
+        public void Test_LocalFunction()
+        {
+            string code = @"
+                using System;
+                using System.Diagnostics;
+
+                namespace First
+                {
+                    public class MyClass
+                    {
+                        public static void Main()
+                        {
+                            var ext = ""zzz"";
+                            CallMe(""Hello"");
+                            CallMe(""Ahoy"");
+
+                            string CallMe(string param)
+                            {
+                                return param + ext;
+                            }
+                        }
+                    }
+                }
+            ";
+
+            var result = this.RunTest(code, new AllTraceLoggingFilter(), "First.MyClass::Main");
+            result.Count.Should().Be(6);
+            result.ElementAt(0).ShouldBeTraceEnterInto("First.MyClass::Main");
+            result.ElementAt(1).ShouldBeTraceEnterInto("First.MyClass::Main", "param", "Hello");
+            result.ElementAt(2).ShouldBeTraceLeaveFrom("First.MyClass::Main", "Hellozzz");
+            result.ElementAt(3).ShouldBeTraceEnterInto("First.MyClass::Main", "param", "Ahoy");
+            result.ElementAt(4).ShouldBeTraceLeaveFrom("First.MyClass::Main", "Ahoyzzz");
+            result.ElementAt(5).ShouldBeTraceLeaveFrom("First.MyClass::Main");
         }
     }
 }

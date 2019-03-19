@@ -13,7 +13,7 @@ namespace Tracer.Fody.Weavers
 {
     internal class AsyncMethodWeaver : MethodWeaverBase
     {
-        private readonly TypeDefinition _generatedType;
+        private TypeDefinition _generatedType;
         private FieldReference _tickFieldRef;
         private MethodBody _moveNextBody;
         private MethodDefinition _moveNextDefinition;
@@ -28,9 +28,9 @@ namespace Tracer.Fody.Weavers
             WeavingLog.LogDebug($"Weaving {methodDefinition.FullName}");
         }
 
-        protected override void WeaveTraceEnter()
+        protected override void WeaveTraceEnter(Dictionary<string, string> configParameters)
         {
-            var instructions = CreateTraceEnterCallInstructions();
+            var instructions = CreateTraceEnterCallInstructions(configParameters);
             _body.InsertAtTheBeginning(instructions);
 
             ExtendGeneratedTypeWithTickcountField();
@@ -61,11 +61,11 @@ namespace Tracer.Fody.Weavers
             }
 
             instrs.Add(Instruction.Create(OpCodes.Ldloc, StartTickVariable));
-            instrs.Add(Instruction.Create(OpCodes.Stfld, _tickFieldRef));
+            instrs.Add(Instruction.Create(OpCodes.Stfld, _tickFieldRef.FixFieldReferenceToUseSameGenericArgumentsAsVariable(genVar)));
             instr.InsertBefore(processor, instrs);
         }
 
-        protected override void WeaveTraceLeave()
+        protected override void WeaveTraceLeave(Dictionary<string, string> configParameters)
         {
             _moveNextDefinition =
                 _generatedType.Methods.Single(it => it.Name.Equals("MoveNext", StringComparison.OrdinalIgnoreCase));
@@ -80,6 +80,8 @@ namespace Tracer.Fody.Weavers
             VariableDefinition returnValueDef = null;
             var processor = _moveNextBody.GetILProcessor();
 
+            VariableDefinition configParamDef = _moveNextBody.DeclareVariable("$configParameters", _typeReferenceProvider.StringTupleArray);
+
             if (setResultInstr != null) //rarely it might happen that there is not SetResult
             {
                 //if we have return value store it in a local var
@@ -89,8 +91,9 @@ namespace Tracer.Fody.Weavers
                     setResultInstr.InsertBefore(processor, retvalDupInstructions);
                 }
 
+
                 //do the exit logging
-                setResultInstr.InsertBefore(processor, CreateTraceReturnLoggingInstructions(returnValueDef));
+                setResultInstr.InsertBefore(processor, CreateTraceReturnLoggingInstructions(returnValueDef, configParamDef, configParameters));
             }
 
             if (setExceptionInstr != null)
@@ -106,7 +109,7 @@ namespace Tracer.Fody.Weavers
                 };
 
                 setExceptionInstr.InsertBefore(processor, exceptionDupInstructions);
-                setExceptionInstr.InsertBefore(processor, CreateTraceReturnWithExceptionLoggingInstructions(exceptionValueDef));
+                setExceptionInstr.InsertBefore(processor, CreateTraceReturnWithExceptionLoggingInstructions(exceptionValueDef, configParamDef, configParameters));
             }
 
             //search and replace static log calls in moveNext
@@ -208,14 +211,15 @@ namespace Tracer.Fody.Weavers
             if (ReturnType.IsGenericParameter)
             {
                 //use the generic parameter of the generated state machine
-                var varType = _generatedType.GenericParameters[0];
+                var varType = _generatedType.GenericParameters.Single(it => it.Name == ReturnType.Name);
                 instructions.Add(Instruction.Create(OpCodes.Box, varType));
             }
             else
             {
                 if (IsBoxingNeeded(ReturnType))
                 {
-                    instructions.Add(Instruction.Create(OpCodes.Box, ReturnType));
+                    var vs = _moveNextBody.Variables.First(v => v.VariableType.Name == ReturnType.Name);
+                    instructions.Add(Instruction.Create(OpCodes.Box, vs.VariableType));
                 }
             }
             instructions.Add(Instruction.Create(OpCodes.Stloc, returnValueDef)); //store return value in local variable
@@ -223,7 +227,7 @@ namespace Tracer.Fody.Weavers
             return instructions;
         }
 
-        private List<Instruction> CreateTraceReturnLoggingInstructions(VariableDefinition returnValueDef)
+        private List<Instruction> CreateTraceReturnLoggingInstructions(VariableDefinition returnValueDef, VariableDefinition configParamDef, Dictionary<string, string> configParameters)
         {
             var instructions = new List<Instruction>();
 
@@ -246,9 +250,13 @@ namespace Tracer.Fody.Weavers
                 instructions.AddRange(StoreVariableInObjectArray(paramValuesDef, 0, returnValueDef));
             }
 
+            if (configParameters?.Any() == true)
+                instructions.AddRange(LoadConfigParameters(configParamDef, configParameters));
+
             //build up Trace call
             instructions.Add(Instruction.Create(OpCodes.Ldsfld, TypeWeaver.CreateLoggerStaticField(_typeReferenceProvider, _methodReferenceProvider, _generatedType)));
             instructions.AddRange(LoadMethodNameOnStack());
+            instructions.Add(configParameters?.Any() == true ? Instruction.Create(OpCodes.Ldloc, configParamDef) : Instruction.Create(OpCodes.Ldnull));
 
             //start ticks
             instructions.Add(Instruction.Create(OpCodes.Ldarg_0));
@@ -263,7 +271,7 @@ namespace Tracer.Fody.Weavers
             return instructions;
         }
 
-        private List<Instruction> CreateTraceReturnWithExceptionLoggingInstructions(VariableDefinition exceptionValue)
+        private List<Instruction> CreateTraceReturnWithExceptionLoggingInstructions(VariableDefinition exceptionValue, VariableDefinition configParamDef, Dictionary<string, string> configParameters)
         {
             var instructions = new List<Instruction>();
 
@@ -279,9 +287,13 @@ namespace Tracer.Fody.Weavers
             instructions.AddRange(StoreValueReadByInstructionsInArray(paramNamesDef, 0, Instruction.Create(OpCodes.Ldstr, ExceptionMarker)));
             instructions.AddRange(StoreVariableInObjectArray(paramValuesDef, 0, exceptionValue));
 
+            if (configParameters?.Any() == true)
+                instructions.AddRange(LoadConfigParameters(configParamDef, configParameters));
+
             //build up Trace call
             instructions.Add(Instruction.Create(OpCodes.Ldsfld, TypeWeaver.CreateLoggerStaticField(_typeReferenceProvider, _methodReferenceProvider, _generatedType)));
             instructions.AddRange(LoadMethodNameOnStack());
+            instructions.Add(configParameters?.Any() == true ? Instruction.Create(OpCodes.Ldloc, configParamDef) : Instruction.Create(OpCodes.Ldnull));
 
             //start ticks
             instructions.Add(Instruction.Create(OpCodes.Ldarg_0));

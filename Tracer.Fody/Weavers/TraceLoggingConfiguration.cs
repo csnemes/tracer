@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Mono.Cecil;
+using Tracer.Fody.Filters;
 
 namespace Tracer.Fody.Weavers
 {
@@ -125,9 +126,9 @@ namespace Tracer.Fody.Weavers
             private NullFilter()
             {}
 
-            public bool ShouldAddTrace(MethodDefinition definition)
+            public FilterResult ShouldAddTrace(MethodDefinition definition)
             {
-                return true;
+                return new FilterResult(true);
             }
         }
 

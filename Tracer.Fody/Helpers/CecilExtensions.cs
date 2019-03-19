@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
+using Mono.Cecil.Rocks;
 using Mono.Collections.Generic;
 
 namespace Tracer.Fody.Helpers
@@ -118,6 +119,20 @@ namespace Tracer.Fody.Helpers
                 instType.GenericArguments.Add(parameter);
             }
             return instType;
+        }
+
+        public static FieldReference FixFieldReferenceToUseSameGenericArgumentsAsVariable(this FieldReference fieldReference, VariableDefinition variableDefinition)
+        {
+            if (fieldReference.DeclaringType.HasGenericParameters)
+            {
+                var instType = new GenericInstanceType(fieldReference.DeclaringType);
+                foreach (var arg in ((GenericInstanceType)variableDefinition.VariableType).GenericArguments)
+                {
+                    instType.GenericArguments.Add(arg);
+                }
+                return new FieldReference(fieldReference.Name, fieldReference.FieldType, instType);
+            }
+            return fieldReference;
         }
 
         public static FieldReference FixFieldReferenceIfDeclaringTypeIsGeneric(this FieldReference fieldReference)

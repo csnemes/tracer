@@ -1,0 +1,46 @@
+﻿<?xml version="1.0"?>
+<package>
+  <metadata>
+    <id>Tracer.Serilog.Fody</id>
+    <version>3.0.0</version>
+    <authors>csnemes,Duane McKinney</authors>
+    <owners>csnemes</owners>
+    <projectUrl>https://github.com/csnemes/tracer</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Serilog adapter for Tracer.Fody which is an ILWeaver adding trace enter and leave log entries to methods. This adapter redirects trace logs and
+    all other log calls to Serilog.</description>
+    <summary>Serilog adapter for Tracer.Fody. Adds trace log entries and rewrite static log calls using Serilog.</summary>
+    <copyright>Copyright 2019</copyright>
+    <tags>Fody, Logging, Tracing, Serilog, ILWeaving, Cecil</tags>
+    <dependencies>
+      <group>
+        <dependency id="Fody" version="[3.3.2,4)" include="All" />
+		    <dependency id="Serilog" version="[2.6.0,3.0)" />
+      </group>
+    </dependencies>
+    <references />
+    	<releaseNotes>
+        * 1.0.0
+        Initial release
+        * 1.0.1
+        Framework version set to 4.5
+        * 1.1.0
+        Added the ability to destructure types in trace enter and leave. Use DestructureAttribute to mark a type as target for destructuring.
+        Use the assembly level DestructureTypeAttribute to mark types outside of your codebase.
+        * 2.0.0
+        Moved to netstandard 2.0
+        * 2.1.0
+        Can use TracerFodySpecialKeyPrefix environment variable to define prefix (instead of $) in $return and $exception.
+        * 2.2.0
+        - Updated to Fody 3.x
+        - TraceOn and NoTrace can be put on structs and constructors
+        * 2.2.1
+		    - Trace enter and leave now use Verbose level instead of Debug
+        * 3.0.0
+	      - Fixed issue with missing local function extra parameter name
+	      - Switched to new Fody package format, upgraded to Fody 3.3.x
+	      - Added pattern based filter for specifying which methods to trace
+  		  - Fixed generic async rewrite issues causing PEVerify errors
+      </releaseNotes>
+  </metadata>
+</package>

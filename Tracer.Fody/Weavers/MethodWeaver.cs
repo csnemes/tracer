@@ -15,22 +15,19 @@ namespace Tracer.Fody.Weavers
     /// </summary>
     internal class MethodWeaver : MethodWeaverBase
     {
-        private Instruction _firstInstructionAfterTraceEnter;
-
 
         internal MethodWeaver(TypeReferenceProvider typeReferenceProvider, MethodReferenceProvider methodReferenceProvider,
             ILoggerProvider loggerProvider, MethodDefinition methodDefinition) : base(typeReferenceProvider, methodReferenceProvider,
                 loggerProvider, methodDefinition)
         {}
 
-        protected override void WeaveTraceEnter()
+        protected override void WeaveTraceEnter(Dictionary<string, string> configParameters)
         {
-            _firstInstructionAfterTraceEnter = _body.Instructions.FirstOrDefault();
-            var instructions = CreateTraceEnterCallInstructions();
+            var instructions = CreateTraceEnterCallInstructions(configParameters);
             _body.InsertAtTheBeginning(instructions);
         }
 
-        protected override void WeaveTraceLeave()
+        protected override void WeaveTraceLeave(Dictionary<string, string> configParameters)
         {
             //----------------------
 
@@ -44,7 +41,7 @@ namespace Tracer.Fody.Weavers
                * we use CLR's fault block capbility to do so
             */
             VariableDefinition returnValueDef = null;
-            
+
             if (HasReturnValue)
             {
                 //Declare local variable for the return value
@@ -52,21 +49,26 @@ namespace Tracer.Fody.Weavers
             }
 
             var allReturns = _body.Instructions.Where(instr => instr.OpCode == OpCodes.Ret).ToList();
-            var handlerStart = CreateExceptionHandlerAtTheEnd();
 
-            var loggingReturnStart = CreateLoggingReturnAtTheEnd(returnValueDef);
+            Instruction loggingReturnStart;
 
             //add exception handler 
             if (!_isEmptyBody)
             {
+                var handlerStart = CreateExceptionHandlerAtTheEnd(configParameters);
+                loggingReturnStart = CreateLoggingReturnAtTheEnd(returnValueDef, configParameters);
                 _body.ExceptionHandlers.Add(new ExceptionHandler(ExceptionHandlerType.Catch)
                 {
-                    TryStart = _firstInstructionAfterTraceEnter,
+                    TryStart = _firstRealInstruction,
                     TryEnd = handlerStart,
                     HandlerStart = handlerStart,
                     HandlerEnd = loggingReturnStart,
                     CatchType = _typeReferenceProvider.Exception
                 });
+            }
+            else
+            {
+                loggingReturnStart = CreateLoggingReturnAtTheEnd(returnValueDef, configParameters);
             }
             
             foreach (var @return in allReturns)
@@ -90,7 +92,7 @@ namespace Tracer.Fody.Weavers
         }
 
 
-        private Instruction CreateExceptionHandlerAtTheEnd()
+        private Instruction CreateExceptionHandlerAtTheEnd(Dictionary<string, string> configParameters)
         {
             var instructions = new List<Instruction>();
 
@@ -108,9 +110,13 @@ namespace Tracer.Fody.Weavers
             instructions.AddRange(StoreValueReadByInstructionsInArray(paramNamesDef, 0, Instruction.Create(OpCodes.Ldstr, ExceptionMarker)));
             instructions.AddRange(StoreVariableInObjectArray(paramValuesDef, 0, exceptionValue));
 
+            if (configParameters?.Any() == true)
+                instructions.AddRange(LoadConfigParameters(ConfigParamDef, configParameters));
+
             //build up Trace call
             instructions.Add(Instruction.Create(OpCodes.Ldsfld, _loggerProvider.StaticLogger));
             instructions.AddRange(LoadMethodNameOnStack());
+            instructions.Add(configParameters?.Any() == true ? Instruction.Create(OpCodes.Ldloc, ConfigParamDef) : Instruction.Create(OpCodes.Ldnull));
 
             //start ticks
             instructions.Add(Instruction.Create(OpCodes.Ldloc, StartTickVariable));
@@ -127,7 +133,7 @@ namespace Tracer.Fody.Weavers
             return _body.AddAtTheEnd(instructions);
         }
 
-        private Instruction CreateLoggingReturnAtTheEnd(VariableDefinition returnValueDef)
+        private Instruction CreateLoggingReturnAtTheEnd(VariableDefinition returnValueDef, Dictionary<string, string> configParameters)
         {
             var instructions = new List<Instruction>();
 
@@ -158,9 +164,13 @@ namespace Tracer.Fody.Weavers
                         paramNamesDef, paramValuesDef, HasReturnValue ? 1 : 0));
             }
 
+            if (configParameters?.Any() == true)
+                instructions.AddRange(LoadConfigParameters(ConfigParamDef, configParameters));
+
             //build up Trace call
             instructions.Add(Instruction.Create(OpCodes.Ldsfld, _loggerProvider.StaticLogger));
             instructions.AddRange(LoadMethodNameOnStack());
+            instructions.Add(configParameters?.Any() == true ? Instruction.Create(OpCodes.Ldloc, ConfigParamDef) : Instruction.Create(OpCodes.Ldnull));
 
             //start ticks
             instructions.Add(Instruction.Create(OpCodes.Ldloc, StartTickVariable));

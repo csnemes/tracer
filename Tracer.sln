@@ -29,7 +29,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestApplication.Serilog.Net
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tracer.NLog", "Tracer.NLog\Tracer.NLog.csproj", "{22929B94-C0F5-43C8-B9DE-C756285A2634}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApplication.NLog.Netstd", "TestApplication.NLog.Netstd\TestApplication.NLog.Netstd.csproj", "{878B8998-4F43-4975-86AF-E42BA4633B38}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestApplication.NLog.Netstd", "TestApplication.NLog.Netstd\TestApplication.NLog.Netstd.csproj", "{878B8998-4F43-4975-86AF-E42BA4633B38}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApplication.PatternFilter", "TestApplication.PatternFilter\TestApplication.PatternFilter.csproj", "{9C8707A4-09EA-40E8-BE63-C2EC92268E6C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -93,6 +95,10 @@ Global
 		{878B8998-4F43-4975-86AF-E42BA4633B38}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{878B8998-4F43-4975-86AF-E42BA4633B38}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{878B8998-4F43-4975-86AF-E42BA4633B38}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9C8707A4-09EA-40E8-BE63-C2EC92268E6C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9C8707A4-09EA-40E8-BE63-C2EC92268E6C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9C8707A4-09EA-40E8-BE63-C2EC92268E6C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9C8707A4-09EA-40E8-BE63-C2EC92268E6C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

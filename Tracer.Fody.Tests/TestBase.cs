@@ -13,6 +13,7 @@ using Microsoft.CSharp;
 using Mono.Cecil;
 using Mono.Cecil.Rocks;
 using NUnit.Framework;
+using Tracer.Fody.Filters;
 using Tracer.Fody.Tests.MockLoggers;
 using Tracer.Fody.Weavers;
 
@@ -62,7 +63,7 @@ namespace Tracer.Fody.Tests
         {
             var destPath = GetDestinationFilePath(assemblyName);
 
-            using (var provider = new CSharpCodeProvider())
+            using (var provider = GetPathHackedProvider())
             {
                 var parameters = new CompilerParameters { OutputAssembly = destPath, IncludeDebugInformation = true };
 
@@ -94,6 +95,19 @@ namespace Tracer.Fody.Tests
 
                 return destPath;
             }
+        }
+
+        static CSharpCodeProvider GetPathHackedProvider()
+        {
+            var provider = new Microsoft.CodeDom.Providers.DotNetCompilerPlatform.CSharpCodeProvider();
+            var settings = provider
+                .GetType()
+                .GetField("_compilerSettings", BindingFlags.Instance | BindingFlags.NonPublic)
+                .GetValue(provider);
+            var path = settings.GetType().GetField("_compilerFullPath", BindingFlags.Instance | BindingFlags.NonPublic);
+            path.SetValue(settings, ((string)path.GetValue(settings)).Replace(@"bin\roslyn\", @"roslyn\"));
+
+            return provider;
         }
 
         private void ResharperUnitTestRunnerFix(string[] additonalAssemblies)
@@ -203,33 +217,33 @@ namespace Tracer.Fody.Tests
 
         protected class AllTraceLoggingFilter : ITraceLoggingFilter
         {
-            public bool ShouldAddTrace(MethodDefinition definition)
+            public FilterResult ShouldAddTrace(MethodDefinition definition)
             {
-                return true;
+                return new FilterResult(true);
             }
         }
 
         protected class NoTraceLoggingFilter : ITraceLoggingFilter
         {
-            public bool ShouldAddTrace(MethodDefinition definition)
+            public FilterResult ShouldAddTrace(MethodDefinition definition)
             {
-                return false;
+                return new FilterResult(false);
             }
         }
 
         protected class PrivateOnlyTraceLoggingFilter : ITraceLoggingFilter
         {
-            public bool ShouldAddTrace(MethodDefinition definition)
+            public FilterResult ShouldAddTrace(MethodDefinition definition)
             {
-                return definition.IsPrivate;
+                return new FilterResult(definition.IsPrivate);
             }
         }
 
         protected class InternalOnlyTraceLoggingFilter : ITraceLoggingFilter
         {
-            public bool ShouldAddTrace(MethodDefinition definition)
+            public FilterResult ShouldAddTrace(MethodDefinition definition)
             {
-                return definition.IsAssembly;
+                return new FilterResult(definition.IsAssembly);
             }
         }
 

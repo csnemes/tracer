@@ -6,7 +6,8 @@
 
   <ItemGroup>
     <PackageReference Include="FluentAssertions" Version="5.3.0" />
-    <PackageReference Include="FodyHelpers" Version="3.0.3" />
+    <PackageReference Include="FodyHelpers" Version="3.3.5" />
+    <PackageReference Include="Microsoft.CodeDom.Providers.DotNetCompilerPlatform" Version="2.0.1" />
     <PackageReference Include="NUnit" Version="3.10.1" />
     <PackageReference Include="System.IO.FileSystem" Version="4.3.0" />
   </ItemGroup>

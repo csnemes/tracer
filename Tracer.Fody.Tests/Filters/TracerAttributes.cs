@@ -11,6 +11,10 @@ namespace TracerAttributes
     {
         public TraceTarget Target { get; set; }
 
+        public OtherParameter OtherParameter { get; set; }
+
+        public bool IncludeArguments { get; set; }
+
         public TraceOn()
         {}
 
@@ -18,6 +22,12 @@ namespace TracerAttributes
         {
             Target = traceTarget;
         }
+    }
+
+    public enum OtherParameter
+    {
+        ParamOne,
+        ParamTwo
     }
 
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method | AttributeTargets.Property | AttributeTargets.Constructor | AttributeTargets.Struct, AllowMultiple = true, Inherited = true)]
