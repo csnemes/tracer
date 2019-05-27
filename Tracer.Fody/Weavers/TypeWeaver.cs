@@ -70,9 +70,14 @@ namespace Tracer.Fody.Weavers
 
         private bool MethodHasCompilerGeneratedAttribute(MethodDefinition methodDefinition)
         {
-            return methodDefinition.HasCustomAttributes && methodDefinition.CustomAttributes
+            var hasAttribute = methodDefinition.HasCustomAttributes && methodDefinition.CustomAttributes
                                               .Any(attr => attr.AttributeType.FullName.Equals(typeof(CompilerGeneratedAttribute).FullName,
                                                   StringComparison.Ordinal));
+
+            //local functions should be instrumented
+            if (hasAttribute && methodDefinition.Name.Contains("|")) return false;
+
+            return hasAttribute;
         }
 
         private bool CalculateTypeHasCompilerGeneratedAttribute(TypeDefinition typeDefinition)

@@ -299,5 +299,52 @@ namespace Tracer.Fody.Tests.TraceTests
             result.ElementAt(4).ShouldBeTraceLeaveFrom("First.MyClass::Main", "Ahoyzzz");
             result.ElementAt(5).ShouldBeTraceLeaveFrom("First.MyClass::Main");
         }
+
+        [Test]
+        public void Test_AsyncLocalFunction()
+        {
+            string code = @"
+                using System;
+                using System.Diagnostics;
+                using System.Threading.Tasks;
+
+                namespace First
+                {
+                    public class MyClass
+                    {
+                        public static void Main()
+                        {
+                            var myClass = new MyClass();
+                            var x1 = myClass.CallMeInner(""Hello"", ""Hello2"").Result;
+                        }
+
+                        private async Task<string> CallMeInner(string param, string param2)
+                        {
+                            var ext = ""zzz"";
+                            return await CallMe(""Hello"");
+
+                            async Task<string> CallMe(string param3)
+                            {
+                                return await AddStrings(param3, ext);
+                            }
+                        }
+
+                        private Task<string> AddStrings(string p1, string p2)
+                        {
+                            return Task.FromResult(p1 + p2);
+                        }
+                    }
+                }
+            ";
+
+            var result = this.RunTest(code, new AllTraceLoggingFilter(), "First.MyClass::Main");
+            result.Count.Should().Be(6);
+            result.ElementAt(0).ShouldBeTraceEnterInto("First.MyClass::Main");
+            result.ElementAt(1).ShouldBeTraceEnterInto("First.MyClass::CallMe", "param", "Hello");
+            result.ElementAt(2).ShouldBeTraceEnterInto("First.MyClass::AddStrings", "p1", "Hello", "p2", "zzz");
+            result.ElementAt(3).ShouldBeTraceLeaveFrom("First.MyClass::AddStrings", "System.Threading.Tasks.Task`1[System.String]");
+            result.ElementAt(4).ShouldBeTraceLeaveFrom("First.MyClass::CallMe","Hellozzz");
+            result.ElementAt(5).ShouldBeTraceLeaveFrom("First.MyClass::Main");
+        }
     }
 }

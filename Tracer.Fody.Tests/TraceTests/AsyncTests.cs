@@ -449,11 +449,11 @@ namespace Tracer.Fody.Tests.TraceTests
             ";
 
             var result = this.RunTest(code, new PrivateOnlyTraceLoggingFilter(), "First.MyClass::Main");
-            result.Count.Should().Be(6);
+            result.Count.Should().Be(4);
             result.ElementAt(0).ShouldBeTraceEnterInto("First.MyClass::CallMe", "param", "Hello", "param2", "Hello2", "paraInt", "42");
             result.ElementAt(1).ShouldBeTraceEnterInto("First.MyClass::Double", "p", "42");
-            result.ElementAt(4).ShouldBeTraceLeaveWithExceptionFrom("First.MyClass::Double", "Err");
-            result.ElementAt(5).ShouldBeTraceLeaveWithExceptionFrom("First.MyClass::CallMe", "Err");
+            result.ElementAt(2).ShouldBeTraceLeaveWithExceptionFrom("First.MyClass::Double", "Err");
+            result.ElementAt(3).ShouldBeTraceLeaveWithExceptionFrom("First.MyClass::CallMe", "Err");
         }
 
         [Test]

@@ -134,14 +134,14 @@ namespace Tracer.Fody.Tests.Filters.PatternFilter
         }
 
         [Test]
-        public void SortTest_ScopeDefsDoesntMatter()
+        public void SortTest_ScopeDefsMatterLessThanNameLength()
         {
             var matcher1 = ClassMatcher.Create("MyClass");
             var matcher2 = ClassMatcher.Create("[public]MyCl");
             var list = new List<ClassMatcher> { matcher2, matcher1 };
             list.Sort();
-            list[0].Should().Be(matcher1);
-            list[1].Should().Be(matcher2);
+            list[0].Should().BeSameAs(matcher1);
+            list[1].Should().BeSameAs(matcher2);
         }
 
         [Test]
@@ -151,8 +151,8 @@ namespace Tracer.Fody.Tests.Filters.PatternFilter
             var matcher2 = ClassMatcher.Create("MyCla??");
             var list = new List<ClassMatcher> { matcher2, matcher1 };
             list.Sort();
-            list[0].Should().Be(matcher1);
-            list[1].Should().Be(matcher2);
+            list[0].Should().BeSameAs(matcher1);
+            list[1].Should().BeSameAs(matcher2);
         }
 
         [Test]

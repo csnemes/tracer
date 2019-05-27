@@ -179,7 +179,6 @@ namespace Tracer.Fody.Filters.PatternFilter
             {
                 var qmarkDiff = thisQmark - otherQmark;
                 if (qmarkDiff != 0) return qmarkDiff;
-                return other._conditionCount - _conditionCount;
             }
 
             var defDiff = (other._filterExpression.Length - otherStar - otherQmark) - (this._filterExpression.Length - thisStar - thisQmark);

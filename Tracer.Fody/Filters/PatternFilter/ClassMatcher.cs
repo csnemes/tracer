@@ -33,6 +33,8 @@ namespace Tracer.Fody.Filters.PatternFilter
             }
         }
 
+        public override string ToString() => _filterExpression;
+
         public bool IsMatch(TypeDefinition typeDefinition)
         {
             var className = typeDefinition.Name;
@@ -110,7 +112,6 @@ namespace Tracer.Fody.Filters.PatternFilter
             {
                 var qmarkDiff = thisQmark - otherQmark;
                 if (qmarkDiff != 0) return qmarkDiff;
-                return other._conditionCount - _conditionCount;
             }
 
             var defDiff = (other._filterExpression.Length - otherStar - otherQmark) - (this._filterExpression.Length - thisStar - thisQmark);
