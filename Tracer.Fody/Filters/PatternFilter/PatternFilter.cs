@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
 using Mono.Cecil;
+using Tracer.Fody.Helpers;
 using Tracer.Fody.Weavers;
 
 namespace Tracer.Fody.Filters.PatternFilter
@@ -30,7 +31,8 @@ namespace Tracer.Fody.Filters.PatternFilter
 
             foreach (var patternDefinition in _patternDefinitions)
             {
-                if (patternDefinition.IsMatching(definition)) return new FilterResult(patternDefinition.TraceEnabled, patternDefinition.Parameters);
+                if (patternDefinition.IsMatching(definition))
+                    return new FilterResult(patternDefinition.TraceEnabled, patternDefinition.Parameters);
             }
 
             //defaults to public methods of public classes only
@@ -55,5 +57,15 @@ namespace Tracer.Fody.Filters.PatternFilter
             return patternDefinitions;
         }
 
+        public void LogFilterInfo(IWeavingLogger weavingLogger)
+        {
+            weavingLogger.LogInfo("Using PatternFilter");
+            weavingLogger.LogInfo("Pattern filter order:");
+            int idx = 1;
+            foreach (var patternDefinition in _patternDefinitions)
+            {
+                weavingLogger.LogInfo($"{idx++}. {patternDefinition}");
+            }
+        }
     }
 }

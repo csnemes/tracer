@@ -62,6 +62,9 @@ namespace TestApplication.Serilog
 
             var result = DoSomething(42, "John");
 
+            var sealedClass = new MySealedClass();
+            sealedClass.DoubleThat(2);
+
             OutParamLogs();
 
             ReceivingStructures(new MyClass());
@@ -129,6 +132,17 @@ namespace TestApplication.Serilog
         public string NullInOut(string inp)
         {
             return null;
+        }
+    }
+
+    public sealed class MySealedClass
+    {
+        public MySealedClass()
+        {}
+
+        public int DoubleThat(int inp)
+        {
+            return inp * 2;
         }
     }
 

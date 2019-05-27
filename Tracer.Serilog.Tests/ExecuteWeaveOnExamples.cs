@@ -2,6 +2,7 @@
 using NUnit.Framework;
 using Tracer.Fody;
 using Tracer.Fody.Filters;
+using Tracer.Fody.Helpers;
 using Tracer.Fody.Weavers;
 
 
@@ -29,6 +30,11 @@ namespace Tracer.Log4Net.Tests
             {
                 return new FilterResult(true);
             }
+
+            public void LogFilterInfo(IWeavingLogger weavingLogger)
+            {
+            }
+
         }
     }
 }

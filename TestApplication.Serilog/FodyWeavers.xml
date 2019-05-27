@@ -1,6 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Weavers xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="FodyWeavers.xsd">
   <Tracer filter="pattern"  traceConstructors="true" traceProperties="false">
-    <On pattern="..*.*" extra="true" />
+    <Off pattern="*" />
+    <On pattern="..[public]*.[public|method]*" />
   </Tracer>
 </Weavers>

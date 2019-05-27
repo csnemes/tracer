@@ -15,17 +15,20 @@ namespace Tracer.Fody.Filters.PatternFilter
         private readonly MemberMatcher _memberMatcher;
         private readonly IMatcher<string> _cachedNamespaceMatcher;
         private readonly IMatcher<TypeDefinition> _cachedClassMatcher;
+        private readonly string _originalExpression;
 
-        private PatternDefinition(bool traceEnabled, NamespaceMatcher namespaceMatcher, ClassMatcher classMatcher, MemberMatcher memberMatcher, Dictionary<string, string> parameters)
+        private PatternDefinition(bool traceEnabled, NamespaceMatcher namespaceMatcher, ClassMatcher classMatcher, MemberMatcher memberMatcher, Dictionary<string, string> parameters, string originalExpression)
         {
             _traceEnabled = traceEnabled;
             _namespaceMatcher = namespaceMatcher;
             _classMatcher = classMatcher;
             _memberMatcher = memberMatcher;
+            _originalExpression = originalExpression;
             _cachedNamespaceMatcher = new CachingDecorator<string>(namespaceMatcher);
             _cachedClassMatcher = new CachingDecorator<TypeDefinition>(classMatcher);
             _parameters = parameters ?? new Dictionary<string, string>();
         }
+        public override string ToString() => _originalExpression;
 
         public bool TraceEnabled => _traceEnabled;
 
@@ -71,7 +74,8 @@ namespace Tracer.Fody.Filters.PatternFilter
                 if (nameSpacePart[0] == '.') nameSpacePart = "." + nameSpacePart;
             }
 
-            return new PatternDefinition(traceEnabled, new NamespaceMatcher(nameSpacePart), ClassMatcher.Create(classPart), MemberMatcher.Create(memberPart), parameters);
+            return new PatternDefinition(traceEnabled, new NamespaceMatcher(nameSpacePart), ClassMatcher.Create(classPart), MemberMatcher.Create(memberPart),
+                parameters, pattern);
         }
 
         public bool IsMatching(MethodDefinition methodDefinition)

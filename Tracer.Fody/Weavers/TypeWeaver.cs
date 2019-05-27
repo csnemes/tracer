@@ -39,7 +39,7 @@ namespace Tracer.Fody.Weavers
             _staticLoggerField = new Lazy<FieldReference>(() => CreateLoggerStaticField(_typeReferenceProvider, _methodReferenceProvider, _typeDefinition));
             _methodWeaverFactory = new MethodWeaverFactory(typeReferenceProvider, methodReferenceProvider, this);
             _hasCompilerGeneratedAttribute =
-                new Lazy<bool>(() => CalculateHasCompilerGeneratedAttribute(typeDefinition));
+                new Lazy<bool>(() => CalculateTypeHasCompilerGeneratedAttribute(typeDefinition));
             _shouldTraceConstructors = shouldTraceConstructors;
             _shouldTraceProperties = shouldTraceProperties;
         }
@@ -56,7 +56,7 @@ namespace Tracer.Fody.Weavers
             {
                 if (AlreadyWeaved(method)) continue;
 
-                bool shouldAddTrace = !HasCompilerGeneratedAttribute 
+                bool shouldAddTrace = !TypeHasCompilerGeneratedAttribute && !MethodHasCompilerGeneratedAttribute(method)
                     && ((method.IsConstructor && _shouldTraceConstructors && !method.IsStatic) || !method.IsConstructor)
                     && ((method.IsPropertyAccessor() && _shouldTraceProperties) || !method.IsPropertyAccessor());
 
@@ -68,19 +68,26 @@ namespace Tracer.Fody.Weavers
             }
         }
 
-        private bool CalculateHasCompilerGeneratedAttribute(TypeDefinition typeDefinition)
+        private bool MethodHasCompilerGeneratedAttribute(MethodDefinition methodDefinition)
         {
-            var hasCompGenAttribute = typeDefinition.HasCustomAttributes && typeDefinition.CustomAttributes
+            return methodDefinition.HasCustomAttributes && methodDefinition.CustomAttributes
+                                              .Any(attr => attr.AttributeType.FullName.Equals(typeof(CompilerGeneratedAttribute).FullName,
+                                                  StringComparison.Ordinal));
+        }
+
+        private bool CalculateTypeHasCompilerGeneratedAttribute(TypeDefinition typeDefinition)
+        {
+            var typeHasCompGenAttribute = typeDefinition.HasCustomAttributes && typeDefinition.CustomAttributes
                        .Any(attr => attr.AttributeType.FullName.Equals(typeof(CompilerGeneratedAttribute).FullName,
                            StringComparison.Ordinal));
 
-            if (!hasCompGenAttribute && typeDefinition.IsNested)
-                return CalculateHasCompilerGeneratedAttribute(typeDefinition.DeclaringType); 
+            if (!typeHasCompGenAttribute && typeDefinition.IsNested)
+                return CalculateTypeHasCompilerGeneratedAttribute(typeDefinition.DeclaringType); 
 
-            return hasCompGenAttribute;
+            return typeHasCompGenAttribute;
         }
 
-        private bool HasCompilerGeneratedAttribute
+        private bool TypeHasCompilerGeneratedAttribute
         {
             get { return _hasCompilerGeneratedAttribute.Value; }
         }

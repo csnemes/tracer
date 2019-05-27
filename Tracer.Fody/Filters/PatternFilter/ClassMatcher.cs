@@ -13,10 +13,11 @@ namespace Tracer.Fody.Filters.PatternFilter
         private readonly bool _matchPublic;
         private readonly bool _matchNonPublic;
         private readonly string _filterExpression;
+        private readonly int _conditionCount;
 
         private static readonly string[] Keywords = { "public", "nonpublic", "internal" };
 
-        private ClassMatcher(string regexPattern, bool matchPublic, bool matchNonPublic, string filterExpression)
+        private ClassMatcher(string regexPattern, bool matchPublic, bool matchNonPublic, string filterExpression, int conditionCount)
         {
             _regex = new Regex(regexPattern,
                 RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.CultureInvariant);
@@ -24,6 +25,7 @@ namespace Tracer.Fody.Filters.PatternFilter
             _matchPublic = matchPublic;
             _matchNonPublic = matchNonPublic;
             _filterExpression = filterExpression;
+            _conditionCount = conditionCount;
 
             if (!matchNonPublic && !matchPublic)
             {
@@ -90,7 +92,8 @@ namespace Tracer.Fody.Filters.PatternFilter
 
             return new ClassMatcher(regexPattern,
                 conditions.Contains("public"),
-                conditions.Contains("nonpublic") || conditions.Contains("internal"), filterExpression);
+                conditions.Contains("nonpublic") || conditions.Contains("internal"), filterExpression,
+                conditions.Count);
         }
 
         public int CompareTo(ClassMatcher other)
@@ -105,10 +108,14 @@ namespace Tracer.Fody.Filters.PatternFilter
             if (thisStar > 0 && otherStar == 0) return 1; //other precedes this
             if (thisStar == 0 && otherStar == 0)
             {
-                return thisQmark - otherQmark;
+                var qmarkDiff = thisQmark - otherQmark;
+                if (qmarkDiff != 0) return qmarkDiff;
+                return other._conditionCount - _conditionCount;
             }
 
-            return (other._filterExpression.Length - otherStar - otherQmark) - (this._filterExpression.Length - thisStar - thisQmark);
+            var defDiff = (other._filterExpression.Length - otherStar - otherQmark) - (this._filterExpression.Length - thisStar - thisQmark);
+            if (defDiff != 0) return defDiff;
+            return other._conditionCount - _conditionCount;
         }
     }
 }

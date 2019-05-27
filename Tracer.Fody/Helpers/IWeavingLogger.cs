@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Tracer.Fody.Helpers
+﻿namespace Tracer.Fody.Helpers
 {
-    internal interface IWeavingLogger
+    public interface IWeavingLogger
     {
         void LogDebug(string message);
 

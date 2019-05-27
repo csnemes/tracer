@@ -29,9 +29,22 @@ namespace TestApplication
             set { _testProperty = value; }
         }
 
+        private async Task ErrDoSomethingAsync()
+        {
+            await Task.Run(async () =>
+            {
+                this.ErrDoSomethingImpl().Wait();
+            });
+        }
+        private async Task ErrDoSomethingImpl()
+        {
+        }
+
         public void Run()
         {
             Thread.Sleep(500);
+
+            ErrDoSomethingAsync().Wait();
 
             Enumerable(new[] {"hi", "there", "!"});
 

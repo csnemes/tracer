@@ -3,6 +3,7 @@ using FluentAssertions;
 using Mono.Cecil;
 using NUnit.Framework;
 using Tracer.Fody.Filters;
+using Tracer.Fody.Helpers;
 using Tracer.Fody.Tests.MockLoggers;
 using Tracer.Fody.Weavers;
 
@@ -86,6 +87,11 @@ namespace Tracer.Fody.Tests.TraceTests
             {
                 ["IncludeArguments"] = "True",
             });
+
+            public void LogFilterInfo(IWeavingLogger weavingLogger)
+            {
+            }
+
         }
 
         private class FakeParamFilterMultiple : ITraceLoggingFilter
@@ -95,6 +101,11 @@ namespace Tracer.Fody.Tests.TraceTests
                 ["IncludeArguments"] = "True",
                 ["Other"] = "42"
             });
+
+            public void LogFilterInfo(IWeavingLogger weavingLogger)
+            {
+            }
+
         }
     }
 }

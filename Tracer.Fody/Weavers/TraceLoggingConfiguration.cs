@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Mono.Cecil;
 using Tracer.Fody.Filters;
+using Tracer.Fody.Helpers;
 
 namespace Tracer.Fody.Weavers
 {
@@ -129,6 +130,10 @@ namespace Tracer.Fody.Weavers
             public FilterResult ShouldAddTrace(MethodDefinition definition)
             {
                 return new FilterResult(true);
+            }
+
+            public void LogFilterInfo(IWeavingLogger weavingLogger)
+            {
             }
         }
 

@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Mono.Cecil;
 using Tracer.Fody.Filters;
+using Tracer.Fody.Helpers;
 
 namespace Tracer.Fody.Weavers
 {
@@ -19,5 +20,7 @@ namespace Tracer.Fody.Weavers
         /// <param name="definition">Definition of the method in question</param>
         /// <returns>true if the method should be traced</returns>
         FilterResult ShouldAddTrace(MethodDefinition definition);
+
+        void LogFilterInfo(IWeavingLogger weavingLogger);
     }
 }

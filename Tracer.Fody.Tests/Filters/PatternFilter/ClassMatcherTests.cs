@@ -92,6 +92,13 @@ namespace Tracer.Fody.Tests.Filters.PatternFilter
         }
 
         [Test]
+        public void SealedPublicClassShouldBeConsideredAsPublic()
+        {
+            var matcher = ClassMatcher.Create("[public]My*");
+            matcher.IsMatch(GetTypeDefinition(typeof(MySealedClass))).Should().BeTrue();
+        }
+
+        [Test]
         public void PartialDefinitionVisibilityPrefix_InternalOnly()
         {
             var matcher = ClassMatcher.Create("[internal]My*");
@@ -196,6 +203,8 @@ namespace Tracer.Fody.Tests.Filters.PatternFilter
     public struct MyStruct { }
 
     public class MyOtherClass { }
+
+    public sealed class MySealedClass { }
 
     class InternalClass { }
 

@@ -31,6 +31,7 @@ namespace Tracer.Fody
             }
             else
             {
+                parser.Result.Filter.LogFilterInfo(this);
                 ModuleLevelWeaver.Execute(parser.Result, ModuleDefinition);
             }
         }

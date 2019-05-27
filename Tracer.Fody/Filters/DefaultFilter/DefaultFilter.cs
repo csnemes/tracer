@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
 using Mono.Cecil;
+using Tracer.Fody.Helpers;
 using Tracer.Fody.Weavers;
 
 namespace Tracer.Fody.Filters.DefaultFilter
@@ -46,7 +47,12 @@ namespace Tracer.Fody.Filters.DefaultFilter
                    _traceAttributeHelper.ShouldTraceBasedOnClassLevelInfo(definition) ?? 
                    ShouldTraceBasedOnAssemblyLevelInfo(definition);
         }
-        
+
+        public void LogFilterInfo(IWeavingLogger weavingLogger)
+        {
+            weavingLogger.LogInfo("Using DefaultFilter");
+        }
+
         private FilterResult ShouldTraceBasedOnAssemblyLevelInfo(MethodDefinition definition)
         {
             //get matching assembly level rule (note that defs are ordered from more specific to least specific. On same level noTrace trumps traceOn)

@@ -14,6 +14,7 @@ using Mono.Cecil;
 using Mono.Cecil.Rocks;
 using NUnit.Framework;
 using Tracer.Fody.Filters;
+using Tracer.Fody.Helpers;
 using Tracer.Fody.Tests.MockLoggers;
 using Tracer.Fody.Weavers;
 
@@ -221,6 +222,11 @@ namespace Tracer.Fody.Tests
             {
                 return new FilterResult(true);
             }
+
+            public void LogFilterInfo(IWeavingLogger weavingLogger)
+            {
+            }
+
         }
 
         protected class NoTraceLoggingFilter : ITraceLoggingFilter
@@ -229,6 +235,11 @@ namespace Tracer.Fody.Tests
             {
                 return new FilterResult(false);
             }
+
+            public void LogFilterInfo(IWeavingLogger weavingLogger)
+            {
+            }
+
         }
 
         protected class PrivateOnlyTraceLoggingFilter : ITraceLoggingFilter
@@ -237,6 +248,11 @@ namespace Tracer.Fody.Tests
             {
                 return new FilterResult(definition.IsPrivate);
             }
+
+            public void LogFilterInfo(IWeavingLogger weavingLogger)
+            {
+            }
+
         }
 
         protected class InternalOnlyTraceLoggingFilter : ITraceLoggingFilter
@@ -245,6 +261,11 @@ namespace Tracer.Fody.Tests
             {
                 return new FilterResult(definition.IsAssembly);
             }
+
+            public void LogFilterInfo(IWeavingLogger weavingLogger)
+            {
+            }
+
         }
 
         #endregion
