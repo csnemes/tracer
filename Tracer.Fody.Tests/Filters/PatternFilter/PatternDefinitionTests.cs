@@ -104,6 +104,48 @@ namespace Tracer.Fody.Tests.Filters.PatternFilter
         }
 
         [Test]
+        public void SortRestrictionTestNextLevelSpecifiedVsNextlevelAll()
+        {
+            var def1 = PatternDefinition.BuildUpDefinition("*", true);
+            var def2 = PatternDefinition.BuildUpDefinition("..[public]*.[public|method]*", true);
+            var def3 = PatternDefinition.BuildUpDefinition("..*.Equals", true);
+
+            var list = new List<PatternDefinition> { def1, def2, def3 };
+            list.Sort();
+            list[0].Should().BeSameAs(def3);
+            list[1].Should().BeSameAs(def2);
+            list[2].Should().BeSameAs(def1);
+        }
+
+        [Test]
+        public void SortRestrictionTestNextLevelSpecifiedVsNextlevelAll2()
+        {
+            var def1 = PatternDefinition.BuildUpDefinition("*", true);
+            var def2 = PatternDefinition.BuildUpDefinition("Sh..*.*", true);
+            var def3 = PatternDefinition.BuildUpDefinition("..MyCl*.*", true);
+
+            var list = new List<PatternDefinition> { def1, def2, def3 };
+            list.Sort();
+            list[0].Should().BeSameAs(def3);
+            list[1].Should().BeSameAs(def2);
+            list[2].Should().BeSameAs(def1);
+        }
+
+        [Test]
+        public void SortRestrictionTestNextLevelSpecifiedVsNextlevelAll3()
+        {
+            var def1 = PatternDefinition.BuildUpDefinition("*", true);
+            var def2 = PatternDefinition.BuildUpDefinition("Whatever..*.Cre", true);
+            var def3 = PatternDefinition.BuildUpDefinition("..*.Equals", true);
+
+            var list = new List<PatternDefinition> { def1, def2, def3 };
+            list.Sort();
+            list[0].Should().BeSameAs(def2);
+            list[1].Should().BeSameAs(def3);
+            list[2].Should().BeSameAs(def1);
+        }
+
+        [Test]
         public void SortRestrictionOnMemberTest()
         {
             var def1 = PatternDefinition.BuildUpDefinition("*", true);

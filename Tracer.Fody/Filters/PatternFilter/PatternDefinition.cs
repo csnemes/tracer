@@ -87,11 +87,24 @@ namespace Tracer.Fody.Filters.PatternFilter
 
         public int CompareTo(PatternDefinition other)
         {
+            if (_memberMatcher.IsAllFilter && !other._memberMatcher.IsAllFilter) return 1;
+            if (!_memberMatcher.IsAllFilter && other._memberMatcher.IsAllFilter) return -1;
+
             var nsMatch = this._namespaceMatcher?.CompareTo(other?._namespaceMatcher) ?? 0;
-            if (nsMatch != 0) return nsMatch;
+            if (nsMatch != 0)
+            {
+                if (_classMatcher.IsAllFilter && !other._classMatcher.IsAllFilter) return 1;
+                if (!_classMatcher.IsAllFilter && other._classMatcher.IsAllFilter) return -1;
+                return nsMatch;
+            }
 
             var classMatch = this._classMatcher?.CompareTo(other?._classMatcher) ?? 0;
-            if (classMatch != 0) return classMatch;
+            if (classMatch != 0)
+            {
+                if (_memberMatcher.IsAllFilter && !other._memberMatcher.IsAllFilter) return 1;
+                if (!_memberMatcher.IsAllFilter && other._memberMatcher.IsAllFilter) return -1;
+                return classMatch;
+            }
 
             return this?._memberMatcher?.CompareTo(other?._memberMatcher) ?? 0;
         }

@@ -185,5 +185,7 @@ namespace Tracer.Fody.Filters.PatternFilter
             if (defDiff != 0) return defDiff;
             return other._conditionCount - _conditionCount;
         }
+
+        public bool IsAllFilter => string.Equals(_filterExpression, "*");
     }
 }
