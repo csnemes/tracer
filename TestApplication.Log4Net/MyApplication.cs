@@ -40,8 +40,25 @@ namespace TestApplication
         {
         }
 
+        private T GenericMethod<T>(T inp)
+        {
+            return inp;
+        }
+
         public void Run()
         {
+            SomethinElse(42);
+            GenericClassTests();
+            GenericMethod("Hello");
+            GenericMethod(42);
+            GenericMethod(new List<string>());
+            return;
+
+            int SomethinElse(int inp)
+            {
+                return inp * 2;
+            }
+
             Thread.Sleep(500);
 
             ErrDoSomethingAsync().Wait();
@@ -57,7 +74,6 @@ namespace TestApplication
             PropertyTests();
 
             GenericMethodTests();
-            GenericClassTests();
 
             StaticLogPropertyRewrites();
             StaticLogRewrites();

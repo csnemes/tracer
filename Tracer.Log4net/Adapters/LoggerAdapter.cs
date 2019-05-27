@@ -1,14 +1,10 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Configuration;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using log4net;
 using log4net.Core;
 using log4net.Util;
@@ -518,7 +514,7 @@ namespace Tracer.Log4Net.Adapters
             if (type.GetTypeInfo().IsGenericType)
             {
                 sb.Append(type.Name.Remove(type.Name.IndexOf('`')));
-                AddGenericPrettyFormat(sb, type.GetGenericTypeDefinition().GenericTypeArguments);
+                AddGenericPrettyFormat(sb, type.GenericTypeArguments);
             }
             else
             {

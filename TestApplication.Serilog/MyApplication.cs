@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Serilog.Events;
 using Tracer.Serilog;
 
@@ -80,6 +77,12 @@ namespace TestApplication.Serilog
                 ThrowException();
             }
             catch {}
+
+            var g1 = new GenericClass<string>();
+            g1.DoNothing("Hello");
+
+            var g2 = new GenericClass<int>();
+            g2.DoNothing(42);
         }
 
         public string InlineTest(int input1)

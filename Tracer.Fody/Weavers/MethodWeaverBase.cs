@@ -61,9 +61,18 @@ namespace Tracer.Fody.Weavers
         {
             get
             {
-                //check if method name is generated and prettyfy it
-                var position = _methodDefinition.Name.IndexOf(">", StringComparison.OrdinalIgnoreCase);
-                return position > 1 ? _methodDefinition.Name.Substring(1, position - 1) : _methodDefinition.Name;
+                //check if method name is generated and prettify it
+                var pipePosition = _methodDefinition.Name.IndexOf("|", StringComparison.OrdinalIgnoreCase);
+                if (pipePosition > 1)
+                {
+                    return _methodDefinition.Name.Substring(0, pipePosition).Replace(">g__", ">");
+                }
+                else
+                {
+                    var position = _methodDefinition.Name.IndexOf(">", StringComparison.OrdinalIgnoreCase);
+                    if (position <= 1) return _methodDefinition.Name;
+                    return _methodDefinition.Name.Substring(1, position - 1);
+                }
             }
         }
 

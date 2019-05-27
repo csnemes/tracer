@@ -77,6 +77,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="GenericClass.cs" />
     <Compile Include="MyApplication.cs" />
     <Compile Include="OutParamClass.cs" />
     <Compile Include="Program.cs" />
