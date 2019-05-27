@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Tracer.Log4Net.Fody</id>
-    <version>3.0.0</version>
+    <version>3.1.0</version>
     <authors>csnemes</authors>
     <owners>csnemes</owners>
     <projectUrl>https://github.com/csnemes/tracer</projectUrl>
@@ -14,7 +14,7 @@
 	
     <dependencies>
       <group>
-        <dependency id="Fody" version="[3.3.2,4)" include="All" />
+        <dependency id="Fody" version="[4.2.1,5.0)" include="All" />
 		<dependency id="log4net" version="[2.0.8,3)" />
       </group>
     </dependencies>
@@ -50,11 +50,17 @@
         * 2.2.0
         - Updated to Fody 3.x
         - TraceOn and NoTrace can be put on structs and constructors
-		    * 3.0.0
-		    - Fixed issue with missing local function extra parameter name
-		    - Switched to new Fody package format, upgraded to Fody 3.3.x
-		    - Added pattern based filter for specifying which methods to trace
-		    - Fixed generic async rewrite issues causing PEVerify errors
+		* 3.0.0
+		- Fixed issue with missing local function extra parameter name
+		- Switched to new Fody package format, upgraded to Fody 3.3.x
+		- Added pattern based filter for specifying which methods to trace
+		- Fixed generic async rewrite issues causing PEVerify errors
+		* 3.1.0
+		- fixed pattern filter sorting bug
+		- added pattern filter order logging on weaving
+		- removed generated labda method logging 
+		- prettified local func method name in logging
+		- Updated to Fody 4.x			
       </releaseNotes>
   </metadata>
 </package>
