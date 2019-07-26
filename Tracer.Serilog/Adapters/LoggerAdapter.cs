@@ -17,6 +17,7 @@ namespace Tracer.Serilog.Adapters
     {
         private readonly SL.ILogger _logger;
         private readonly string _typeName;
+        private readonly string _namespaceName;
         private const string NullString = "<NULL>";
 
         private static readonly MessageTemplate _traceEnterTemplate;
@@ -38,6 +39,7 @@ namespace Tracer.Serilog.Adapters
         {
             _logger = SL.Log.Logger.ForContext(type);
             _typeName = PrettyFormat(type);
+            _namespaceName = type.Namespace;
 
             _assembliesParsedForDestructureTypeAttribute.GetOrAdd(type.Assembly, SeekForDestructureTypeAttribute);
             _renderParameterMethod = GetRenderedFormat;
@@ -291,6 +293,7 @@ namespace Tracer.Serilog.Adapters
 
             logEvent.AddPropertyIfAbsent(new LogEventProperty("MethodName", new ScalarValue(methodName)));
             logEvent.AddPropertyIfAbsent(new LogEventProperty("ClassName", new ScalarValue(_typeName)));
+            logEvent.AddPropertyIfAbsent(new LogEventProperty("Namespace", new ScalarValue(_namespaceName)));
 
             _logger.Write(logEvent);
         }
@@ -330,6 +333,7 @@ namespace Tracer.Serilog.Adapters
 
                 logEvent.AddPropertyIfAbsent(new LogEventProperty("TraceType", new ScalarValue("Enter")));
                 logEvent.AddPropertyIfAbsent(new LogEventProperty("ClassName", new ScalarValue(_typeName)));
+                logEvent.AddPropertyIfAbsent(new LogEventProperty("Namespace", new ScalarValue(_namespaceName)));
 
                 _logger.Write(logEvent);
             }
@@ -375,6 +379,7 @@ namespace Tracer.Serilog.Adapters
                 logEvent.AddPropertyIfAbsent(new LogEventProperty("EndTicks", new ScalarValue(endTicks)));
                 logEvent.AddPropertyIfAbsent(new LogEventProperty("TraceType", new ScalarValue("Leave")));
                 logEvent.AddPropertyIfAbsent(new LogEventProperty("ClassName", new ScalarValue(_typeName)));
+                logEvent.AddPropertyIfAbsent(new LogEventProperty("Namespace", new ScalarValue(_namespaceName)));
 
                 _logger.Write(logEvent);
             }

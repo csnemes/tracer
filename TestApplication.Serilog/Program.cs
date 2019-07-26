@@ -16,7 +16,7 @@ namespace TestApplication.Serilog
             Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Verbose()
                 .WriteTo.RollingFile("c:\\ApplicationLogs\\log-{Date}.txt",
-                outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff} [{MachineName}][{ThreadId}][{Level}]{ClassName}.{MethodName} {Message}{NewLine}{Exception}")
+                outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff} [{MachineName}][{ThreadId}][{Level}]{Namespace}.{ClassName}.{MethodName} {Message}{NewLine}{Exception}")
                 .WriteTo.Elasticsearch(new ElasticsearchSinkOptions(new Uri("http://localhost:9200"))
                 {
                     AutoRegisterTemplate = true,
