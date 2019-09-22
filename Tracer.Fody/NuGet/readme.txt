@@ -13,6 +13,8 @@ Add the Tracer element to FodyWeavers.xml under Weavers element in order to conf
   </Tracer>
 </Weavers>
 
+If there is no FodyWeavers.xml file see https://github.com/Fody/Home/blob/master/pages/usage.md
+
 Within the <Tracer> element specify <On> And <Off> elements with patterns to select which methods to trace.
 (e.g. <On pattern="TestApplication.*..My*.[public]*Method" /> or <Off pattern="TestApplication.*..[internal]My*.*Method" />)
 

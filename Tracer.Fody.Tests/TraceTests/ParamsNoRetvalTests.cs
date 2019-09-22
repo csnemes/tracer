@@ -1,4 +1,5 @@
-﻿using FluentAssertions;
+﻿using System;
+using FluentAssertions;
 using NUnit.Framework;
 using Tracer.Fody.Tests.MockLoggers;
 
@@ -7,6 +8,45 @@ namespace Tracer.Fody.Tests.TraceTests
     [TestFixture]
     public class ParamsNoRetvalTests : TestBase
     {
+        [Test]
+        public void Test_Static_ReadOnlySpan_Param_Method()
+        {
+            string code = @"
+                using System;
+                using System.Diagnostics;
+
+                namespace First
+                {
+                    public class MyClass
+                    {
+                        public static void Main()
+                        {
+                            var x = new RefStruct(42); 
+                            Test3(x);
+                        }
+
+                        private static void Test3(RefStruct param)
+                        {
+                        }
+                    }
+
+                    public readonly ref struct RefStruct
+                    {
+                        public readonly int Value1;
+
+                        public RefStruct(int value1) {
+                            this.Value1 = value1;
+                        }
+                    }
+                }
+            ";
+
+            var result = this.RunTest(code, new PrivateOnlyTraceLoggingFilter(), "First.MyClass::Main");
+            result.Count.Should().Be(2);
+            result.ElementAt(0).ShouldBeTraceEnterInto("First.MyClass::Test3", "param", "42");
+            result.ElementAt(1).ShouldBeTraceLeaveFrom("First.MyClass::Test3");
+        }
+
         [Test]
         public void Test_Static_SingleStringParameter_Empty_Method()
         {

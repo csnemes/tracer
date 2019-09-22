@@ -66,11 +66,12 @@ namespace Tracer.Fody.Tests
 
             using (var provider = GetPathHackedProvider())
             {
-                var parameters = new CompilerParameters { OutputAssembly = destPath, IncludeDebugInformation = true };
+                var parameters = new CompilerParameters { OutputAssembly = destPath, IncludeDebugInformation = true,CompilerOptions = "-langversion:7.2"};
 
                 parameters.ReferencedAssemblies.Add("System.dll");
                 parameters.ReferencedAssemblies.Add("System.Core.dll");
                 parameters.ReferencedAssemblies.Add("System.Data.dll");
+                parameters.ReferencedAssemblies.Add("System.Runtime.dll");
                 if (additonalAssemblies != null)
                 {
                     parameters.ReferencedAssemblies.AddRange(additonalAssemblies);
