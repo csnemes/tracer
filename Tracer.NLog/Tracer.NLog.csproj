@@ -5,7 +5,7 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFrameworks>net46;netstandard2.0</TargetFrameworks>
     <ApplicationIcon />
     <OutputTypeEx>library</OutputTypeEx>
     <StartupObject />
@@ -15,7 +15,7 @@
   </PropertyGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="copy $(TargetPath) $(ProjectDir)\NuGet\lib\netstandard2.0" />
+    <Exec Command="copy $(TargetPath) $(ProjectDir)\NuGet\lib\$(TargetFramework)\" />
   </Target>
 
   <ItemGroup>
