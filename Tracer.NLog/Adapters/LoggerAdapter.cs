@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Reflection;
 using System.Text;
 using NLog;
 
@@ -12,28 +10,14 @@ namespace Tracer.NLog.Adapters
         private const string NullString = "<NULL>";
         private readonly ILogger _logger;
         private readonly string _typeName;
-
-        private const string TYPE_INFO = "TypeInfo";
-        private const string METHOD_INFO = "MethodInfo";
         private readonly string _specialPrefix;
 
         public LoggerAdapter(Type type)
         {
             _typeName = PrettyFormat(type);
-            _logger = FixLoggerLoggerType(LogManager.GetLogger(type.FullName));
+            _logger = LogManager.GetLogger(type.ToString());
             var configPrefix = Environment.GetEnvironmentVariable("TracerFodySpecialKeyPrefix");
             _specialPrefix = string.IsNullOrWhiteSpace(configPrefix) ? "$" : configPrefix;
-        }
-
-        private static readonly FieldInfo LoggerTypeField = typeof(Logger).GetField("loggerType", BindingFlags.Instance | BindingFlags.NonPublic);
-
-        private static Logger FixLoggerLoggerType(Logger logger)
-        {
-            if (LoggerTypeField != null)
-            {
-                LoggerTypeField.SetValue(logger, typeof(LoggerAdapter));
-            }
-            return logger;
         }
 
         #region Methods required for trace enter and leave
@@ -42,27 +26,14 @@ namespace Tracer.NLog.Adapters
         {
             if (_logger.IsTraceEnabled)
             {
-                string message;
-                var propDict = new Dictionary<string, object>();
-                propDict["trace"] = "ENTER";
+                string argInfo = CaptureArguementsInfo(paramNames, paramValues);
 
-                if (paramNames != null)
-                {
-                    var parameters = new StringBuilder();
-                    for (int i = 0; i < paramNames.Length; i++)
-                    {
-                        parameters.AppendFormat("{0}={1}", paramNames[i], GetRenderedFormat(paramValues[i], NullString));
-                        if (i < paramNames.Length - 1) parameters.Append(", ");
-                    }
-                    var argInfo = parameters.ToString();
-                    propDict["arguments"] = argInfo;
-                    message = String.Format("Entered into {0} ({1}).", methodInfo, argInfo);
-                }
-                else
-                {
-                    message = String.Format("Entered into {0}.", methodInfo);
-                }
-                LogTrace(LogLevel.Trace, methodInfo, message, null, propDict);
+                var logEvent = string.IsNullOrEmpty(argInfo) ?
+                    LogEventInfo.Create(LogLevel.Trace, _logger.Name, null, "Entered into {0}.", new object[] { methodInfo }) :
+                    LogEventInfo.Create(LogLevel.Trace, _logger.Name, null, "Entered into {0} ({1}).", new object[] { methodInfo, argInfo });
+                logEvent.Properties["trace"] = "ENTER";
+                logEvent.Properties["arguments"] = argInfo;
+                LogEvent(methodInfo, logEvent);
             }
         }
 
@@ -70,31 +41,38 @@ namespace Tracer.NLog.Adapters
         {
             if (_logger.IsTraceEnabled)
             {
-                var propDict = new Dictionary<string, object>();
-                propDict["trace"] = "LEAVE";
-
-                string returnValue = null;
-                if (paramNames != null)
-                {
-                    var parameters = new StringBuilder();
-                    for (int i = 0; i < paramNames.Length; i++)
-                    {
-                        parameters.AppendFormat("{0}={1}", FixSpecialParameterName(paramNames[i] ?? "$return"), GetRenderedFormat(paramValues[i], NullString));
-                        if (i < paramNames.Length - 1) parameters.Append(", ");
-                    }
-                    returnValue = parameters.ToString();
-                    propDict["arguments"] = returnValue;
-                }
-
                 var timeTaken = ConvertTicksToMilliseconds(endTicks - startTicks);
-                propDict["startTicks"] = startTicks;
-                propDict["endTicks"] = endTicks;
-                propDict["timeTaken"] = timeTaken;
 
-                LogTrace(LogLevel.Trace, methodInfo,
-                    String.Format("Returned from {1} ({2}). Time taken: {0:0.00} ms.",
-                        timeTaken, methodInfo, returnValue), null, propDict);
+                string argInfo = CaptureArguementsInfo(paramNames, paramValues);
+
+                var logEvent = LogEventInfo.Create(LogLevel.Trace, _logger.Name, null, "Returned from {1} ({2}). Time taken: {0:0.00} ms.", new object[] { timeTaken, methodInfo, argInfo });
+                logEvent.Properties["trace"] = "LEAVE";
+                logEvent.Properties["arguments"] = argInfo;
+                logEvent.Properties["startTicks"] = startTicks;
+                logEvent.Properties["endTicks"] = endTicks;
+                logEvent.Properties["timeTaken"] = timeTaken;
+                LogEvent(methodInfo, logEvent);
             }
+        }
+
+        private string CaptureArguementsInfo(string[] paramNames, object[] paramValues)
+        {
+            string argInfo = string.Empty;
+            if (paramNames?.Length > 0)
+            {
+                var parameters = new StringBuilder();
+                for (int i = 0; i < paramNames.Length; i++)
+                {
+                    if (parameters.Length > 0)
+                        parameters.Append(", ");
+                    parameters.Append(FixSpecialParameterName(paramNames[i] ?? "$return"));
+                    parameters.Append('=');
+                    parameters.Append(GetRenderedFormat(paramValues[i], NullString));
+                }
+                argInfo = parameters.ToString();
+            }
+
+            return argInfo;
         }
 
         private string FixSpecialParameterName(string paramName)
@@ -105,6 +83,19 @@ namespace Tracer.NLog.Adapters
             }
 
             return paramName;
+        }
+
+        private static double ConvertTicksToMilliseconds(long ticks)
+        {
+            //ticks * tickFrequency * 10000
+            return ticks * (10000000 / (double)Stopwatch.Frequency) / 10000L;
+        }
+
+        private string GetRenderedFormat(object message, string stringRepresentationOfNull = "")
+        {
+            if (message == null)
+                return stringRepresentationOfNull;
+            return message.ToString();
         }
 
         private static void AddGenericPrettyFormat(StringBuilder sb, Type[] genericArgumentTypes)
@@ -118,15 +109,11 @@ namespace Tracer.NLog.Adapters
             sb.Append(">");
         }
 
-        private static double ConvertTicksToMilliseconds(long ticks)
-        {
-            //ticks * tickFrequency * 10000
-            return ticks * (10000000 / (double)Stopwatch.Frequency) / 10000L;
-        }
-
         private static string PrettyFormat(Type type)
         {
             var sb = new StringBuilder();
+            sb.Append(type.Namespace);
+            sb.Append(".");
             if (type.IsGenericType)
             {
                 sb.Append(type.Name.Remove(type.Name.IndexOf('`')));
@@ -139,33 +126,23 @@ namespace Tracer.NLog.Adapters
             return sb.ToString();
         }
 
-        private string GetRenderedFormat(object message, string stringRepresentationOfNull = "")
+        private void LogValue<T>(LogLevel logLevel, string methodInfo, T value, IFormatProvider formatProvider = null)
         {
-            if (message == null)
-                return stringRepresentationOfNull;
-            if (message is string)
-                return (string)message;
-            return message.ToString();
+            var logEvent = LogEventInfo.Create(logLevel, _logger.Name, formatProvider, value);
+            LogEvent(methodInfo, logEvent);
         }
 
-        private void LogTrace(LogLevel level, string methodInfo, string message, Exception exception = null, Dictionary<string, object> properties = null)
+        private void LogMessage(LogLevel logLevel, string methodInfo, Exception exception, string message, IFormatProvider formatProvider = null, object[] args = null)
         {
-            var eventData = new LogEventInfo();
-            eventData.Exception = exception;
-            eventData.Message = message;
-            eventData.Level = level;
-            eventData.LoggerName = _logger.Name;
+            var logEvent = LogEventInfo.Create(logLevel, _logger.Name, exception, formatProvider, message, args);
+            LogEvent(methodInfo, logEvent);
+        }
 
-            eventData.Properties.Add(TYPE_INFO, _typeName);
-            eventData.Properties.Add(METHOD_INFO, methodInfo);
-
-            if (properties != null)
-            {
-                foreach (var property in properties)
-                    eventData.Properties.Add(property.Key, property.Value);
-            }
-
-            _logger.Log(typeof(LoggerAdapter), eventData);
+        private void LogEvent(string methodInfo, LogEventInfo logEvent)
+        {
+            if (!string.IsNullOrEmpty(methodInfo))
+                logEvent.SetCallerInfo(_typeName, methodInfo, string.Empty, 0);
+            _logger.Log(typeof(LoggerAdapter), logEvent);
         }
 
         #endregion
@@ -179,7 +156,6 @@ namespace Tracer.NLog.Adapters
         {
             get { return _logger.IsTraceEnabled; }
         }
-
 
         public bool LogIsDebugEnabled
         {
@@ -210,95 +186,111 @@ namespace Tracer.NLog.Adapters
 
         public void LogTrace<T>(string methodInfo, T value)
         {
-            _logger.Trace(value);
+            if (_logger.IsTraceEnabled)
+                LogValue(LogLevel.Trace, methodInfo, value);
         }
 
         public void LogTrace<T>(string methodInfo, IFormatProvider formatProvider, T value)
         {
-            _logger.Trace(formatProvider, value);
+            if (_logger.IsTraceEnabled)
+                LogValue(LogLevel.Trace, methodInfo, value, formatProvider);
         }
 
         public void LogTrace(string methodInfo, LogMessageGenerator messageFunc)
         {
-            _logger.Trace(messageFunc);
+            if (_logger.IsTraceEnabled)
+                LogMessage(LogLevel.Trace, methodInfo, null, messageFunc());
         }
 
         public void LogTraceException(string methodInfo, string message, Exception exception)
         {
-            _logger.Trace(message, exception);
+            if (_logger.IsTraceEnabled)
+                LogMessage(LogLevel.Trace, methodInfo, exception, message);
         }
 
         public void LogTrace(string methodInfo, Exception exception, string message)
         {
-            _logger.Trace(exception, message);
+            if (_logger.IsTraceEnabled)
+                LogMessage(LogLevel.Trace, methodInfo, exception, message);
         }
 
         public void LogTrace(string methodInfo, Exception exception, string message, params object[] args)
         {
-            _logger.Trace(exception, message, args);
+            if (_logger.IsTraceEnabled)
+                LogMessage(LogLevel.Trace, methodInfo, exception, message, null, args);
         }
 
         public void LogTrace(string methodInfo, Exception exception, IFormatProvider formatProvider, string message,
             params object[] args)
         {
-            _logger.Trace(exception, formatProvider, message, args);
+            if (_logger.IsTraceEnabled)
+                LogMessage(LogLevel.Trace, methodInfo, exception, message, formatProvider, args);
         }
 
         public void LogTrace(string methodInfo, IFormatProvider formatProvider, string message, params object[] args)
         {
-            _logger.Trace(formatProvider, message, args);
+            if (_logger.IsTraceEnabled)
+                LogMessage(LogLevel.Trace, methodInfo, null, message, formatProvider, args);
         }
 
         public void LogTrace(string methodInfo, string message)
         {
-            _logger.Trace(message);
+            if (_logger.IsTraceEnabled)
+                LogMessage(LogLevel.Trace, methodInfo, null, message);
         }
 
         public void LogTrace(string methodInfo, string message, params object[] args)
         {
-            _logger.Trace(message, args);
+            if (_logger.IsTraceEnabled)
+                LogMessage(LogLevel.Trace, methodInfo, null, message, null, args);
         }
 
         public void LogTrace(string methodInfo, string message, Exception exception)
         {
-            _logger.Trace(message, exception);
+            if (_logger.IsTraceEnabled)
+                LogMessage(LogLevel.Trace, methodInfo, exception, message);
         }
 
         public void LogTrace<TArgument>(string methodInfo, IFormatProvider formatProvider, string message,
             TArgument argument)
         {
-            _logger.Trace(formatProvider, message, argument);
+            if (_logger.IsTraceEnabled)
+                LogMessage(LogLevel.Trace, methodInfo, null, message, formatProvider, new object[] { argument });
         }
 
         public void LogTrace<TArgument>(string methodInfo, string message, TArgument argument)
         {
-            _logger.Trace(message, argument);
+            if (_logger.IsTraceEnabled)
+                LogMessage(LogLevel.Trace, methodInfo, null, message, null, new object[] { argument });
         }
 
         public void LogTrace<TArgument1, TArgument2>(string methodInfo, IFormatProvider formatProvider, string message,
             TArgument1 argument1, TArgument2 argument2)
         {
-            _logger.Trace(formatProvider, message, argument1, argument2);
+            if (_logger.IsTraceEnabled)
+                LogMessage(LogLevel.Trace, methodInfo, null, message, formatProvider, new object[] { argument1, argument2 });
         }
 
         public void LogTrace<TArgument1, TArgument2>(string methodInfo, string message, TArgument1 argument1,
             TArgument2 argument2)
         {
-            _logger.Trace(message, argument1, argument2);
+            if (_logger.IsTraceEnabled)
+                LogMessage(LogLevel.Trace, methodInfo, null, message, null, new object[] { argument1, argument2 });
         }
 
         public void LogTrace<TArgument1, TArgument2, TArgument3>(string methodInfo, IFormatProvider formatProvider,
             string message, TArgument1 argument1, TArgument2 argument2, TArgument3 argument3)
         {
-            _logger.Trace(formatProvider, message, argument1, argument2, argument3);
+            if (_logger.IsTraceEnabled)
+                LogMessage(LogLevel.Trace, methodInfo, null, message, formatProvider, new object[] { argument1, argument2, argument3 });
         }
 
         public void LogTrace<TArgument1, TArgument2, TArgument3>(string methodInfo, string message, TArgument1 argument1,
             TArgument2 argument2, TArgument3 argument3)
         {
-            _logger.Trace(message, argument1, argument2, argument3);
+            if (_logger.IsTraceEnabled)
+                LogMessage(LogLevel.Trace, methodInfo, null, message, null, new object[] { argument1, argument2, argument3 });
         }
-
 
         #endregion
 
@@ -306,95 +298,111 @@ namespace Tracer.NLog.Adapters
 
         public void LogDebug<T>(string methodInfo, T value)
         {
-            _logger.Debug(value);
+            if (_logger.IsDebugEnabled)
+                LogValue(LogLevel.Debug, methodInfo, value);
         }
 
         public void LogDebug<T>(string methodInfo, IFormatProvider formatProvider, T value)
         {
-            _logger.Debug(formatProvider, value);
+            if (_logger.IsDebugEnabled)
+                LogValue(LogLevel.Debug, methodInfo, value, formatProvider);
         }
 
         public void LogDebug(string methodInfo, LogMessageGenerator messageFunc)
         {
-            _logger.Debug(messageFunc);
+            if (_logger.IsDebugEnabled)
+                LogMessage(LogLevel.Debug, methodInfo, null, messageFunc());
         }
 
         public void LogDebugException(string methodInfo, string message, Exception exception)
         {
-            _logger.Debug(message, exception);
+            if (_logger.IsDebugEnabled)
+                LogMessage(LogLevel.Debug, methodInfo, exception, message);
         }
 
         public void LogDebug(string methodInfo, Exception exception, string message)
         {
-            _logger.Debug(exception, message);
+            if (_logger.IsDebugEnabled)
+                LogMessage(LogLevel.Debug, methodInfo, exception, message);
         }
 
         public void LogDebug(string methodInfo, Exception exception, string message, params object[] args)
         {
-            _logger.Debug(exception, message, args);
+            if (_logger.IsDebugEnabled)
+                LogMessage(LogLevel.Debug, methodInfo, exception, message, null, args);
         }
 
         public void LogDebug(string methodInfo, Exception exception, IFormatProvider formatProvider, string message,
             params object[] args)
         {
-            _logger.Debug(exception, formatProvider, message, args);
+            if (_logger.IsDebugEnabled)
+                LogMessage(LogLevel.Debug, methodInfo, exception, message, formatProvider, args);
         }
 
         public void LogDebug(string methodInfo, IFormatProvider formatProvider, string message, params object[] args)
         {
-            _logger.Debug(formatProvider, message, args);
+            if (_logger.IsDebugEnabled)
+                LogMessage(LogLevel.Debug, methodInfo, null, message, formatProvider, args);
         }
 
         public void LogDebug(string methodInfo, string message)
         {
-            _logger.Debug(message);
+            if (_logger.IsDebugEnabled)
+                LogMessage(LogLevel.Debug, methodInfo, null, message);
         }
 
         public void LogDebug(string methodInfo, string message, params object[] args)
         {
-            _logger.Debug(message, args);
+            if (_logger.IsDebugEnabled)
+                LogMessage(LogLevel.Debug, methodInfo, null, message, null, args);
         }
 
         public void LogDebug(string methodInfo, string message, Exception exception)
         {
-            _logger.Debug(message, exception);
+            if (_logger.IsDebugEnabled)
+                LogMessage(LogLevel.Debug, methodInfo, exception, message);
         }
 
         public void LogDebug<TArgument>(string methodInfo, IFormatProvider formatProvider, string message,
             TArgument argument)
         {
-            _logger.Debug(formatProvider, message, argument);
+            if (_logger.IsDebugEnabled)
+                LogMessage(LogLevel.Debug, methodInfo, null, message, formatProvider, new object[] { argument });
         }
 
         public void LogDebug<TArgument>(string methodInfo, string message, TArgument argument)
         {
-            _logger.Debug(message, argument);
+            if (_logger.IsDebugEnabled)
+                LogMessage(LogLevel.Debug, methodInfo, null, message, null, new object[] { argument });
         }
 
         public void LogDebug<TArgument1, TArgument2>(string methodInfo, IFormatProvider formatProvider, string message,
             TArgument1 argument1, TArgument2 argument2)
         {
-            _logger.Debug(formatProvider, message, argument1, argument2);
+            if (_logger.IsDebugEnabled)
+                LogMessage(LogLevel.Debug, methodInfo, null, message, formatProvider, new object[] { argument1, argument2 });
         }
 
         public void LogDebug<TArgument1, TArgument2>(string methodInfo, string message, TArgument1 argument1,
             TArgument2 argument2)
         {
-            _logger.Debug(message, argument1, argument2);
+            if (_logger.IsDebugEnabled)
+                LogMessage(LogLevel.Debug, methodInfo, null, message, null, new object[] { argument1, argument2 });
         }
 
         public void LogDebug<TArgument1, TArgument2, TArgument3>(string methodInfo, IFormatProvider formatProvider,
             string message, TArgument1 argument1, TArgument2 argument2, TArgument3 argument3)
         {
-            _logger.Debug(formatProvider, message, argument1, argument2, argument3);
+            if (_logger.IsDebugEnabled)
+                LogMessage(LogLevel.Debug, methodInfo, null, message, formatProvider, new object[] { argument1, argument2, argument3 });
         }
 
         public void LogDebug<TArgument1, TArgument2, TArgument3>(string methodInfo, string message, TArgument1 argument1,
             TArgument2 argument2, TArgument3 argument3)
         {
-            _logger.Debug(message, argument1, argument2, argument3);
+            if (_logger.IsDebugEnabled)
+                LogMessage(LogLevel.Debug, methodInfo, null, message, null, new object[] { argument1, argument2, argument3 });
         }
-
 
         #endregion
 
@@ -402,93 +410,110 @@ namespace Tracer.NLog.Adapters
 
         public void LogInfo<T>(string methodInfo, T value)
         {
-            _logger.Info(value);
+            if (_logger.IsInfoEnabled)
+                LogValue(LogLevel.Info, methodInfo, value);
         }
 
         public void LogInfo<T>(string methodInfo, IFormatProvider formatProvider, T value)
         {
-            _logger.Info(formatProvider, value);
+            if (_logger.IsInfoEnabled)
+                LogValue(LogLevel.Info, methodInfo, value, formatProvider);
         }
 
         public void LogInfo(string methodInfo, LogMessageGenerator messageFunc)
         {
-            _logger.Info(messageFunc);
+            if (_logger.IsInfoEnabled)
+                LogMessage(LogLevel.Info, methodInfo, null, messageFunc());
         }
 
         public void LogInfoException(string methodInfo, string message, Exception exception)
         {
-            _logger.Info(message, exception);
+            if (_logger.IsInfoEnabled)
+                LogMessage(LogLevel.Info, methodInfo, exception, message);
         }
 
         public void LogInfo(string methodInfo, Exception exception, string message)
         {
-            _logger.Info(exception, message);
+            if (_logger.IsInfoEnabled)
+                LogMessage(LogLevel.Info, methodInfo, exception, message);
         }
 
         public void LogInfo(string methodInfo, Exception exception, string message, params object[] args)
         {
-            _logger.Info(exception, message, args);
+            if (_logger.IsInfoEnabled)
+                LogMessage(LogLevel.Info, methodInfo, exception, message, null, args);
         }
 
         public void LogInfo(string methodInfo, Exception exception, IFormatProvider formatProvider, string message,
             params object[] args)
         {
-            _logger.Info(exception, formatProvider, message, args);
+            if (_logger.IsInfoEnabled)
+                LogMessage(LogLevel.Info, methodInfo, exception, message, formatProvider, args);
         }
 
         public void LogInfo(string methodInfo, IFormatProvider formatProvider, string message, params object[] args)
         {
-            _logger.Info(formatProvider, message, args);
+            if (_logger.IsInfoEnabled)
+                LogMessage(LogLevel.Info, methodInfo, null, message, formatProvider, args);
         }
 
         public void LogInfo(string methodInfo, string message)
         {
-            _logger.Info(message);
+            if (_logger.IsInfoEnabled)
+                LogMessage(LogLevel.Info, methodInfo, null, message);
         }
 
         public void LogInfo(string methodInfo, string message, params object[] args)
         {
-            _logger.Info(message, args);
+            if (_logger.IsInfoEnabled)
+                LogMessage(LogLevel.Info, methodInfo, null, message, null, args);
         }
 
         public void LogInfo(string methodInfo, string message, Exception exception)
         {
-            _logger.Info(message, exception);
+            if (_logger.IsInfoEnabled)
+                LogMessage(LogLevel.Info, methodInfo, exception, message);
         }
 
         public void LogInfo<TArgument>(string methodInfo, IFormatProvider formatProvider, string message,
             TArgument argument)
         {
-            _logger.Info(formatProvider, message, argument);
+            if (_logger.IsInfoEnabled)
+                LogMessage(LogLevel.Info, methodInfo, null, message, formatProvider, new object[] { argument });
         }
 
         public void LogInfo<TArgument>(string methodInfo, string message, TArgument argument)
         {
-            _logger.Info(message, argument);
+            if (_logger.IsInfoEnabled)
+                LogMessage(LogLevel.Info, methodInfo, null, message, null, new object[] { argument });
         }
 
         public void LogInfo<TArgument1, TArgument2>(string methodInfo, IFormatProvider formatProvider, string message,
             TArgument1 argument1, TArgument2 argument2)
         {
-            _logger.Info(formatProvider, message, argument1, argument2);
+            if (_logger.IsInfoEnabled)
+                LogMessage(LogLevel.Info, methodInfo, null, message, formatProvider, new object[] { argument1, argument2 });
         }
 
         public void LogInfo<TArgument1, TArgument2>(string methodInfo, string message, TArgument1 argument1,
             TArgument2 argument2)
         {
-            _logger.Info(message, argument1, argument2);
+            if (_logger.IsInfoEnabled)
+                LogMessage(LogLevel.Info, methodInfo, null, message, null, new object[] { argument1, argument2 });
         }
 
         public void LogInfo<TArgument1, TArgument2, TArgument3>(string methodInfo, IFormatProvider formatProvider,
             string message, TArgument1 argument1, TArgument2 argument2, TArgument3 argument3)
         {
-            _logger.Info(formatProvider, message, argument1, argument2, argument3);
+            if (_logger.IsInfoEnabled)
+                LogMessage(LogLevel.Info, methodInfo, null, message, formatProvider, new object[] { argument1, argument2, argument3 });
         }
 
         public void LogInfo<TArgument1, TArgument2, TArgument3>(string methodInfo, string message, TArgument1 argument1,
             TArgument2 argument2, TArgument3 argument3)
         {
-            _logger.Info(message, argument1, argument2, argument3);
+            if (_logger.IsInfoEnabled)
+                LogMessage(LogLevel.Info, methodInfo, null, message, null, new object[] { argument1, argument2, argument3 });
         }
 
 
@@ -498,93 +523,110 @@ namespace Tracer.NLog.Adapters
 
         public void LogWarn<T>(string methodInfo, T value)
         {
-            _logger.Warn(value);
+            if (_logger.IsWarnEnabled)
+                LogValue(LogLevel.Warn, methodInfo, value);
         }
 
         public void LogWarn<T>(string methodInfo, IFormatProvider formatProvider, T value)
         {
-            _logger.Warn(formatProvider, value);
+            if (_logger.IsWarnEnabled)
+                LogValue(LogLevel.Warn, methodInfo, value, formatProvider);
         }
 
         public void LogWarn(string methodInfo, LogMessageGenerator messageFunc)
         {
-            _logger.Warn(messageFunc);
+            if (_logger.IsWarnEnabled)
+                LogMessage(LogLevel.Warn, methodInfo, null, messageFunc());
         }
 
         public void LogWarnException(string methodInfo, string message, Exception exception)
         {
-            _logger.Warn(message, exception);
+            if (_logger.IsWarnEnabled)
+                LogMessage(LogLevel.Warn, methodInfo, exception, message);
         }
 
         public void LogWarn(string methodInfo, Exception exception, string message)
         {
-            _logger.Warn(exception, message);
+            if (_logger.IsWarnEnabled)
+                LogMessage(LogLevel.Warn, methodInfo, exception, message);
         }
 
         public void LogWarn(string methodInfo, Exception exception, string message, params object[] args)
         {
-            _logger.Warn(exception, message, args);
+            if (_logger.IsWarnEnabled)
+                LogMessage(LogLevel.Warn, methodInfo, exception, message, null, args);
         }
 
         public void LogWarn(string methodInfo, Exception exception, IFormatProvider formatProvider, string message,
             params object[] args)
         {
-            _logger.Warn(exception, formatProvider, message, args);
+            if (_logger.IsWarnEnabled)
+                LogMessage(LogLevel.Warn, methodInfo, exception, message, formatProvider, args);
         }
 
         public void LogWarn(string methodInfo, IFormatProvider formatProvider, string message, params object[] args)
         {
-            _logger.Warn(formatProvider, message, args);
+            if (_logger.IsWarnEnabled)
+                LogMessage(LogLevel.Warn, methodInfo, null, message, formatProvider, args);
         }
 
         public void LogWarn(string methodInfo, string message)
         {
-            _logger.Warn(message);
+            if (_logger.IsWarnEnabled)
+                LogMessage(LogLevel.Warn, methodInfo, null, message);
         }
 
         public void LogWarn(string methodInfo, string message, params object[] args)
         {
-            _logger.Warn(message, args);
+            if (_logger.IsWarnEnabled)
+                LogMessage(LogLevel.Warn, methodInfo, null, message, null, args);
         }
 
         public void LogWarn(string methodInfo, string message, Exception exception)
         {
-            _logger.Warn(message, exception);
+            if (_logger.IsWarnEnabled)
+                LogMessage(LogLevel.Warn, methodInfo, exception, message);
         }
 
         public void LogWarn<TArgument>(string methodInfo, IFormatProvider formatProvider, string message,
             TArgument argument)
         {
-            _logger.Warn(formatProvider, message, argument);
+            if (_logger.IsWarnEnabled)
+                LogMessage(LogLevel.Warn, methodInfo, null, message, formatProvider, new object[] { argument });
         }
 
         public void LogWarn<TArgument>(string methodInfo, string message, TArgument argument)
         {
-            _logger.Warn(message, argument);
+            if (_logger.IsWarnEnabled)
+                LogMessage(LogLevel.Warn, methodInfo, null, message, null, new object[] { argument });
         }
 
         public void LogWarn<TArgument1, TArgument2>(string methodInfo, IFormatProvider formatProvider, string message,
             TArgument1 argument1, TArgument2 argument2)
         {
-            _logger.Warn(formatProvider, message, argument1, argument2);
+            if (_logger.IsWarnEnabled)
+                LogMessage(LogLevel.Warn, methodInfo, null, message, formatProvider, new object[] { argument1, argument2 });
         }
 
         public void LogWarn<TArgument1, TArgument2>(string methodInfo, string message, TArgument1 argument1,
             TArgument2 argument2)
         {
-            _logger.Warn(message, argument1, argument2);
+            if (_logger.IsWarnEnabled)
+                LogMessage(LogLevel.Warn, methodInfo, null, message, null, new object[] { argument1, argument2 });
         }
 
         public void LogWarn<TArgument1, TArgument2, TArgument3>(string methodInfo, IFormatProvider formatProvider,
             string message, TArgument1 argument1, TArgument2 argument2, TArgument3 argument3)
         {
-            _logger.Warn(formatProvider, message, argument1, argument2, argument3);
+            if (_logger.IsWarnEnabled)
+                LogMessage(LogLevel.Warn, methodInfo, null, message, formatProvider, new object[] { argument1, argument2, argument3 });
         }
 
         public void LogWarn<TArgument1, TArgument2, TArgument3>(string methodInfo, string message, TArgument1 argument1,
             TArgument2 argument2, TArgument3 argument3)
         {
-            _logger.Warn(message, argument1, argument2, argument3);
+            if (_logger.IsWarnEnabled)
+                LogMessage(LogLevel.Warn, methodInfo, null, message, null, new object[] { argument1, argument2, argument3 });
         }
 
 
@@ -594,93 +636,110 @@ namespace Tracer.NLog.Adapters
 
         public void LogError<T>(string methodInfo, T value)
         {
-            _logger.Error(value);
+            if (_logger.IsErrorEnabled)
+                LogValue(LogLevel.Error, methodInfo, value);
         }
 
         public void LogError<T>(string methodInfo, IFormatProvider formatProvider, T value)
         {
-            _logger.Error(formatProvider, value);
+            if (_logger.IsErrorEnabled)
+                LogValue(LogLevel.Error, methodInfo, value, formatProvider);
         }
 
         public void LogError(string methodInfo, LogMessageGenerator messageFunc)
         {
-            _logger.Error(messageFunc);
+            if (_logger.IsErrorEnabled)
+                LogMessage(LogLevel.Error, methodInfo, null, messageFunc());
         }
 
         public void LogErrorException(string methodInfo, string message, Exception exception)
         {
-            _logger.Error(message, exception);
+            if (_logger.IsErrorEnabled)
+                LogMessage(LogLevel.Error, methodInfo, exception, message);
         }
 
         public void LogError(string methodInfo, Exception exception, string message)
         {
-            _logger.Error(exception, message);
+            if (_logger.IsErrorEnabled)
+                LogMessage(LogLevel.Error, methodInfo, exception, message);
         }
 
         public void LogError(string methodInfo, Exception exception, string message, params object[] args)
         {
-            _logger.Error(exception, message, args);
+            if (_logger.IsErrorEnabled)
+                LogMessage(LogLevel.Error, methodInfo, exception, message, null, args);
         }
 
         public void LogError(string methodInfo, Exception exception, IFormatProvider formatProvider, string message,
             params object[] args)
         {
-            _logger.Error(exception, formatProvider, message, args);
+            if (_logger.IsErrorEnabled)
+                LogMessage(LogLevel.Error, methodInfo, exception, message, formatProvider, args);
         }
 
         public void LogError(string methodInfo, IFormatProvider formatProvider, string message, params object[] args)
         {
-            _logger.Error(formatProvider, message, args);
+            if (_logger.IsErrorEnabled)
+                LogMessage(LogLevel.Error, methodInfo, null, message, formatProvider, args);
         }
 
         public void LogError(string methodInfo, string message)
         {
-            _logger.Error(message);
+            if (_logger.IsErrorEnabled)
+                LogMessage(LogLevel.Error, methodInfo, null, message);
         }
 
         public void LogError(string methodInfo, string message, params object[] args)
         {
-            _logger.Error(message, args);
+            if (_logger.IsErrorEnabled)
+                LogMessage(LogLevel.Error, methodInfo, null, message, null, args);
         }
 
         public void LogError(string methodInfo, string message, Exception exception)
         {
-            _logger.Error(message, exception);
+            if (_logger.IsErrorEnabled)
+                LogMessage(LogLevel.Error, methodInfo, exception, message);
         }
 
         public void LogError<TArgument>(string methodInfo, IFormatProvider formatProvider, string message,
             TArgument argument)
         {
-            _logger.Error(formatProvider, message, argument);
+            if (_logger.IsErrorEnabled)
+                LogMessage(LogLevel.Error, methodInfo, null, message, formatProvider, new object[] { argument });
         }
 
         public void LogError<TArgument>(string methodInfo, string message, TArgument argument)
         {
-            _logger.Error(message, argument);
+            if (_logger.IsErrorEnabled)
+                LogMessage(LogLevel.Error, methodInfo, null, message, null, new object[] { argument });
         }
 
         public void LogError<TArgument1, TArgument2>(string methodInfo, IFormatProvider formatProvider, string message,
             TArgument1 argument1, TArgument2 argument2)
         {
-            _logger.Error(formatProvider, message, argument1, argument2);
+            if (_logger.IsErrorEnabled)
+                LogMessage(LogLevel.Error, methodInfo, null, message, formatProvider, new object[] { argument1, argument2 });
         }
 
         public void LogError<TArgument1, TArgument2>(string methodInfo, string message, TArgument1 argument1,
             TArgument2 argument2)
         {
-            _logger.Error(message, argument1, argument2);
+            if (_logger.IsErrorEnabled)
+                LogMessage(LogLevel.Error, methodInfo, null, message, null, new object[] { argument1, argument2 });
         }
 
         public void LogError<TArgument1, TArgument2, TArgument3>(string methodInfo, IFormatProvider formatProvider,
             string message, TArgument1 argument1, TArgument2 argument2, TArgument3 argument3)
         {
-            _logger.Error(formatProvider, message, argument1, argument2, argument3);
+            if (_logger.IsErrorEnabled)
+                LogMessage(LogLevel.Error, methodInfo, null, message, formatProvider, new object[] { argument1, argument2, argument3 });
         }
 
         public void LogError<TArgument1, TArgument2, TArgument3>(string methodInfo, string message, TArgument1 argument1,
             TArgument2 argument2, TArgument3 argument3)
         {
-            _logger.Error(message, argument1, argument2, argument3);
+            if (_logger.IsErrorEnabled)
+                LogMessage(LogLevel.Error, methodInfo, null, message, null, new object[] { argument1, argument2, argument3 });
         }
 
 
@@ -690,93 +749,110 @@ namespace Tracer.NLog.Adapters
 
         public void LogFatal<T>(string methodInfo, T value)
         {
-            _logger.Fatal(value);
+            if (_logger.IsFatalEnabled)
+                LogValue(LogLevel.Fatal, methodInfo, value);
         }
 
         public void LogFatal<T>(string methodInfo, IFormatProvider formatProvider, T value)
         {
-            _logger.Fatal(formatProvider, value);
+            if (_logger.IsFatalEnabled)
+                LogValue(LogLevel.Fatal, methodInfo, value, formatProvider);
         }
 
         public void LogFatal(string methodInfo, LogMessageGenerator messageFunc)
         {
-            _logger.Fatal(messageFunc);
+            if (_logger.IsFatalEnabled)
+                LogMessage(LogLevel.Fatal, methodInfo, null, messageFunc());
         }
 
         public void LogFatalException(string methodInfo, string message, Exception exception)
         {
-            _logger.Fatal(message, exception);
+            if (_logger.IsFatalEnabled)
+                LogMessage(LogLevel.Fatal, methodInfo, exception, message);
         }
 
         public void LogFatal(string methodInfo, Exception exception, string message)
         {
-            _logger.Fatal(exception, message);
+            if (_logger.IsFatalEnabled)
+                LogMessage(LogLevel.Fatal, methodInfo, exception, message);
         }
 
         public void LogFatal(string methodInfo, Exception exception, string message, params object[] args)
         {
-            _logger.Fatal(exception, message, args);
+            if (_logger.IsFatalEnabled)
+                LogMessage(LogLevel.Fatal, methodInfo, exception, message, null, args);
         }
 
         public void LogFatal(string methodInfo, Exception exception, IFormatProvider formatProvider, string message,
             params object[] args)
         {
-            _logger.Fatal(exception, formatProvider, message, args);
+            if (_logger.IsFatalEnabled)
+                LogMessage(LogLevel.Fatal, methodInfo, exception, message, formatProvider, args);
         }
 
         public void LogFatal(string methodInfo, IFormatProvider formatProvider, string message, params object[] args)
         {
-            _logger.Fatal(formatProvider, message, args);
+            if (_logger.IsFatalEnabled)
+                LogMessage(LogLevel.Fatal, methodInfo, null, message, formatProvider, args);
         }
 
         public void LogFatal(string methodInfo, string message)
         {
-            _logger.Fatal(message);
+            if (_logger.IsFatalEnabled)
+                LogMessage(LogLevel.Fatal, methodInfo, null, message);
         }
 
         public void LogFatal(string methodInfo, string message, params object[] args)
         {
-            _logger.Fatal(message, args);
+            if (_logger.IsFatalEnabled)
+                LogMessage(LogLevel.Fatal, methodInfo, null, message, null, args);
         }
 
         public void LogFatal(string methodInfo, string message, Exception exception)
         {
-            _logger.Fatal(message, exception);
+            if (_logger.IsFatalEnabled)
+                LogMessage(LogLevel.Fatal, methodInfo, exception, message);
         }
 
         public void LogFatal<TArgument>(string methodInfo, IFormatProvider formatProvider, string message,
             TArgument argument)
         {
-            _logger.Fatal(formatProvider, message, argument);
+            if (_logger.IsFatalEnabled)
+                LogMessage(LogLevel.Fatal, methodInfo, null, message, formatProvider, new object[] { argument });
         }
 
         public void LogFatal<TArgument>(string methodInfo, string message, TArgument argument)
         {
-            _logger.Fatal(message, argument);
+            if (_logger.IsFatalEnabled)
+                LogMessage(LogLevel.Fatal, methodInfo, null, message, null, new object[] { argument });
         }
 
         public void LogFatal<TArgument1, TArgument2>(string methodInfo, IFormatProvider formatProvider, string message,
             TArgument1 argument1, TArgument2 argument2)
         {
-            _logger.Fatal(formatProvider, message, argument1, argument2);
+            if (_logger.IsFatalEnabled)
+                LogMessage(LogLevel.Fatal, methodInfo, null, message, formatProvider, new object[] { argument1, argument2 });
         }
 
         public void LogFatal<TArgument1, TArgument2>(string methodInfo, string message, TArgument1 argument1,
             TArgument2 argument2)
         {
-            _logger.Fatal(message, argument1, argument2);
+            if (_logger.IsFatalEnabled)
+                LogMessage(LogLevel.Fatal, methodInfo, null, message, null, new object[] { argument1, argument2 });
         }
 
         public void LogFatal<TArgument1, TArgument2, TArgument3>(string methodInfo, IFormatProvider formatProvider,
             string message, TArgument1 argument1, TArgument2 argument2, TArgument3 argument3)
         {
-            _logger.Fatal(formatProvider, message, argument1, argument2, argument3);
+            if (_logger.IsFatalEnabled)
+                LogMessage(LogLevel.Fatal, methodInfo, null, message, formatProvider, new object[] { argument1, argument2, argument3 });
         }
 
         public void LogFatal<TArgument1, TArgument2, TArgument3>(string methodInfo, string message, TArgument1 argument1,
             TArgument2 argument2, TArgument3 argument3)
         {
-            _logger.Fatal(message, argument1, argument2, argument3);
+            if (_logger.IsFatalEnabled)
+                LogMessage(LogLevel.Fatal, methodInfo, null, message, null, new object[] { argument1, argument2, argument3 });
         }
 
 
