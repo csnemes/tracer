@@ -19,4 +19,4 @@ build:
 
 after_build:
   - cmd: nuget pack .\Tracer.NLog\NuGet\Tracer.NLog.Fody.nuspec -version "%GitVersion_NuGetVersion%" -prop "target=%CONFIGURATION%"
-  - cmd: appveyor PushArtifact "Tracer.NLog.Fody.%GitVersion_NuGetVersion%.nupkg"
+  - cmd: appveyor PushArtifact "Tracer.4NLog.Fody.%GitVersion_NuGetVersion%.nupkg"
