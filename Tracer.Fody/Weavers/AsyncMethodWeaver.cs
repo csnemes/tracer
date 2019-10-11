@@ -114,7 +114,8 @@ namespace Tracer.Fody.Weavers
             var loggingTraceEnterInstructions = new List<Instruction>();
             loggingTraceEnterInstructions.Add(Instruction.Create(OpCodes.Ldarg_0));
             loggingTraceEnterInstructions.Add(Instruction.Create(OpCodes.Ldfld, stateField));
-            loggingTraceEnterInstructions.Add(Instruction.Create(OpCodes.Brtrue, firstInstruction));
+            loggingTraceEnterInstructions.Add(Instruction.Create(OpCodes.Ldc_I4_M1));
+            loggingTraceEnterInstructions.Add(Instruction.Create(OpCodes.Bne_Un, firstInstruction));
 
             if (configParameters?.Any() == true)
             {
