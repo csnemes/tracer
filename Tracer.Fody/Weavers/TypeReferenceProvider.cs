@@ -92,6 +92,11 @@ namespace Tracer.Fody.Weavers
             get { return _moduleDefinition.TypeSystem.Int64; }
         }
 
+        public TypeReference Int
+        {
+            get { return _moduleDefinition.TypeSystem.Int32; }
+        }
+
         public TypeReference Task
         {
             get { return _task.Value; }
