@@ -8,13 +8,17 @@ namespace Tracer.NLog.Adapters
     public class LoggerAdapter
     {
         private const string NullString = "<NULL>";
+        private const string TYPE_INFO = "TypeInfo";
+        private const string METHOD_INFO = "MethodInfo";
         private readonly ILogger _logger;
         private readonly string _typeName;
+        private readonly string _typeFullName;
         private readonly string _specialPrefix;
 
         public LoggerAdapter(Type type)
         {
             _typeName = PrettyFormat(type);
+            _typeFullName = string.Concat(type.Namespace, ".", _typeName);
             _logger = LogManager.GetLogger(type.ToString());
             var configPrefix = Environment.GetEnvironmentVariable("TracerFodySpecialKeyPrefix");
             _specialPrefix = string.IsNullOrWhiteSpace(configPrefix) ? "$" : configPrefix;
@@ -33,6 +37,8 @@ namespace Tracer.NLog.Adapters
                     LogEventInfo.Create(LogLevel.Trace, _logger.Name, null, "Entered into {0} ({1}).", new object[] { methodInfo, argInfo });
                 logEvent.Properties["trace"] = "ENTER";
                 logEvent.Properties["arguments"] = argInfo;
+                logEvent.Properties[TYPE_INFO] = _typeName;     // TODO Consider removing this, when using NLog 5.0
+                logEvent.Properties[METHOD_INFO] = methodInfo;  // TODO Consider removing this, when using NLog 5.0
                 LogEvent(methodInfo, logEvent);
             }
         }
@@ -51,6 +57,8 @@ namespace Tracer.NLog.Adapters
                 logEvent.Properties["startTicks"] = startTicks;
                 logEvent.Properties["endTicks"] = endTicks;
                 logEvent.Properties["timeTaken"] = timeTaken;
+                logEvent.Properties[TYPE_INFO] = _typeName;
+                logEvent.Properties[METHOD_INFO] = methodInfo;
                 LogEvent(methodInfo, logEvent);
             }
         }
@@ -112,8 +120,6 @@ namespace Tracer.NLog.Adapters
         private static string PrettyFormat(Type type)
         {
             var sb = new StringBuilder();
-            sb.Append(type.Namespace);
-            sb.Append(".");
             if (type.IsGenericType)
             {
                 sb.Append(type.Name.Remove(type.Name.IndexOf('`')));
@@ -141,7 +147,7 @@ namespace Tracer.NLog.Adapters
         private void LogEvent(string methodInfo, LogEventInfo logEvent)
         {
             if (!string.IsNullOrEmpty(methodInfo))
-                logEvent.SetCallerInfo(_typeName, methodInfo, string.Empty, 0);
+                logEvent.SetCallerInfo(_typeFullName, methodInfo, string.Empty, 0);
             _logger.Log(typeof(LoggerAdapter), logEvent);
         }
 
