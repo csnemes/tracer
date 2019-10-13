@@ -43,7 +43,7 @@ namespace Tracer.Fody.Tests.TraceTests
 
             var result = this.RunTest(code, new PrivateOnlyTraceLoggingFilter(), "First.MyClass::Main");
             result.Count.Should().Be(2);
-            result.ElementAt(0).ShouldBeTraceEnterInto("First.MyClass::Test3", "param", "42");
+            result.ElementAt(0).ShouldBeTraceEnterInto("First.MyClass::Test3", "param", "First.RefStruct");
             result.ElementAt(1).ShouldBeTraceLeaveFrom("First.MyClass::Test3");
         }
 

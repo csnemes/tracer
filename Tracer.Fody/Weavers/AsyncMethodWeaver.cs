@@ -32,13 +32,15 @@ namespace Tracer.Fody.Weavers
 
         protected override void WeaveTraceEnter(Dictionary<string, string> configParameters)
         {
+            //var instructions = CreateTraceEnterCallInstructions(configParameters);
+
             var instructions = new List<Instruction>();
             VariableDefinition paramNamesDef = null;
             VariableDefinition paramValuesDef = null;
 
             var traceEnterNeedsParamArray = _body.Method.Parameters.Any(param => !param.IsOut);
             var traceEnterParamArraySize = _body.Method.Parameters.Count(param => !param.IsOut);
-            
+
             if (traceEnterNeedsParamArray)
             {
                 //Declare local variables for the arrays
@@ -91,7 +93,7 @@ namespace Tracer.Fody.Weavers
             instrs.Add(Instruction.Create(_generatedType.IsValueType ? OpCodes.Ldloca : OpCodes.Ldloc, genVar));
             instrs.Add(traceEnterNeedsParamArray ? Instruction.Create(OpCodes.Ldloc, paramValuesDef) : Instruction.Create(OpCodes.Ldnull));
             instrs.Add(Instruction.Create(OpCodes.Stfld, _paramValuesFieldRef.FixFieldReferenceToUseSameGenericArgumentsAsVariable(genVar)));
-            
+
             instr.InsertBefore(processor, instrs);
 
             WeaveTraceEnterToStateMachine(configParameters);
@@ -111,9 +113,24 @@ namespace Tracer.Fody.Weavers
             var stateField = _generatedType.Fields.First(fld =>
                 fld.Name.Contains("__state") && fld.FieldType == _typeReferenceProvider.Int);
 
+            var stateFieldRef = stateField.FixFieldReferenceIfDeclaringTypeIsGeneric();
+
             var loggingTraceEnterInstructions = new List<Instruction>();
+
+            //log state starts
+            //loggingTraceEnterInstructions.Add(Instruction.Create(OpCodes.Ldsfld, TypeWeaver.CreateLoggerStaticField(_typeReferenceProvider, _methodReferenceProvider, _generatedType)));
+            //loggingTraceEnterInstructions.Add(Instruction.Create(OpCodes.Ldarg_0));
+            //loggingTraceEnterInstructions.Add(Instruction.Create(OpCodes.Ldfld, stateFieldRef));
+            //loggingTraceEnterInstructions.Add(Instruction.Create(OpCodes.Box, _typeReferenceProvider.Int));
+            //loggingTraceEnterInstructions.Add(Instruction.Create(OpCodes.Callvirt, _methodReferenceProvider.GetToStringReference()));
+            //loggingTraceEnterInstructions.Add(Instruction.Create(OpCodes.Ldnull));
+            //loggingTraceEnterInstructions.Add(Instruction.Create(OpCodes.Ldnull));
+            //loggingTraceEnterInstructions.Add(Instruction.Create(OpCodes.Ldnull));
+            //loggingTraceEnterInstructions.Add(Instruction.Create(OpCodes.Callvirt, _methodReferenceProvider.GetTraceEnterReference()));
+            //log state ends
+
             loggingTraceEnterInstructions.Add(Instruction.Create(OpCodes.Ldarg_0));
-            loggingTraceEnterInstructions.Add(Instruction.Create(OpCodes.Ldfld, stateField));
+            loggingTraceEnterInstructions.Add(Instruction.Create(OpCodes.Ldfld, stateFieldRef));
             loggingTraceEnterInstructions.Add(Instruction.Create(OpCodes.Ldc_I4_M1));
             loggingTraceEnterInstructions.Add(Instruction.Create(OpCodes.Bne_Un, firstInstruction));
 
@@ -132,7 +149,6 @@ namespace Tracer.Fody.Weavers
 
             loggingTraceEnterInstructions.Add(Instruction.Create(OpCodes.Ldarg_0));
             loggingTraceEnterInstructions.Add(Instruction.Create(OpCodes.Ldfld, _paramValuesFieldRef));
-            loggingTraceEnterInstructions.Add(Instruction.Create(OpCodes.Nop));
             loggingTraceEnterInstructions.Add(Instruction.Create(OpCodes.Callvirt, _methodReferenceProvider.GetTraceEnterReference()));
 
             firstInstruction.InsertBefore(processor, loggingTraceEnterInstructions);
