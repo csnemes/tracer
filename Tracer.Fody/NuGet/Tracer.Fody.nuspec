@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Tracer.Fody</id>
-    <version>3.1.0</version>
+    <version>3.2.0</version>
     <authors>csnemes</authors>
     <owners>csnemes</owners>
     <projectUrl>https://github.com/csnemes/tracer</projectUrl>
@@ -16,7 +16,7 @@
 	<developmentDependency>true</developmentDependency>
     <dependencies>
       <group>
-        <dependency id="Fody" version="[4.2.1,5.0)" include="All" />
+        <dependency id="Fody" version="4.2.1" include="All" />
       </group>
     </dependencies>
     <references />
@@ -58,17 +58,22 @@
 * 2.2.0
     - Updated dependency to Fody 3.x
 * 3.0.0
-	- Fixed issue with missing local function extra parameter name
-	- Switched to new Fody package format, upgraded to Fody 3.3.x
-	- Added pattern based filter for specifying which methods to trace	
-	- Fixed generic async rewrite issues causing PEVerify errors
-	- Added the possibility to pass in extra configuration parameters to trace enter and leave methods (breaks signature)
+    - Fixed issue with missing local function extra parameter name
+    - Switched to new Fody package format, upgraded to Fody 3.3.x
+    - Added pattern based filter for specifying which methods to trace	
+    - Fixed generic async rewrite issues causing PEVerify errors
+    - Added the possibility to pass in extra configuration parameters to trace enter and leave methods (breaks signature)
 * 3.1.0
-	- fixed pattern filter sorting bug
-	- added pattern filter order logging on weaving
-	- removed generated labda method logging 
-	- prettified local func method name in logging
-	- Updated to Fody 4.x
+     - fixed pattern filter sorting bug
+     - added pattern filter order logging on weaving
+     - removed generated labda method logging 
+     - prettified local func method name in logging
+     - Updated to Fody 4.x
+* 3.2.0
+     - fixed call context problem with async methods
+     - added disabled attribute to turn off tracer weaving completely 
+     - fixed error when tracing ref struct method parameters
+     - removed Fody reference cap. Please beware that using Fody 5.x or higher generates warning
 	</releaseNotes>
   </metadata>
 </package>

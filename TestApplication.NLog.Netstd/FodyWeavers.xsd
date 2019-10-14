@@ -125,6 +125,11 @@
                 <xs:documentation>Turn on tracing for properties.</xs:documentation>
               </xs:annotation>
             </xs:attribute>
+            <xs:attribute name="disabled" type="xs:boolean">
+              <xs:annotation>
+                <xs:documentation>Set to true to turn of trace rewriting.</xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
           </xs:complexType>
         </xs:element>
       </xs:all>

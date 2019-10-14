@@ -1,4 +1,4 @@
-Tracer 3.0.0
+Tracer 3.2.0
 ======
 
 Tracing and logging rewriter using Fody. It adds trace enter and trace leave log entries for the methods specified. Such calls include incoming and outgoing arguments as well as time spent in the method. It also rewrites static log entries to properly configured log calls. Tracer is the rewriter core on which one of the specific adapters like Tracer.Log4Net is built uppon. Creating custom adapters for your specific needs is very easy.
@@ -73,6 +73,17 @@ Version History for Tracer:
     - Added pattern based filter for specifying which methods to trace	
     - Fixed generic async rewrite issues causing PEVerify errors
     - Added the possibility to pass in extra configuration parameters to trace enter and leave methods (breaks trace enter and leave signature)
+* 3.1.0
+     - fixed pattern filter sorting bug
+     - added pattern filter order logging on weaving
+     - removed generated labda method logging 
+     - prettified local func method name in logging
+     - Updated to Fody 4.x
+* 3.2.0
+     - fixed call context problem with async methods
+     - added disabled attribute to turn off tracer weaving completely 
+     - fixed error when tracing ref struct method parameters
+     - removed Fody reference cap. Please beware that using Fody 5.x or higher generates warning
 
 Version History for Tracer.Log4Net:
 ---

@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Tracer.4NLog.Fody</id>
-    <version>3.1.1</version>
+    <version>3.2.0</version>
     <authors>csnemes</authors>
     <owners>csnemes</owners>
     <projectUrl>https://github.com/csnemes/tracer</projectUrl>
@@ -14,7 +14,7 @@
     <tags>Fody, Logging, Tracing, NLog, ILWeaving, Cecil, 4NLog</tags>
     <dependencies>
       <group>
-	    	<dependency id="Fody" version="[4.2.1,6.0)" include="All" />
+	    	<dependency id="Fody" version="4.2.1" include="All" />
 	    	<dependency id="NLog" version="[4.5.11,5.0.0)" />
       </group>
     </dependencies>
@@ -37,7 +37,12 @@
       - added pattern filter order logging on weaving
       - removed generated labda method logging 
       - prettified local func method name in logging
-      - Updated to Fody 4.x					
+      - Updated to Fody 4.x	
+      * 3.2.0
+      - fixed call context problem with async methods
+      - added disabled attribute to turn off tracer weaving completely 
+      - fixed error when tracing ref struct method parameters
+      - removed Fody reference cap. Please beware that using Fody 5.x or higher generates warning				
       </releaseNotes>
   </metadata>
 </package>
