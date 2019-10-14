@@ -28,6 +28,7 @@ namespace Tracer.Fody.Helpers
         private string _filter;
         private bool _traceConstructorsFlag;
         private bool _tracePropertiesFlag = true;
+        private bool _disabled = false;
         private IEnumerable<XElement> _filterConfigElements;
 
         public static FodyConfigParser Parse(XElement element, XElement defaultElement)
@@ -46,6 +47,9 @@ namespace Tracer.Fody.Helpers
                     .WithLogger(_logger)
                     .WithLogManager(_logManager)
                     .WithStaticLogger(_staticLogger);
+
+                if (_disabled)
+                    result.Disabled();
 
                 if (String.Equals(_filter, "pattern", StringComparison.OrdinalIgnoreCase))
                 {
@@ -89,6 +93,7 @@ namespace Tracer.Fody.Helpers
                 _traceConstructorsFlag = Boolean.Parse(GetAttributeValueOrDefault(element, "traceConstructors", Boolean.FalseString));
                 _tracePropertiesFlag = Boolean.Parse(GetAttributeValueOrDefault(element, "traceProperties", Boolean.TrueString));
                 _filter = GetAttributeValue(element, "filter", false);
+                _disabled = Boolean.Parse(GetAttributeValueOrDefault(element, "disabled", Boolean.FalseString));
                 _filterConfigElements = element.Descendants();
             }
             catch (Exception ex)

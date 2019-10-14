@@ -37,6 +37,12 @@ namespace Tracer.Fody.Weavers
         {
             try
             {
+                if (configuration.IsDisabled)
+                {
+                    WeavingLog.LogInfo("Weaving is disabled.");
+                    return;
+                }
+                
                 WeavingLog.LogInfo("Tracer: Starts weaving.");
                 var timer = Stopwatch.StartNew();
                 var weaver = new ModuleLevelWeaver(configuration, moduleDefinition);

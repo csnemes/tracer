@@ -19,11 +19,13 @@ namespace Tracer.Fody.Weavers
         private readonly string _staticLoggerTypeFullName;
         private readonly bool _traceConstructors;
         private readonly bool _traceProperties;
+        private readonly bool _isDisabled;
 
         private TraceLoggingConfiguration(ITraceLoggingFilter filter, string adapterAssemblyDisplayName, 
             string loggerAdapterTypeName, string logManagerAdapterTypeName, string staticLoggerTypeFullName, bool traceConstructors
-            ,bool traceProperties)
+            ,bool traceProperties, bool isDisabled = false)
         {
+            _isDisabled = isDisabled;
             _filter = filter ?? NullFilter.Instance;
             _adapterAssemblyName = new AssemblyName(adapterAssemblyDisplayName ?? "Tracer.LogAdapter, Version=1.0.0.0");
             //set version to avoid cecil nullRef exception issue
@@ -44,6 +46,8 @@ namespace Tracer.Fody.Weavers
         {
             get { return _filter; }
         }
+
+        public bool IsDisabled => _isDisabled;
 
         public AssemblyNameReference AssemblyNameReference
         {
@@ -146,6 +150,7 @@ namespace Tracer.Fody.Weavers
             private string _staticLoggerTypeName;
             private bool _traceConstructors = false;
             private bool _traceProperties = true;
+            private bool _isDisabled = false;
 
             public static implicit operator TraceLoggingConfiguration(TraceLoggingConfigurationBuilder builder)
             {
@@ -156,7 +161,14 @@ namespace Tracer.Fody.Weavers
                     builder._logManagerAdapterTypeName,
                     builder._staticLoggerTypeName,
                     builder._traceConstructors,
-                    builder._traceProperties);
+                    builder._traceProperties,
+                    builder._isDisabled);
+            }
+
+            public TraceLoggingConfigurationBuilder Disabled()
+            {
+                _isDisabled = true;
+                return this;
             }
 
             public TraceLoggingConfigurationBuilder WithFilter(ITraceLoggingFilter filter)
