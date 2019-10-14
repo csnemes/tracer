@@ -117,18 +117,6 @@ namespace Tracer.Fody.Weavers
 
             var loggingTraceEnterInstructions = new List<Instruction>();
 
-            //log state starts
-            //loggingTraceEnterInstructions.Add(Instruction.Create(OpCodes.Ldsfld, TypeWeaver.CreateLoggerStaticField(_typeReferenceProvider, _methodReferenceProvider, _generatedType)));
-            //loggingTraceEnterInstructions.Add(Instruction.Create(OpCodes.Ldarg_0));
-            //loggingTraceEnterInstructions.Add(Instruction.Create(OpCodes.Ldfld, stateFieldRef));
-            //loggingTraceEnterInstructions.Add(Instruction.Create(OpCodes.Box, _typeReferenceProvider.Int));
-            //loggingTraceEnterInstructions.Add(Instruction.Create(OpCodes.Callvirt, _methodReferenceProvider.GetToStringReference()));
-            //loggingTraceEnterInstructions.Add(Instruction.Create(OpCodes.Ldnull));
-            //loggingTraceEnterInstructions.Add(Instruction.Create(OpCodes.Ldnull));
-            //loggingTraceEnterInstructions.Add(Instruction.Create(OpCodes.Ldnull));
-            //loggingTraceEnterInstructions.Add(Instruction.Create(OpCodes.Callvirt, _methodReferenceProvider.GetTraceEnterReference()));
-            //log state ends
-
             loggingTraceEnterInstructions.Add(Instruction.Create(OpCodes.Ldarg_0));
             loggingTraceEnterInstructions.Add(Instruction.Create(OpCodes.Ldfld, stateFieldRef));
             loggingTraceEnterInstructions.Add(Instruction.Create(OpCodes.Ldc_I4_M1));
@@ -145,10 +133,10 @@ namespace Tracer.Fody.Weavers
             loggingTraceEnterInstructions.Add(configParameters?.Any() == true ? Instruction.Create(OpCodes.Ldloc, ConfigParamDef) : Instruction.Create(OpCodes.Ldnull));
 
             loggingTraceEnterInstructions.Add(Instruction.Create(OpCodes.Ldarg_0));
-            loggingTraceEnterInstructions.Add(Instruction.Create(OpCodes.Ldfld, _paramNamesFieldRef));
+            loggingTraceEnterInstructions.Add(Instruction.Create(OpCodes.Ldfld, _paramNamesFieldRef.FixFieldReferenceIfDeclaringTypeIsGeneric()));
 
             loggingTraceEnterInstructions.Add(Instruction.Create(OpCodes.Ldarg_0));
-            loggingTraceEnterInstructions.Add(Instruction.Create(OpCodes.Ldfld, _paramValuesFieldRef));
+            loggingTraceEnterInstructions.Add(Instruction.Create(OpCodes.Ldfld, _paramValuesFieldRef.FixFieldReferenceIfDeclaringTypeIsGeneric()));
             loggingTraceEnterInstructions.Add(Instruction.Create(OpCodes.Callvirt, _methodReferenceProvider.GetTraceEnterReference()));
 
             firstInstruction.InsertBefore(processor, loggingTraceEnterInstructions);

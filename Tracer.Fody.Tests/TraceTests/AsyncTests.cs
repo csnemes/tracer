@@ -47,10 +47,14 @@ namespace Tracer.Fody.Tests.TraceTests
 
             var result = this.RunTest(code, new PrivateOnlyTraceLoggingFilter(), "First.MyClass::Main");
             result.Count.Should().Be(8);
-            result.ElementAt(0).ShouldBeTraceEnterInto("First.MyClass::CallMe", "param", "Hello", "param2", "Hello2", "paraInt", "42");
+            result.ElementAt(0).ShouldBeTraceEnterInto("First.MyClass::CallMe", "param", "21", "param2", "Hello2", "paraInt", "42");
             result.ElementAt(1).ShouldBeTraceEnterInto("First.MyClass::Double", "p", "42");
             result.ElementAt(2).ShouldBeTraceLeaveFrom("First.MyClass::Double", "84");
             result.ElementAt(3).ShouldBeTraceLeaveFrom("First.MyClass::CallMe", "84");
+            result.ElementAt(4).ShouldBeTraceEnterInto("First.MyClass::CallMe", "param", "22", "param2", "Hello3", "paraInt", "42");
+            result.ElementAt(5).ShouldBeTraceEnterInto("First.MyClass::Double", "p", "42");
+            result.ElementAt(6).ShouldBeTraceLeaveFrom("First.MyClass::Double", "84");
+            result.ElementAt(7).ShouldBeTraceLeaveFrom("First.MyClass::CallMe", "84");
         }
 
         [Test]
@@ -350,11 +354,11 @@ namespace Tracer.Fody.Tests.TraceTests
             ";
 
             var result = this.RunTest(code, new PrivateOnlyTraceLoggingFilter(), "First.MyClass::Main");
-            result.Count.Should().Be(8);
-            result.ElementAt(4).ShouldBeTraceEnterInto("First.MyClass::CallMe", "param", "12", "param2", "Ahoy2", "paraInt", "43");
-            result.ElementAt(5).ShouldBeTraceEnterInto("First.MyClass::Double", "p", "43");
-            result.ElementAt(6).ShouldBeTraceLeaveFrom("First.MyClass::Double", "86");
-            result.ElementAt(7).ShouldBeTraceLeaveFrom("First.MyClass::CallMe", "86");
+            result.Count.Should().Be(4);
+            result.ElementAt(0).ShouldBeTraceEnterInto("First.MyClass::CallMe", "param", "12", "param2", "Ahoy2", "paraInt", "43");
+            result.ElementAt(1).ShouldBeTraceEnterInto("First.MyClass::Double", "p", "43");
+            result.ElementAt(2).ShouldBeTraceLeaveFrom("First.MyClass::Double", "86");
+            result.ElementAt(3).ShouldBeTraceLeaveFrom("First.MyClass::CallMe", "86");
         }
 
         [Test]
