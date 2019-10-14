@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27004.2005
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29403.142
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tracer.Fody", "Tracer.Fody\Tracer.Fody.csproj", "{AB86D24C-9FAD-4151-A285-E90D66B5E05B}"
 EndProject
@@ -32,6 +32,10 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestApplication.NLog.Netstd", "TestApplication.NLog.Netstd\TestApplication.NLog.Netstd.csproj", "{878B8998-4F43-4975-86AF-E42BA4633B38}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApplication.PatternFilter", "TestApplication.PatternFilter\TestApplication.PatternFilter.csproj", "{9C8707A4-09EA-40E8-BE63-C2EC92268E6C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApplication.NLog", "TestApplication.NLog\TestApplication.NLog.csproj", "{69B3C912-54BF-4CD3-A431-948839549F97}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tracer.NLog.Tests", "Tracer.NLog.Tests\Tracer.NLog.Tests.csproj", "{B173DCF3-4A3A-477D-9ECB-FC0DD3C867F4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -99,6 +103,14 @@ Global
 		{9C8707A4-09EA-40E8-BE63-C2EC92268E6C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9C8707A4-09EA-40E8-BE63-C2EC92268E6C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9C8707A4-09EA-40E8-BE63-C2EC92268E6C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{69B3C912-54BF-4CD3-A431-948839549F97}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{69B3C912-54BF-4CD3-A431-948839549F97}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{69B3C912-54BF-4CD3-A431-948839549F97}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{69B3C912-54BF-4CD3-A431-948839549F97}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B173DCF3-4A3A-477D-9ECB-FC0DD3C867F4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B173DCF3-4A3A-477D-9ECB-FC0DD3C867F4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B173DCF3-4A3A-477D-9ECB-FC0DD3C867F4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B173DCF3-4A3A-477D-9ECB-FC0DD3C867F4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
