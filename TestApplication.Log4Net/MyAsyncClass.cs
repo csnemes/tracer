@@ -31,6 +31,7 @@ namespace TestApplication
 
         public async Task<string> StringRetvalAsync(string input)
         {
+            input = input + "!";
             await NoRetvalAsync(input, 42);
             var x = await IntRetvalAsync(input);
             return $"{input}Ret";

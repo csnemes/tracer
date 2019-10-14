@@ -15,6 +15,8 @@ namespace Tracer.Fody.Weavers
     {
         private TypeDefinition _generatedType;
         private FieldReference _tickFieldRef;
+        private FieldReference _paramNamesFieldRef;
+        private FieldReference _paramValuesFieldRef;
         private MethodBody _moveNextBody;
         private MethodDefinition _moveNextDefinition;
 
@@ -30,11 +32,32 @@ namespace Tracer.Fody.Weavers
 
         protected override void WeaveTraceEnter(Dictionary<string, string> configParameters)
         {
-            var instructions = CreateTraceEnterCallInstructions(configParameters);
+            //var instructions = CreateTraceEnterCallInstructions(configParameters);
+
+            var instructions = new List<Instruction>();
+            VariableDefinition paramNamesDef = null;
+            VariableDefinition paramValuesDef = null;
+
+            var traceEnterNeedsParamArray = _body.Method.Parameters.Any(param => !param.IsOut);
+            var traceEnterParamArraySize = _body.Method.Parameters.Count(param => !param.IsOut);
+
+            if (traceEnterNeedsParamArray)
+            {
+                //Declare local variables for the arrays
+                paramNamesDef = ParamNamesVariable;
+                paramValuesDef = ParamValuesVariable;
+
+                instructions.AddRange(InitArray(paramNamesDef, traceEnterParamArraySize, _typeReferenceProvider.String));
+                instructions.AddRange(InitArray(paramValuesDef, traceEnterParamArraySize, _typeReferenceProvider.Object));
+
+                instructions.AddRange(BuildInstructionsToCopyParameterNamesAndValues(
+                    _body.Method.Parameters.Where(p => !p.IsOut), paramNamesDef, paramValuesDef, 0));
+            }
+
             _body.InsertAtTheBeginning(instructions);
 
-            ExtendGeneratedTypeWithTickcountField();
-            //pass initial tickcount to generated type
+            //pass initial tickcount and other parameters to generated type
+            ExtendGeneratedTypeWithLoggingFields();
 
             //search the variable for the state machine in the body
             var genVar = _body.Variables.FirstOrDefault(it => it.VariableType.GetElementType().FullName.Equals(_generatedType.FullName));
@@ -49,20 +72,74 @@ namespace Tracer.Fody.Weavers
             Instruction instr;
 
             //search the first ldloc or ldloca that uses this variable and insert our param passing block
+
             if (!_generatedType.IsValueType)
             {
                 instr = _body.Instructions.FirstOrDefault(it => it.OpCode == OpCodes.Ldloc && it.Operand == genVar);
-                instrs.Add(Instruction.Create(OpCodes.Ldloc, genVar));
             }
             else
             {
                 instr = _body.Instructions.FirstOrDefault(it => it.OpCode == OpCodes.Ldloca && it.Operand == genVar);
-                instrs.Add(Instruction.Create(OpCodes.Ldloca, genVar));
             }
 
+            instrs.Add(Instruction.Create( _generatedType.IsValueType ? OpCodes.Ldloca : OpCodes.Ldloc, genVar));
             instrs.Add(Instruction.Create(OpCodes.Ldloc, StartTickVariable));
             instrs.Add(Instruction.Create(OpCodes.Stfld, _tickFieldRef.FixFieldReferenceToUseSameGenericArgumentsAsVariable(genVar)));
+
+            instrs.Add(Instruction.Create(_generatedType.IsValueType ? OpCodes.Ldloca : OpCodes.Ldloc, genVar));
+            instrs.Add(traceEnterNeedsParamArray ? Instruction.Create(OpCodes.Ldloc, paramNamesDef) : Instruction.Create(OpCodes.Ldnull));
+            instrs.Add(Instruction.Create(OpCodes.Stfld, _paramNamesFieldRef.FixFieldReferenceToUseSameGenericArgumentsAsVariable(genVar)));
+
+            instrs.Add(Instruction.Create(_generatedType.IsValueType ? OpCodes.Ldloca : OpCodes.Ldloc, genVar));
+            instrs.Add(traceEnterNeedsParamArray ? Instruction.Create(OpCodes.Ldloc, paramValuesDef) : Instruction.Create(OpCodes.Ldnull));
+            instrs.Add(Instruction.Create(OpCodes.Stfld, _paramValuesFieldRef.FixFieldReferenceToUseSameGenericArgumentsAsVariable(genVar)));
+
             instr.InsertBefore(processor, instrs);
+
+            WeaveTraceEnterToStateMachine(configParameters);
+        }
+
+        private void WeaveTraceEnterToStateMachine(Dictionary<string, string> configParameters)
+        {
+            _moveNextDefinition =
+                _generatedType.Methods.Single(it => it.Name.Equals("MoveNext", StringComparison.OrdinalIgnoreCase));
+            _moveNextBody = _moveNextDefinition.Body;
+
+            _moveNextBody.SimplifyMacros();
+
+            var processor = _moveNextBody.GetILProcessor();
+            var firstInstruction = _moveNextBody.Instructions.First();
+
+            var stateField = _generatedType.Fields.First(fld =>
+                fld.Name.Contains("__state") && fld.FieldType == _typeReferenceProvider.Int);
+
+            var stateFieldRef = stateField.FixFieldReferenceIfDeclaringTypeIsGeneric();
+
+            var loggingTraceEnterInstructions = new List<Instruction>();
+
+            loggingTraceEnterInstructions.Add(Instruction.Create(OpCodes.Ldarg_0));
+            loggingTraceEnterInstructions.Add(Instruction.Create(OpCodes.Ldfld, stateFieldRef));
+            loggingTraceEnterInstructions.Add(Instruction.Create(OpCodes.Ldc_I4_M1));
+            loggingTraceEnterInstructions.Add(Instruction.Create(OpCodes.Bne_Un, firstInstruction));
+
+            if (configParameters?.Any() == true)
+            {
+                loggingTraceEnterInstructions.AddRange(LoadConfigParameters(ConfigParamDef, configParameters));
+            }
+
+            //call the logger with params
+            loggingTraceEnterInstructions.Add(Instruction.Create(OpCodes.Ldsfld, TypeWeaver.CreateLoggerStaticField(_typeReferenceProvider, _methodReferenceProvider, _generatedType)));
+            loggingTraceEnterInstructions.AddRange(LoadMethodNameOnStack());
+            loggingTraceEnterInstructions.Add(configParameters?.Any() == true ? Instruction.Create(OpCodes.Ldloc, ConfigParamDef) : Instruction.Create(OpCodes.Ldnull));
+
+            loggingTraceEnterInstructions.Add(Instruction.Create(OpCodes.Ldarg_0));
+            loggingTraceEnterInstructions.Add(Instruction.Create(OpCodes.Ldfld, _paramNamesFieldRef.FixFieldReferenceIfDeclaringTypeIsGeneric()));
+
+            loggingTraceEnterInstructions.Add(Instruction.Create(OpCodes.Ldarg_0));
+            loggingTraceEnterInstructions.Add(Instruction.Create(OpCodes.Ldfld, _paramValuesFieldRef.FixFieldReferenceIfDeclaringTypeIsGeneric()));
+            loggingTraceEnterInstructions.Add(Instruction.Create(OpCodes.Callvirt, _methodReferenceProvider.GetTraceEnterReference()));
+
+            firstInstruction.InsertBefore(processor, loggingTraceEnterInstructions);
         }
 
         protected override void WeaveTraceLeave(Dictionary<string, string> configParameters)
@@ -376,11 +453,20 @@ namespace Tracer.Fody.Weavers
             
         }
 
-        private void ExtendGeneratedTypeWithTickcountField()
+        private void ExtendGeneratedTypeWithLoggingFields()
         {
             var tickField = new FieldDefinition(StartTickVarName, FieldAttributes.Public, _typeReferenceProvider.Long);
             _generatedType.Fields.Add(tickField);
             _tickFieldRef = tickField;
+
+            var paramNamesField = new FieldDefinition("$entryParamNames", FieldAttributes.Public, _typeReferenceProvider.StringArray);
+            _generatedType.Fields.Add(paramNamesField);
+            _paramNamesFieldRef = paramNamesField;
+
+            var paramValuesField = new FieldDefinition("$entryParamValues", FieldAttributes.Public, _typeReferenceProvider.ObjectArray);
+            _generatedType.Fields.Add(paramValuesField);
+            _paramValuesFieldRef = paramValuesField;
+
         }
     }
 }

@@ -26,6 +26,8 @@ namespace Tracer.Fody.Weavers
                 new Lazy<MethodReference>(() => _moduleDefinition.ImportReference(typeof(Stopwatch).GetRuntimeMethod("GetTimestamp", new Type[0])));
             _getTupleCreateReference =
                 new Lazy<MethodReference>(InternalGetTupleCreateReference);
+            _getToStringReference =
+                new Lazy<MethodReference>(() => _moduleDefinition.ImportReference(typeof(object).GetRuntimeMethod("ToString", new Type[0])));
         }
 
         public MethodReference GetTraceEnterReference()
@@ -55,12 +57,15 @@ namespace Tracer.Fody.Weavers
         private readonly Lazy<MethodReference> _getTypeFromHandleReference;
         private readonly Lazy<MethodReference> _getTimestampReference;
         private readonly Lazy<MethodReference> _getTupleCreateReference;
+        private readonly Lazy<MethodReference> _getToStringReference;
 
         public MethodReference GetGetTypeFromHandleReference() => _getTypeFromHandleReference.Value;
 
         public MethodReference GetTimestampReference() => _getTimestampReference.Value;
 
         public MethodReference GetTupleCreateReference() => _getTupleCreateReference.Value;
+        
+        public MethodReference GetToStringReference() => _getToStringReference.Value;
 
         private MethodReference InternalGetTupleCreateReference()
         {
