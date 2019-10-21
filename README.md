@@ -7,12 +7,11 @@ See [Wiki](https://github.com/csnemes/tracer/wiki) for details.
 
 Existing adapters are (supporting netstandard 2.0):
 
-|Adapter     |NuGet package              |Version |
-|------------|---------------------------|-------:|
-|Log4Net     |Tracer.Log4Net.Fody        | 3.0.0  |
-|Serilog     |Tracer.Serilog.Fody        | 3.0.0  |
-|NLog        |Tracer.4NLog.Fody          | 3.0.0  |
-
+| Adapter      | NuGet package       | Version               |
+| -------------| ------------------- | :-------------------: |
+| **Log4Net**  | Tracer.Log4Net.Fody | [![NuGet](https://img.shields.io/nuget/v/Tracer.Log4Net.Fody.svg)](https://www.nuget.org/packages/Tracer.Log4Net.Fody/) |
+| **Serilog**  | Tracer.Serilog.Fody | [![NuGet](https://img.shields.io/nuget/v/Tracer.Serilog.Fody.svg)](https://www.nuget.org/packages/Tracer.Serilog.Fody/) |
+| **NLog**     | Tracer.4NLog.Fody   | [![NuGet](https://img.shields.io/nuget/v/Tracer.4NLog.Fody.svg)](https://www.nuget.org/packages/Tracer.4NLog.Fody/) |
 
 Should you have any question/problem send an email to csaba.nemes@outlook.com or add an issue/request.
 
@@ -151,6 +150,9 @@ Version History for Tracer.4NLog:
     TraceOn and NoTrace can be put on structs and constructors      
 * 3.0.0
     - See Tracer.Fody Version History
+* 3.2.0
+    Added support for net461.
+	Improved integration with NLog CallSite support
     
 Notes:
 ---
