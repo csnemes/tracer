@@ -223,6 +223,47 @@ namespace Tracer.Fody.Tests.TraceTests
         }
 
         [Test]
+        public void Test_AsyncWithStaticOverwritesWhenNoTracing()
+        {
+            string code = @"
+                using System;
+                using System.Diagnostics;
+                using System.Threading.Tasks;
+                using Tracer.Fody.Tests.MockLoggers;
+
+                namespace First
+                {
+                    public class MyClass
+                    {
+                        public static void Main()
+                        {
+                            var myClass = new MyClass();
+                            var x1 = myClass.CallMe(""Hello"", ""Hello2"", 42).Result;
+                        }
+
+                        protected async Task<int> CallMe(string param, string param2, int paraInt)
+                        {
+                            var result = await Double(paraInt);
+                            MockLog.OuterNoParam();
+                            return result;
+                        }
+
+                        protected async Task<int> Double(int p)
+                        {
+                            MockLog.Outer(""hello"");
+                            return await Task.Run(()=>  p * 2);
+                        }
+                    }
+                }
+            ";
+
+            var result = this.RunTest(code, new PrivateOnlyTraceLoggingFilter(), "First.MyClass::Main");
+            result.Count.Should().Be(2);
+            result.ElementAt(0).ShouldBeLogCall("First.MyClass::Double", "MockLogOuter", "hello");
+            result.ElementAt(1).ShouldBeLogCall("First.MyClass::CallMe", "MockLogOuterNoParam");
+        }
+
+        [Test]
         public void Test_AsyncStringReturnValue()
         {
             string code = @"

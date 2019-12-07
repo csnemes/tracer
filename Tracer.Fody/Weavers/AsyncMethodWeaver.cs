@@ -450,7 +450,18 @@ namespace Tracer.Fody.Weavers
 
         protected override void SearchForAndReplaceStaticLogCalls()
         {
-            
+            if (_moveNextBody != null) return; //already weaved with trace
+            _moveNextDefinition =
+                _generatedType.Methods.Single(it => it.Name.Equals("MoveNext", StringComparison.OrdinalIgnoreCase));
+            _moveNextBody = _moveNextDefinition.Body;
+
+            _moveNextBody.SimplifyMacros();
+
+            //search and replace static log calls in moveNext
+            SearchForAndReplaceStaticLogCallsInMoveNext();
+
+            _moveNextBody.InitLocals = true;
+            _moveNextBody.OptimizeMacros();
         }
 
         private void ExtendGeneratedTypeWithLoggingFields()
