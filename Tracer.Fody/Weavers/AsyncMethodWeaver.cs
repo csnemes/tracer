@@ -32,8 +32,6 @@ namespace Tracer.Fody.Weavers
 
         protected override void WeaveTraceEnter(Dictionary<string, string> configParameters)
         {
-            //var instructions = CreateTraceEnterCallInstructions(configParameters);
-
             var instructions = new List<Instruction>();
             VariableDefinition paramNamesDef = null;
             VariableDefinition paramValuesDef = null;
@@ -82,7 +80,14 @@ namespace Tracer.Fody.Weavers
                 instr = _body.Instructions.FirstOrDefault(it => it.OpCode == OpCodes.Ldloca && it.Operand == genVar);
             }
 
-            instrs.Add(Instruction.Create( _generatedType.IsValueType ? OpCodes.Ldloca : OpCodes.Ldloc, genVar));
+            //timer start
+            instrs.AddRange(new[]
+            {
+                Instruction.Create(OpCodes.Call, _methodReferenceProvider.GetTimestampReference()),
+                Instruction.Create(OpCodes.Stloc, StartTickVariable)
+            });
+
+            instrs.Add(Instruction.Create(_generatedType.IsValueType ? OpCodes.Ldloca : OpCodes.Ldloc, genVar));
             instrs.Add(Instruction.Create(OpCodes.Ldloc, StartTickVariable));
             instrs.Add(Instruction.Create(OpCodes.Stfld, _tickFieldRef.FixFieldReferenceToUseSameGenericArgumentsAsVariable(genVar)));
 
