@@ -49,6 +49,9 @@ namespace Tracer.Fody.Weavers
                     }
                 }
             }
+
+            HasNoTraceOnReturnValue = _methodDefinition.CustomAttributes.Any(attr =>
+                                          attr.AttributeType.FullName.Equals("TracerAttributes.NoReturnTrace", StringComparison.Ordinal));
         }
 
         private bool IsConstructorCall(Instruction ins)
@@ -86,6 +89,8 @@ namespace Tracer.Fody.Weavers
             get { return (ReturnType.MetadataType != MetadataType.Void); }
         }
 
+        protected bool HasNoTraceOnReturnValue;
+       
         /// <summary>
         /// Runs the method weaver which adds trace logs if required and rewrites static log calls
         /// </summary>
@@ -126,6 +131,10 @@ namespace Tracer.Fody.Weavers
             }
         }
 
+        protected static bool HasNoTraceAttribute(ParameterDefinition parameterDefinition) =>
+            parameterDefinition?.CustomAttributes.Any(attr =>
+                attr.AttributeType.FullName.Equals("TracerAttributes.NoTrace", StringComparison.Ordinal)) ?? false;
+
         protected List<Instruction> CreateTraceEnterCallInstructions(Dictionary<string, string> configParameters)
         {
             /* TRACE ENTRY: 
@@ -140,8 +149,9 @@ namespace Tracer.Fody.Weavers
             VariableDefinition paramNamesDef = null;
             VariableDefinition paramValuesDef = null;
 
-            var traceEnterNeedsParamArray = _body.Method.Parameters.Any(param => !param.IsOut);
-            var traceEnterParamArraySize = _body.Method.Parameters.Count(param => !param.IsOut);
+            var filteredParameters = _body.Method.Parameters.Where(p => !HasNoTraceAttribute(p) && !p.IsOut).ToList();
+            var traceEnterNeedsParamArray = filteredParameters.Any();
+            var traceEnterParamArraySize = filteredParameters.Count;
 
             if (traceEnterNeedsParamArray)
             {
@@ -153,7 +163,7 @@ namespace Tracer.Fody.Weavers
                 instructions.AddRange(InitArray(paramValuesDef, traceEnterParamArraySize, _typeReferenceProvider.Object));
 
                 instructions.AddRange(BuildInstructionsToCopyParameterNamesAndValues(
-                    _body.Method.Parameters.Where(p => !p.IsOut), paramNamesDef, paramValuesDef, 0));
+                    filteredParameters, paramNamesDef, paramValuesDef, 0));
             }
 
             if (configParameters?.Any() == true)

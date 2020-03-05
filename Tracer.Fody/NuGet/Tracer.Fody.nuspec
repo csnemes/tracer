@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Tracer.Fody</id>
-    <version>3.2.2</version>
+    <version>3.3.0</version>
     <authors>csnemes</authors>
     <owners>csnemes</owners>
     <projectUrl>https://github.com/csnemes/tracer</projectUrl>
@@ -74,6 +74,10 @@
      - added disabled attribute to turn off tracer weaving completely 
      - fixed error when tracing ref struct method parameters
      - removed Fody reference cap. Please beware that using Fody 5.x or higher generates warning
+* 3.3.0
+     - NoTrace can be applied to method parameters
+     - NoReturnTrace attribute to skip return value logging
+     - Various bug fixes
 	</releaseNotes>
   </metadata>
 </package>

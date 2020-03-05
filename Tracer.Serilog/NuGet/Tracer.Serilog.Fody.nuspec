@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Tracer.Serilog.Fody</id>
-    <version>3.2.2</version>
+    <version>3.3.0</version>
     <authors>csnemes,Duane McKinney</authors>
     <owners>csnemes</owners>
     <projectUrl>https://github.com/csnemes/tracer</projectUrl>
@@ -20,38 +20,42 @@
     </dependencies>
     <references />
     	<releaseNotes>
-       * 1.0.0
-       Initial release
-       * 1.0.1
-       Framework version set to 4.5
-       * 1.1.0
-       Added the ability to destructure types in trace enter and leave. Use DestructureAttribute to mark a type as target for destructuring.
-       Use the assembly level DestructureTypeAttribute to mark types outside of your codebase.
-       * 2.0.0
-       Moved to netstandard 2.0
-       * 2.1.0
-       Can use TracerFodySpecialKeyPrefix environment variable to define prefix (instead of $) in $return and $exception.
-       * 2.2.0
-       - Updated to Fody 3.x
-       - TraceOn and NoTrace can be put on structs and constructors
-       * 2.2.1
-       - Trace enter and leave now use Verbose level instead of Debug
-       * 3.0.0
-       - Fixed issue with missing local function extra parameter name
-       - Switched to new Fody package format, upgraded to Fody 3.3.x
-       - Added pattern based filter for specifying which methods to trace
-       - Fixed generic async rewrite issues causing PEVerify errors
-       * 3.1.0
-       - fixed pattern filter sorting bug
-       - added pattern filter order logging on weaving
-       - removed generated labda method logging 
-       - prettified local func method name in logging
-       - Updated to Fody 4.x		
-       * 3.2.0
-       - fixed call context problem with async methods
-       - added disabled attribute to turn off tracer weaving completely 
-       - fixed error when tracing ref struct method parameters
-       - removed Fody reference cap. Please beware that using Fody 5.x or higher generates warning		  
+        * 1.0.0
+        Initial release
+        * 1.0.1
+        Framework version set to 4.5
+        * 1.1.0
+        Added the ability to destructure types in trace enter and leave. Use DestructureAttribute to mark a type as target for destructuring.
+        Use the assembly level DestructureTypeAttribute to mark types outside of your codebase.
+        * 2.0.0
+        Moved to netstandard 2.0
+        * 2.1.0
+        Can use TracerFodySpecialKeyPrefix environment variable to define prefix (instead of $) in $return and $exception.
+        * 2.2.0
+        - Updated to Fody 3.x
+        - TraceOn and NoTrace can be put on structs and constructors
+        * 2.2.1
+        - Trace enter and leave now use Verbose level instead of Debug
+        * 3.0.0
+        - Fixed issue with missing local function extra parameter name
+        - Switched to new Fody package format, upgraded to Fody 3.3.x
+        - Added pattern based filter for specifying which methods to trace
+        - Fixed generic async rewrite issues causing PEVerify errors
+        * 3.1.0
+        - fixed pattern filter sorting bug
+        - added pattern filter order logging on weaving
+        - removed generated labda method logging
+        - prettified local func method name in logging
+        - Updated to Fody 4.x
+        * 3.2.0
+        - fixed call context problem with async methods
+        - added disabled attribute to turn off tracer weaving completely
+        - fixed error when tracing ref struct method parameters
+        - removed Fody reference cap. Please beware that using Fody 5.x or higher generates warning
+        * 3.3.0
+        - NoTrace can be applied to method parameters
+        - NoReturnTrace attribute to skip return value logging
+        - Various bug fixes
       </releaseNotes>
   </metadata>
 </package>

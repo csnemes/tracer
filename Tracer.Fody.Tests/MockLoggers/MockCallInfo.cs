@@ -138,6 +138,10 @@ namespace Tracer.Fody.Tests.MockLoggers
             mock.LoggerName.Should().Be(split[0]);
             mock.ContainingMethod.Should().Contain(split[1]);
             mock.CallType.Should().Be(MockCallInfo.MockCallType.TraceLeave);
+            if (!(mock.ParamValues == null || mock.ParamValues.Length == 0 || mock.ParamNames[0] != null))
+            {
+                throw new Exception("There's a return value");
+            }
         }
 
         public static void ShouldBeTraceLeaveFrom(this MockCallInfo mock, string methodFullName, string returnValue)

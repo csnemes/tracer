@@ -36,8 +36,9 @@ namespace Tracer.Fody.Weavers
             VariableDefinition paramNamesDef = null;
             VariableDefinition paramValuesDef = null;
 
-            var traceEnterNeedsParamArray = _body.Method.Parameters.Any(param => !param.IsOut);
-            var traceEnterParamArraySize = _body.Method.Parameters.Count(param => !param.IsOut);
+            var filteredParameters = _body.Method.Parameters.Where(p => !HasNoTraceAttribute(p) && !p.IsOut).ToList();
+            var traceEnterNeedsParamArray = filteredParameters.Any();
+            var traceEnterParamArraySize = filteredParameters.Count;
 
             if (traceEnterNeedsParamArray)
             {
@@ -49,7 +50,7 @@ namespace Tracer.Fody.Weavers
                 instructions.AddRange(InitArray(paramValuesDef, traceEnterParamArraySize, _typeReferenceProvider.Object));
 
                 instructions.AddRange(BuildInstructionsToCopyParameterNamesAndValues(
-                    _body.Method.Parameters.Where(p => !p.IsOut), paramNamesDef, paramValuesDef, 0));
+                    filteredParameters, paramNamesDef, paramValuesDef, 0));
             }
 
             _body.InsertAtTheBeginning(instructions);
@@ -316,7 +317,7 @@ namespace Tracer.Fody.Weavers
             VariableDefinition paramNamesDef = null;
             VariableDefinition paramValuesDef = null;
 
-            bool hasReturnValue = HasReturnValue;
+            bool hasReturnValue = HasReturnValue && !HasNoTraceOnReturnValue;
 
             if (hasReturnValue)
             {

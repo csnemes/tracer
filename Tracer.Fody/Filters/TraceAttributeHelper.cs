@@ -110,14 +110,20 @@ namespace Tracer.Fody.Filters
             return null;
         }
 
-        private TraceTargetVisibility GetTargetVisibilityFromAttribute(CustomAttribute attribute)
+        internal static TraceTargetVisibility GetTargetVisibilityFromAttribute(CustomAttribute attribute)
         {
             var intVal = 0; //defaults to public
             if (attribute.HasProperties)
             {
-                intVal = (int)attribute.Properties[0].Argument.Value;
+                var targetProp = attribute.Properties
+                    .Where(it => it.Name.Equals("Target", StringComparison.OrdinalIgnoreCase)).ToList();
+                if (targetProp.Any())
+                {
+                    return (TraceTargetVisibility)(int)targetProp[0].Argument.Value;
+                }
             }
-            else if (attribute.HasConstructorArguments)
+
+            if (attribute.HasConstructorArguments)
             {
                 intVal = (int)attribute.ConstructorArguments[0].Value;
             }

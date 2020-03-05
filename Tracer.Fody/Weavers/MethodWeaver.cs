@@ -139,9 +139,13 @@ namespace Tracer.Fody.Weavers
 
             VariableDefinition paramNamesDef = null;
             VariableDefinition paramValuesDef = null;
-            
-            var traceLeaveNeedsParamArray = (HasReturnValue || _body.Method.Parameters.Any(param => param.IsOut || param.ParameterType.IsByReference));
-            var traceLeaveParamArraySize = _body.Method.Parameters.Count(param => param.IsOut || param.ParameterType.IsByReference) + (HasReturnValue ? 1 : 0); 
+
+            var filteredParameters =
+                _body.Method.Parameters.Where(param => param.IsOut || param.ParameterType.IsByReference)
+                    .Where(p => !HasNoTraceAttribute(p)).ToList();
+
+            var traceLeaveNeedsParamArray = ((HasReturnValue && !HasNoTraceOnReturnValue) || filteredParameters.Any());
+            var traceLeaveParamArraySize = filteredParameters.Count + ((HasReturnValue && !HasNoTraceOnReturnValue) ? 1 : 0); 
 
             if (traceLeaveNeedsParamArray)
             {
@@ -153,15 +157,14 @@ namespace Tracer.Fody.Weavers
                 instructions.AddRange(InitArray(paramNamesDef, traceLeaveParamArraySize, _typeReferenceProvider.String));
                 instructions.AddRange(InitArray(paramValuesDef, traceLeaveParamArraySize, _typeReferenceProvider.Object));
 
-                if (HasReturnValue)
+                if (HasReturnValue && !HasNoTraceOnReturnValue)
                 {
                     instructions.AddRange(StoreValueReadByInstructionsInArray(paramNamesDef, 0, Instruction.Create(OpCodes.Ldnull)));
                     instructions.AddRange(StoreVariableInObjectArray(paramValuesDef, 0, returnValueDef));
                 }
 
                 instructions.AddRange(
-                    BuildInstructionsToCopyParameterNamesAndValues(_body.Method.Parameters.Where(p => p.IsOut || p.ParameterType.IsByReference),
-                        paramNamesDef, paramValuesDef, HasReturnValue ? 1 : 0));
+                    BuildInstructionsToCopyParameterNamesAndValues(filteredParameters, paramNamesDef, paramValuesDef, (HasReturnValue && !HasNoTraceOnReturnValue) ? 1 : 0));
             }
 
             if (configParameters?.Any() == true)

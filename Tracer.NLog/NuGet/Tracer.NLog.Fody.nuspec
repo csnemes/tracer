@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Tracer.4NLog.Fody</id>
-    <version>3.2.2</version>
+    <version>3.3.0</version>
     <authors>csnemes</authors>
     <owners>csnemes</owners>
     <projectUrl>https://github.com/csnemes/tracer</projectUrl>
@@ -20,29 +20,33 @@
     </dependencies>
     <references />
     	<releaseNotes>
-      * 2.0.0
-      - Moved to netstandard 2.0
-      * 2.1.0
-      - Can use TracerFodySpecialKeyPrefix environment variable to define prefix (instead of $) in $return and $exception.
-      * 2.2.0
-      - Updated to Fody 3.x
-      - TraceOn and NoTrace can be put on structs and constructors
-      * 3.0.0
-      - Fixed issue with missing local function extra parameter name
-      - Switched to new Fody package format, upgraded to Fody 3.3.x
-      - Added pattern based filter for specifying which methods to trace
-      - Fixed generic async rewrite issues causing PEVerify errors
-      * 3.1.0
-      - fixed pattern filter sorting bug
-      - added pattern filter order logging on weaving
-      - removed generated labda method logging 
-      - prettified local func method name in logging
-      - Updated to Fody 4.x	
-      * 3.2.0
-      - fixed call context problem with async methods
-      - added disabled attribute to turn off tracer weaving completely 
-      - fixed error when tracing ref struct method parameters
-      - removed Fody reference cap. Please beware that using Fody 5.x or higher generates warning				
+        * 2.0.0
+        - Moved to netstandard 2.0
+        * 2.1.0
+        - Can use TracerFodySpecialKeyPrefix environment variable to define prefix (instead of $) in $return and $exception.
+        * 2.2.0
+        - Updated to Fody 3.x
+        - TraceOn and NoTrace can be put on structs and constructors
+        * 3.0.0
+        - Fixed issue with missing local function extra parameter name
+        - Switched to new Fody package format, upgraded to Fody 3.3.x
+        - Added pattern based filter for specifying which methods to trace
+        - Fixed generic async rewrite issues causing PEVerify errors
+        * 3.1.0
+        - fixed pattern filter sorting bug
+        - added pattern filter order logging on weaving
+        - removed generated labda method logging
+        - prettified local func method name in logging
+        - Updated to Fody 4.x
+        * 3.2.0
+        - fixed call context problem with async methods
+        - added disabled attribute to turn off tracer weaving completely
+        - fixed error when tracing ref struct method parameters
+        - removed Fody reference cap. Please beware that using Fody 5.x or higher generates warning
+        * 3.3.0
+        - NoTrace can be applied to method parameters
+        - NoReturnTrace attribute to skip return value logging
+        - Various bug fixes
       </releaseNotes>
   </metadata>
 </package>

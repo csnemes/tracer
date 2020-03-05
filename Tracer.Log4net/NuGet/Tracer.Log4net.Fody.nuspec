@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Tracer.Log4Net.Fody</id>
-    <version>3.2.2</version>
+    <version>3.3.0</version>
     <authors>csnemes</authors>
     <owners>csnemes</owners>
     <projectUrl>https://github.com/csnemes/tracer</projectUrl>
@@ -58,14 +58,18 @@
         * 3.1.0
         - fixed pattern filter sorting bug
         - added pattern filter order logging on weaving
-        - removed generated labda method logging 
+        - removed generated labda method logging
         - prettified local func method name in logging
-        - Updated to Fody 4.x			
+        - Updated to Fody 4.x
         * 3.2.0
         - fixed call context problem with async methods
-        - added disabled attribute to turn off tracer weaving completely 
+        - added disabled attribute to turn off tracer weaving completely
         - fixed error when tracing ref struct method parameters
         - removed Fody reference cap. Please beware that using Fody 5.x or higher generates warning
+        * 3.3.0
+        - NoTrace can be applied to method parameters
+        - NoReturnTrace attribute to skip return value logging
+        - Various bug fixes
       </releaseNotes>
   </metadata>
 </package>
