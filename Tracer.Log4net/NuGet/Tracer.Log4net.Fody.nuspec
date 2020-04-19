@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Tracer.Log4Net.Fody</id>
-    <version>3.3.0</version>
+    <version>3.3.1</version>
     <authors>csnemes</authors>
     <owners>csnemes</owners>
     <projectUrl>https://github.com/csnemes/tracer</projectUrl>
