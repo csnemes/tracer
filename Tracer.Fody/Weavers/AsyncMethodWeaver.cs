@@ -130,13 +130,13 @@ namespace Tracer.Fody.Weavers
 
             if (configParameters?.Any() == true)
             {
-                loggingTraceEnterInstructions.AddRange(LoadConfigParameters(ConfigParamDef, configParameters));
+                loggingTraceEnterInstructions.AddRange(LoadConfigParameters(GetMoveNextConfigParameterVariable(), configParameters));
             }
 
             //call the logger with params
             loggingTraceEnterInstructions.Add(Instruction.Create(OpCodes.Ldsfld, TypeWeaver.CreateLoggerStaticField(_typeReferenceProvider, _methodReferenceProvider, _generatedType)));
             loggingTraceEnterInstructions.AddRange(LoadMethodNameOnStack());
-            loggingTraceEnterInstructions.Add(configParameters?.Any() == true ? Instruction.Create(OpCodes.Ldloc, ConfigParamDef) : Instruction.Create(OpCodes.Ldnull));
+            loggingTraceEnterInstructions.Add(configParameters?.Any() == true ? Instruction.Create(OpCodes.Ldloc, GetMoveNextConfigParameterVariable()) : Instruction.Create(OpCodes.Ldnull));
 
             loggingTraceEnterInstructions.Add(Instruction.Create(OpCodes.Ldarg_0));
             loggingTraceEnterInstructions.Add(Instruction.Create(OpCodes.Ldfld, _paramNamesFieldRef.FixFieldReferenceIfDeclaringTypeIsGeneric()));
@@ -146,6 +146,17 @@ namespace Tracer.Fody.Weavers
             loggingTraceEnterInstructions.Add(Instruction.Create(OpCodes.Callvirt, _methodReferenceProvider.GetTraceEnterReference()));
 
             firstInstruction.InsertBefore(processor, loggingTraceEnterInstructions);
+        }
+
+        private VariableDefinition _moveNextConfigParameter;
+
+        private VariableDefinition GetMoveNextConfigParameterVariable()
+        {
+            if (_moveNextConfigParameter == null)
+            {
+                _moveNextConfigParameter = _moveNextBody.DeclareVariable("$configParameters", _typeReferenceProvider.StringTupleArray);
+            }
+            return _moveNextConfigParameter;
         }
 
         protected override void WeaveTraceLeave(Dictionary<string, string> configParameters)
@@ -163,8 +174,6 @@ namespace Tracer.Fody.Weavers
             VariableDefinition returnValueDef = null;
             var processor = _moveNextBody.GetILProcessor();
 
-            VariableDefinition configParamDef = _moveNextBody.DeclareVariable("$configParameters", _typeReferenceProvider.StringTupleArray);
-
             if (setResultInstr != null) //rarely it might happen that there is not SetResult
             {
                 //if we have return value store it in a local var
@@ -176,7 +185,7 @@ namespace Tracer.Fody.Weavers
 
 
                 //do the exit logging
-                setResultInstr.InsertBefore(processor, CreateTraceReturnLoggingInstructions(returnValueDef, configParamDef, configParameters));
+                setResultInstr.InsertBefore(processor, CreateTraceReturnLoggingInstructions(returnValueDef, GetMoveNextConfigParameterVariable(), configParameters));
             }
 
             if (setExceptionInstr != null)
@@ -192,7 +201,7 @@ namespace Tracer.Fody.Weavers
                 };
 
                 setExceptionInstr.InsertBefore(processor, exceptionDupInstructions);
-                setExceptionInstr.InsertBefore(processor, CreateTraceReturnWithExceptionLoggingInstructions(exceptionValueDef, configParamDef, configParameters));
+                setExceptionInstr.InsertBefore(processor, CreateTraceReturnWithExceptionLoggingInstructions(exceptionValueDef, GetMoveNextConfigParameterVariable(), configParameters));
             }
 
             //search and replace static log calls in moveNext
