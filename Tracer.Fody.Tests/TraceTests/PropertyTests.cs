@@ -75,5 +75,48 @@ namespace Tracer.Fody.Tests.TraceTests
             result.ElementAt(1).ShouldBeTraceLeaveFrom("First.MyClass::set_IntValue");
         }
 
+        [Test]
+        public void Test_AutoProperty()
+        {
+            string code = @"
+                using System;
+                using System.Diagnostics;
+
+                namespace First
+                {
+                    public class MyClass
+                    {
+                        public static void Main()
+                        {
+                            var mc = new MyClass(); 
+                            mc.FirstName = ""john"";
+                            var i = mc.FirstName;
+                        }
+
+                        private string FirstName { get; set; }
+
+                        private string LastName { get; set; }
+
+                        private string FullName
+                        {
+                            get
+                            {
+                                return $""{ this.LastName} { this.FirstName}"";
+                            }
+                        }
+                    }
+                }
+            ";
+
+            var result = this.RunTest(code, new PrivateOnlyTraceLoggingFilter(), "First.MyClass::Main");
+            result.Count.Should().Be(4);
+            result.ElementAt(0).ShouldBeTraceEnterInto("First.MyClass::set_FirstName");
+            result.ElementAt(1).ShouldBeTraceLeaveFrom("First.MyClass::set_FirstName");
+            result.ElementAt(2).ShouldBeTraceEnterInto("First.MyClass::get_FirstName");
+            result.ElementAt(3).ShouldBeTraceLeaveFrom("First.MyClass::get_FirstName", "john");
+        }
+
+
+
     }
 }

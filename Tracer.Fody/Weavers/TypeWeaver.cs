@@ -74,8 +74,8 @@ namespace Tracer.Fody.Weavers
                                               .Any(attr => attr.AttributeType.FullName.Equals(typeof(CompilerGeneratedAttribute).FullName,
                                                   StringComparison.Ordinal));
 
-            //local functions should be instrumented
-            if (hasAttribute && methodDefinition.Name.Contains("|")) return false;
+            //local functions and generated property accessors should be instrumented
+            if (hasAttribute && (methodDefinition.Name.Contains("|") || methodDefinition.IsPropertyAccessor())) return false;
 
             return hasAttribute;
         }
