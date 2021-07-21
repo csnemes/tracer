@@ -4,7 +4,6 @@ using Tracer.Fody;
 using Tracer.Fody.Filters;
 using Tracer.Fody.Helpers;
 using Tracer.Fody.Weavers;
-using System;
 
 
 namespace Tracer.Log4Net.Tests
@@ -22,11 +21,7 @@ namespace Tracer.Log4Net.Tests
                 .WithLogger(typeof(Tracer.NLog.Adapters.LoggerAdapter).FullName)
                 .WithStaticLogger(typeof(Tracer.NLog.Log).FullName);
 
-            string src = @"D:\Work\TestNlogAutoLogger3\TestApplication.NLog\bin\Debug\TestApplication.NLog.exe";
-            string dst = @"D:\Work\TestNlogAutoLogger3\TestApplication.NLog\bin\Debug\TestApplication.NLog224.exe";
-            System.IO.File.Copy(src, dst, true);
-            System.IO.Directory.SetCurrentDirectory(System.IO.Path.GetDirectoryName(dst));
-            AssemblyWeaver.Execute(dst, config);
+            AssemblyWeaver.Execute("..\\..\\..\\TestApplication.NLog\\bin\\debug\\TestApplication.NLog.exe", config);
         }
 
         private class PublicMethodsFilter : ITraceLoggingFilter
