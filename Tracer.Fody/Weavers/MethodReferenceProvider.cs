@@ -41,6 +41,13 @@ namespace Tracer.Fody.Weavers
             return logTraceEnterMethod;
         }
 
+        public MethodReference GetIsTraceEnabled()
+        {
+            var logTraceEnterMethod = new MethodReference("get_LogIsTraceEnabled", _moduleDefinition.TypeSystem.Boolean, _typeReferenceProvider.LogAdapterReference);
+            logTraceEnterMethod.HasThis = true; //instance method
+            return logTraceEnterMethod;
+        }
+
         public MethodReference GetTraceLeaveReference()
         {
             var logTraceLeaveMethod = new MethodReference("TraceLeave", _moduleDefinition.TypeSystem.Void, _typeReferenceProvider.LogAdapterReference);

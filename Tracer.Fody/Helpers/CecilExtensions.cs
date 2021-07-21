@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
-using Mono.Cecil.Rocks;
 using Mono.Collections.Generic;
 
 namespace Tracer.Fody.Helpers
@@ -15,6 +11,76 @@ namespace Tracer.Fody.Helpers
     /// </summary>
     public static class CecilExtensions
     {
+        #region Functions for cloning body instructions
+
+        /// <summary>
+        /// Clones instruction & fixes branching.
+        /// </summary>
+        /// <returns> Cloned instruction. </returns>
+        public static IEnumerable<Instruction> CloneInstructions(this IEnumerable<Instruction> instructions)
+        {
+            List<Instruction> clonedInstructions = new List<Instruction>();
+            int instructionOffset = 0;
+
+            foreach (Instruction instr in instructions)
+            {
+                instr.Offset = instructionOffset;
+                Instruction clonedInstruction = instr.CloneInstruction();
+                clonedInstructions.Add(clonedInstruction);
+                ++instructionOffset;
+            };
+
+            var mapInstructions = clonedInstructions.GetReferenceMap();
+            foreach (Instruction instruction in clonedInstructions)
+            {
+                instruction.FixBranching(mapInstructions);
+            }
+            return clonedInstructions;
+        }
+
+        /// <summary>
+        /// Clones instruction as new one.
+        /// </summary>
+        /// <returns> Cloned instruction. </returns>
+        private static Instruction CloneInstruction(this Instruction instr)
+        {
+            var newInstr = Instruction.Create(OpCodes.Nop);
+            newInstr.OpCode = instr.OpCode;
+            newInstr.Offset = instr.Offset;
+            newInstr.Operand = instr.Operand;
+            return newInstr;
+        }
+
+        /// <summary>
+        /// Returns reference map created by Offset. Instructions must have options
+        /// </summary>
+        private static IDictionary<int, Instruction> GetReferenceMap(this IEnumerable<Instruction> instructionsWithOffsets)
+        {
+            return instructionsWithOffsets.ToDictionary(x => x.Offset, y => y);
+        }
+
+        /// <summary>
+        /// After cloning if branches shows jump to original instuction instead new one. Calling this function on inctructions will fix it.
+        /// </summary>
+        public static void FixBranching(this Instruction instr, IDictionary<int,Instruction> referenceMap)
+        {
+            if (instr.Operand is Instruction)
+            {
+                Instruction operandInstruction = (Instruction)instr.Operand;
+                instr.Operand = referenceMap[operandInstruction.Offset];
+            }
+            else if (instr.Operand is Instruction[])
+            {
+                Instruction[] operandInstructions = (Instruction[])instr.Operand;
+                foreach(Instruction  operandInstruction in operandInstructions)
+                {
+                    operandInstruction.FixBranching(referenceMap);
+                }
+            }
+        }
+
+        #endregion
+
         /// <summary>
         /// Inserts the given instructions before the current (this) instruction using the given processor
         /// </summary>

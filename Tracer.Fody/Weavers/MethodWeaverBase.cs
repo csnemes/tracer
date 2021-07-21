@@ -104,6 +104,7 @@ namespace Tracer.Fody.Weavers
             {
                 WeaveTraceEnter(parameters);
                 WeaveTraceLeave(parameters);
+                WeaveIf();
             }
 
             SearchForAndReplaceStaticLogCalls();
@@ -115,6 +116,8 @@ namespace Tracer.Fody.Weavers
         protected abstract void WeaveTraceEnter(Dictionary<string, string> configParameters);
 
         protected abstract void WeaveTraceLeave(Dictionary<string, string> configParameters);
+
+        protected virtual void WeaveIf() { }
 
         protected abstract void SearchForAndReplaceStaticLogCalls();
 
