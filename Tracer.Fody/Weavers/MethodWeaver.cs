@@ -1,11 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
-using Mono.Cecil.Rocks;
 using Tracer.Fody.Helpers;
 
 namespace Tracer.Fody.Weavers
@@ -15,11 +12,32 @@ namespace Tracer.Fody.Weavers
     /// </summary>
     internal class MethodWeaver : MethodWeaverBase
     {
+        IEnumerable<Instruction> originalInstructions;
 
         internal MethodWeaver(TypeReferenceProvider typeReferenceProvider, MethodReferenceProvider methodReferenceProvider,
             ILoggerProvider loggerProvider, MethodDefinition methodDefinition) : base(typeReferenceProvider, methodReferenceProvider,
                 loggerProvider, methodDefinition)
-        {}
+        {
+            originalInstructions = _body.Instructions.CloneInstructions();
+        }
+
+        override protected void WeaveIf()
+        {
+            var instructions = new List<Instruction>();
+            var metRef = _methodReferenceProvider.GetIsTraceEnabled();
+
+            instructions.AddRange(new[] {
+                Instruction.Create(OpCodes.Ldsfld, _loggerProvider.StaticLogger),
+                Instruction.Create(OpCodes.Callvirt, metRef),
+            });
+
+            var ifLabel = Instruction.Create(OpCodes.Nop); // instruction to jump if logIsTraceDisabled
+            var logIsTraceDisabled = Instruction.Create(OpCodes.Brtrue, ifLabel);
+            instructions.Add(logIsTraceDisabled);
+            instructions.AddRange(originalInstructions);
+            instructions.Add(ifLabel);
+            _body.InsertAtTheBeginning(instructions);
+        }
 
         protected override void WeaveTraceEnter(Dictionary<string, string> configParameters)
         {
