@@ -12,13 +12,14 @@ namespace Tracer.Fody.Weavers
     /// </summary>
     internal class MethodWeaver : MethodWeaverBase
     {
+        IEnumerable<Instruction> originalInstructions;
 
         internal MethodWeaver(TypeReferenceProvider typeReferenceProvider, MethodReferenceProvider methodReferenceProvider,
             ILoggerProvider loggerProvider, MethodDefinition methodDefinition) : base(typeReferenceProvider, methodReferenceProvider,
                 loggerProvider, methodDefinition)
-        {}
-
-        IEnumerable<Instruction> originalInstructions;
+        {
+            originalInstructions = _body.Instructions.CloneInstructions();
+        }
 
         override protected void WeaveIf()
         {
@@ -40,7 +41,6 @@ namespace Tracer.Fody.Weavers
 
         protected override void WeaveTraceEnter(Dictionary<string, string> configParameters)
         {
-            originalInstructions = _body.Instructions.CloneInstructions();
             var instructions = CreateTraceEnterCallInstructions(configParameters);
             _body.InsertAtTheBeginning(instructions);
         }
