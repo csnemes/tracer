@@ -47,6 +47,10 @@ namespace Tracer.Serilog.Adapters
             var configPrefix = Environment.GetEnvironmentVariable("TracerFodySpecialKeyPrefix");
             _specialPrefix = string.IsNullOrWhiteSpace(configPrefix) ? "$" : configPrefix;
         }
+        public bool LogIsTraceEnabled
+        {
+            get { return _logger.IsEnabled(LogEventLevel.Verbose); }
+        }
 
         public void LogWrite(string methodInfo, LogEventLevel level, string messageTemplate)
         {
@@ -212,7 +216,7 @@ namespace Tracer.Serilog.Adapters
             {
                 DoLog(methodInfo, LogEventLevel.Warning, exception, messageTemplate, parameters);
             }
-        }
+        }     
 
         public void LogError(string methodInfo, string messageTemplate)
         {
