@@ -398,6 +398,11 @@ namespace Tracer.Log4Net.Adapters
             }
         }
 
+        public bool LogIsTraceEnabled
+        {
+            get { return _logger.IsEnabledFor(Level.Trace); }
+        }
+
         public bool LogIsDebugEnabled
         {
             get { return _logger.IsEnabledFor(Level.Debug); }

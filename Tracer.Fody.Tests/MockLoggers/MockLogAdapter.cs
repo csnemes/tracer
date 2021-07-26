@@ -16,6 +16,11 @@ namespace Tracer.Fody.Tests.MockLoggers
             _type = type;
         }
 
+        public bool LogIsTraceEnabled
+        {
+            get { return true; }
+        }
+
         public void TraceEnter(string methodInfo, Tuple<string, string>[] configParameters, string[] paramNames, object[] paramValues)
         {
             if (paramNames != null)
