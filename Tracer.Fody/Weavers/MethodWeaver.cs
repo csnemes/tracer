@@ -12,13 +12,15 @@ namespace Tracer.Fody.Weavers
     /// </summary>
     internal class MethodWeaver : MethodWeaverBase
     {
-        IEnumerable<Instruction> originalInstructions;
+        IEnumerable<Instruction> copiedInstructions;
+        ICollection<ExceptionHandler> copiedExceptionHandlers;
 
         internal MethodWeaver(TypeReferenceProvider typeReferenceProvider, MethodReferenceProvider methodReferenceProvider,
             ILoggerProvider loggerProvider, MethodDefinition methodDefinition) : base(typeReferenceProvider, methodReferenceProvider,
                 loggerProvider, methodDefinition)
         {
-            originalInstructions = _body.Instructions.CloneInstructions();
+            copiedInstructions = _body.Instructions.CloneInstructions();
+            copiedExceptionHandlers = _body.ExceptionHandlers.CopyExceptions(copiedInstructions);
         }
 
         override protected void WeaveIf()
@@ -34,9 +36,14 @@ namespace Tracer.Fody.Weavers
             var ifLabel = Instruction.Create(OpCodes.Nop); // instruction to jump if logIsTraceDisabled
             var logIsTraceDisabled = Instruction.Create(OpCodes.Brtrue, ifLabel);
             instructions.Add(logIsTraceDisabled);
-            instructions.AddRange(originalInstructions);
+            instructions.AddRange(copiedInstructions);
             instructions.Add(ifLabel);
             _body.InsertAtTheBeginning(instructions);
+
+            foreach (ExceptionHandler exHandler in copiedExceptionHandlers)
+            {
+                _body.ExceptionHandlers.Add(exHandler);
+            }
         }
 
         protected override void WeaveTraceEnter(Dictionary<string, string> configParameters)

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
@@ -12,6 +13,59 @@ namespace Tracer.Fody.Helpers
     public static class CecilExtensions
     {
         #region Functions for cloning body instructions
+
+        public static ICollection<ExceptionHandler> CopyExceptions(this IEnumerable<ExceptionHandler> exceptionHandlersToCopy, IEnumerable<Instruction> newInstructions)
+        {
+            ICollection<ExceptionHandler> newHandlers = new Mono.Collections.Generic.Collection<ExceptionHandler>();
+
+            foreach (ExceptionHandler origHandler in exceptionHandlersToCopy)
+            {
+                ExceptionHandler clonedHandler = new ExceptionHandler(origHandler.HandlerType);
+                if (origHandler.CatchType != null)
+                {
+                    clonedHandler.CatchType = origHandler.CatchType;
+                }
+                if (origHandler.HandlerStart != null)
+                {
+                    clonedHandler.HandlerStart = newInstructions.FindInstructionByOffset(origHandler.HandlerStart.Offset);
+                }
+
+                if (origHandler.HandlerEnd != null)
+                {
+                    clonedHandler.HandlerEnd = newInstructions.FindInstructionByOffset(origHandler.HandlerEnd.Offset);
+                }
+
+                if (origHandler.FilterStart != null)
+                {
+                    clonedHandler.FilterStart = newInstructions.FindInstructionByOffset(origHandler.FilterStart.Offset);
+                }
+
+                if (origHandler.TryEnd != null)
+                {
+                    clonedHandler.TryEnd = newInstructions.FindInstructionByOffset(origHandler.TryEnd.Offset);
+                }
+
+                if (origHandler.TryStart != null)
+                {
+                    clonedHandler.TryStart = newInstructions.FindInstructionByOffset(origHandler.TryStart.Offset);
+                }
+
+                newHandlers.Add(clonedHandler);
+            }
+            return newHandlers;
+        }
+
+        private static Instruction FindInstructionByOffset(this IEnumerable<Instruction> instructions, int offsetToFind)
+        {
+            foreach (Instruction instruction in instructions)
+            {
+                if (instruction.Offset == offsetToFind)
+                {
+                    return instruction;
+                }
+            }
+            throw new ArgumentException("Given offset instruction was not found", nameof(offsetToFind));
+        }
 
         /// <summary>
         /// Clones instruction & fixes branching.
