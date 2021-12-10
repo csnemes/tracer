@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\lib\FodyHelpers.6.6.0\build\FodyHelpers.props" Condition="Exists('..\lib\FodyHelpers.6.6.0\build\FodyHelpers.props')" />
   <Import Project="..\lib\NUnit.3.12.0\build\NUnit.props" Condition="Exists('..\lib\NUnit.3.12.0\build\NUnit.props')" />
-  <Import Project="..\lib\FodyHelpers.4.2.1\build\FodyHelpers.props" Condition="Exists('..\lib\FodyHelpers.4.2.1\build\FodyHelpers.props')" />
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -40,20 +40,17 @@
     <Reference Include="FluentAssertions, Version=5.6.0.0, Culture=neutral, PublicKeyToken=33f2691a05b67b6a, processorArchitecture=MSIL">
       <HintPath>..\lib\FluentAssertions.5.6.0\lib\net45\FluentAssertions.dll</HintPath>
     </Reference>
-    <Reference Include="FodyHelpers, Version=4.2.1.0, Culture=neutral, PublicKeyToken=1ca091877d12ca03, processorArchitecture=MSIL">
-      <HintPath>..\lib\FodyHelpers.4.2.1\lib\net46\FodyHelpers.dll</HintPath>
+    <Reference Include="FodyHelpers, Version=6.6.0.0, Culture=neutral, PublicKeyToken=1ca091877d12ca03, processorArchitecture=MSIL">
+      <HintPath>..\lib\FodyHelpers.6.6.0\lib\netstandard2.0\FodyHelpers.dll</HintPath>
     </Reference>
-    <Reference Include="Mono.Cecil, Version=0.11.0.0, Culture=neutral, PublicKeyToken=1ca091877d12ca03, processorArchitecture=MSIL">
-      <HintPath>..\lib\FodyHelpers.4.2.1\lib\net46\Mono.Cecil.dll</HintPath>
+    <Reference Include="Mono.Cecil, Version=0.11.4.0, Culture=neutral, PublicKeyToken=1ca091877d12ca03, processorArchitecture=MSIL">
+      <HintPath>..\lib\FodyHelpers.6.6.0\lib\netstandard2.0\Mono.Cecil.dll</HintPath>
     </Reference>
-    <Reference Include="Mono.Cecil.Mdb, Version=0.11.0.0, Culture=neutral, PublicKeyToken=1ca091877d12ca03, processorArchitecture=MSIL">
-      <HintPath>..\lib\FodyHelpers.4.2.1\lib\net46\Mono.Cecil.Mdb.dll</HintPath>
+    <Reference Include="Mono.Cecil.Pdb, Version=0.11.4.0, Culture=neutral, PublicKeyToken=1ca091877d12ca03, processorArchitecture=MSIL">
+      <HintPath>..\lib\FodyHelpers.6.6.0\lib\netstandard2.0\Mono.Cecil.Pdb.dll</HintPath>
     </Reference>
-    <Reference Include="Mono.Cecil.Pdb, Version=0.11.0.0, Culture=neutral, PublicKeyToken=1ca091877d12ca03, processorArchitecture=MSIL">
-      <HintPath>..\lib\FodyHelpers.4.2.1\lib\net46\Mono.Cecil.Pdb.dll</HintPath>
-    </Reference>
-    <Reference Include="Mono.Cecil.Rocks, Version=0.11.0.0, Culture=neutral, PublicKeyToken=1ca091877d12ca03, processorArchitecture=MSIL">
-      <HintPath>..\lib\FodyHelpers.4.2.1\lib\net46\Mono.Cecil.Rocks.dll</HintPath>
+    <Reference Include="Mono.Cecil.Rocks, Version=0.11.4.0, Culture=neutral, PublicKeyToken=1ca091877d12ca03, processorArchitecture=MSIL">
+      <HintPath>..\lib\FodyHelpers.6.6.0\lib\netstandard2.0\Mono.Cecil.Rocks.dll</HintPath>
     </Reference>
     <Reference Include="nunit.framework, Version=3.12.0.0, Culture=neutral, PublicKeyToken=2638cd05610744eb, processorArchitecture=MSIL">
       <HintPath>..\lib\NUnit.3.12.0\lib\net45\nunit.framework.dll</HintPath>
@@ -94,11 +91,11 @@
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
-    <Error Condition="!Exists('..\lib\FodyHelpers.4.2.1\build\FodyHelpers.props')" Text="$([System.String]::Format('$(ErrorText)', '..\lib\FodyHelpers.4.2.1\build\FodyHelpers.props'))" />
-    <Error Condition="!Exists('..\lib\FodyHelpers.4.2.1\build\FodyHelpers.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\lib\FodyHelpers.4.2.1\build\FodyHelpers.targets'))" />
     <Error Condition="!Exists('..\lib\NUnit.3.12.0\build\NUnit.props')" Text="$([System.String]::Format('$(ErrorText)', '..\lib\NUnit.3.12.0\build\NUnit.props'))" />
+    <Error Condition="!Exists('..\lib\FodyHelpers.6.6.0\build\FodyHelpers.props')" Text="$([System.String]::Format('$(ErrorText)', '..\lib\FodyHelpers.6.6.0\build\FodyHelpers.props'))" />
+    <Error Condition="!Exists('..\lib\FodyHelpers.6.6.0\build\FodyHelpers.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\lib\FodyHelpers.6.6.0\build\FodyHelpers.targets'))" />
   </Target>
-  <Import Project="..\lib\FodyHelpers.4.2.1\build\FodyHelpers.targets" Condition="Exists('..\lib\FodyHelpers.4.2.1\build\FodyHelpers.targets')" />
+  <Import Project="..\lib\FodyHelpers.6.6.0\build\FodyHelpers.targets" Condition="Exists('..\lib\FodyHelpers.6.6.0\build\FodyHelpers.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
