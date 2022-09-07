@@ -268,6 +268,34 @@ namespace Tracer.Fody.Tests.Filters.DefaultFilter
         }
 
         [Test]
+        public void MethodLevelTraceOn_Overrides_AssemblyLevel_VirtualMethod()
+        {
+            string code = @"
+                using TracerAttributes;
+
+                namespace First
+                {
+                    public class MyDerivedClass : MyClass
+                    {
+                        protected override void MyMethod()
+                        {}
+                    }
+
+                    public class MyClass
+                    {
+                        [TraceOn]
+                        protected virtual void MyMethod()
+                        {}
+                    }
+                }
+            ";
+
+            var methodDef = GetMethodDefinition(code, "MyDerivedClass", "MyMethod");
+            var filter = GetDefaultFilter(TraceTargetVisibility.Public, TraceTargetVisibility.Public);
+            filter.ShouldAddTrace(methodDef).ShouldTrace.Should().BeTrue();
+        }
+
+        [Test]
         public void MethodLevelTraceOn_Overrides_ClassLevel()
         {
             string code = @"
