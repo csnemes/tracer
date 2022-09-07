@@ -13,24 +13,33 @@ namespace Tracer.Fody.Filters
 
         public FilterResult? ShouldTraceBasedOnMethodLevelInfo(MethodDefinition definition)
         {
-            if (!definition.IsPropertyAccessor())
+            while (true)
             {
-                if (definition.CustomAttributes.Any(attr => attr.AttributeType.FullName.Equals("TracerAttributes.TraceOn", StringComparison.Ordinal)))
-                    return new FilterResult(true, GetTraceOnAttributeParameters(definition));
-                if (definition.CustomAttributes.Any(attr => attr.AttributeType.FullName.Equals("TracerAttributes.NoTrace", StringComparison.Ordinal)))
-                    return new FilterResult(false);
-            }
-            else
-            { //its a property accessor check the prop for the attribute
-                var correspondingProp =
-                    definition.DeclaringType.Properties.FirstOrDefault(prop => prop.GetMethod == definition || prop.SetMethod == definition);
-                if (correspondingProp != null)
+                if (!definition.IsPropertyAccessor())
                 {
-                    if (correspondingProp.CustomAttributes.Any(attr => attr.AttributeType.FullName.Equals("TracerAttributes.TraceOn", StringComparison.Ordinal)))
+                    if (definition.CustomAttributes.Any(attr => attr.AttributeType.FullName.Equals("TracerAttributes.TraceOn", StringComparison.Ordinal)))
                         return new FilterResult(true, GetTraceOnAttributeParameters(definition));
-                    if (correspondingProp.CustomAttributes.Any(attr => attr.AttributeType.FullName.Equals("TracerAttributes.NoTrace", StringComparison.Ordinal)))
+                    if (definition.CustomAttributes.Any(attr => attr.AttributeType.FullName.Equals("TracerAttributes.NoTrace", StringComparison.Ordinal)))
                         return new FilterResult(false);
                 }
+                else
+                { //its a property accessor check the prop for the attribute
+                    var correspondingProp =
+                        definition.DeclaringType.Properties.FirstOrDefault(prop => prop.GetMethod == definition || prop.SetMethod == definition);
+                    if (correspondingProp != null)
+                    {
+                        if (correspondingProp.CustomAttributes.Any(attr => attr.AttributeType.FullName.Equals("TracerAttributes.TraceOn", StringComparison.Ordinal)))
+                            return new FilterResult(true, GetTraceOnAttributeParameters(definition));
+                        if (correspondingProp.CustomAttributes.Any(attr => attr.AttributeType.FullName.Equals("TracerAttributes.NoTrace", StringComparison.Ordinal)))
+                            return new FilterResult(false);
+                    }
+                }
+
+                MethodDefinition baseDefinition = Mono.Cecil.Rocks.MethodDefinitionRocks.GetBaseMethod(definition);
+                if (baseDefinition == definition)
+                    break;
+
+                definition = baseDefinition;
             }
 
             return null;

@@ -186,6 +186,18 @@ namespace Tracer.Fody.Tests
             }
         }
 
+        protected MethodDefinition GetMethodDefinition(string source, string className, string methodName)
+        {
+            var testDllLocation = new Uri(Assembly.GetExecutingAssembly().CodeBase);
+            var assemblyPath = Compile(source, "testasm", new[] { testDllLocation.AbsolutePath });
+
+            using (var moduleDef = ModuleDefinition.ReadModule(assemblyPath))
+            {
+                return moduleDef.GetAllTypes().Where(typeDef => typeDef.Name == className).SelectMany(typeDef => typeDef.Methods)
+                    .FirstOrDefault(methodDef => methodDef.Name.Equals(methodName, StringComparison.OrdinalIgnoreCase));
+            }
+        }
+
         protected MethodDefinition GetMethodDefinition(string source, string methodName)
         {
             var testDllLocation = new Uri(Assembly.GetExecutingAssembly().CodeBase);
